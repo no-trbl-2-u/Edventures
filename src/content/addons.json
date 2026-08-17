@@ -1,0 +1,15 @@
+[
+  {
+    "id": "medication",
+    "name": "Medication administration",
+    "price": 5,
+    "note": "Insulin injections unavailable.",
+    "freeWithOvernight": true
+  },
+  {
+    "id": "nail-trim-addon",
+    "name": "Nail trim (added to any visit)",
+    "price": 8,
+    "freeWithOvernight": false
+  }
+]

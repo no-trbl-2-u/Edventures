@@ -1,0 +1,37 @@
+[
+  {
+    "id": "dog-walk",
+    "name": "Dog Walks",
+    "blurb": "A walk at your dog's pace - or a jog, at no extra charge.",
+    "tiers": [
+      { "minutes": 15, "price": 15 },
+      { "minutes": 30, "price": 25 },
+      { "minutes": 60, "price": 40 }
+    ],
+    "order": 1
+  },
+  {
+    "id": "cat-visit",
+    "name": "Cat Visits",
+    "blurb": "Drop-in visits for feeding, litter, play, and company.",
+    "tiers": [
+      { "minutes": 15, "price": 18 },
+      { "minutes": 30, "price": 25 }
+    ],
+    "order": 2
+  },
+  {
+    "id": "nail-trim",
+    "name": "Nail Trims",
+    "blurb": "Available as its own visit, or added to any other visit.",
+    "tiers": [{ "minutes": 15, "price": 20 }],
+    "order": 3
+  },
+  {
+    "id": "overnight",
+    "name": "Overnight Stays",
+    "blurb": "In-home overnight care, so your pet keeps their own routine.",
+    "tiers": [{ "minutes": 720, "price": 55 }],
+    "order": 4
+  }
+]

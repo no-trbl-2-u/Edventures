@@ -1,4 +1,15 @@
-# Content drafts — UNVERIFIED
+# Content drafts — PROMOTED ✅
+
+> ## These drafts have been promoted to `src/content/`.
+>
+> **`src/content/` is now canonical.** This folder is kept as the working record of how the content was derived, what was verified, and what's still open with Edward. Edit `src/content/`, not here.
+>
+> Structured data (`services.json`, `addons.json`, `fees.json`, `photos.json`) is schema-validated at build time — a mistyped price fails the build rather than shipping.
+
+---
+
+## Original header
+
 
 Machine transcriptions of the image assets in `starting-assets/`, produced in **Phase 0.5**.
 
@@ -25,7 +36,7 @@ Once promoted, **the Markdown is canonical and the images are archival.** Never 
 | `services.md` | `Flyer.png` | ☑ jogging resolved — folds into Dog Walks |
 | `service-area.md` | `Locations served.jpg` | ☐ **check all 11 zips** |
 | `contact.md` | `Contact us.jpg` *(deleted)* | ☐ — **now the only record of that content** |
-| `photo-captions.md` | filenames + images | ☐ alt text still inferred, not observed |
+| `photo-captions.md` | filenames + images | ✅ **all 21 opened and described** |
 
 ## Resolved (TJ)
 

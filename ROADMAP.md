@@ -105,9 +105,12 @@ These are settled. Everything below follows from them.
   - [ ] `Kisses from Jackie.jpeg` → `kisses-from-jackie.jpg`
   - [ ] **Watch the uppercase extensions:** `ME and Stellaluna.JPG`, `Smooches.JPG`, `Stellaluna at the Park.JPG` — case-sensitive Linux hosts will 404 on `.JPG` if referenced as `.jpg`
 - [ ] Build a slug → caption mapping file (the original filenames carry the captions — preserve that information before renaming destroys it)
+- [ ] **Apply EXIF rotation, then strip the tag.** Nine photos carry orientation tags (listed in [photo-captions.md](content-draft/photo-captions.md)). They display correctly in browsers today, but a naive resize bakes in the wrong rotation — they'd break *during* optimization. In `sharp`, a bare `.rotate()` handles it.
+- [ ] Stripping EXIF also removes **GPS coordinates** — several photos were taken at clients' homes. Do not publish location metadata.
 - [ ] Convert to WebP with JPEG fallback
 - [ ] Resize: max 1600px wide for gallery, 800px for inline, 400px for thumbnails
-- [ ] Target under 200KB each. ~25 phone-camera photos will otherwise make the gallery painful on mobile.
+- [ ] Target under 200KB each. ~21 phone-camera photos will otherwise make the gallery painful on mobile.
+- [ ] Verify orientation visually after processing — this bug is invisible until someone looks
 - [ ] Copy `First Aid Certificate.pdf` to `public/` for direct linking
 
 ### 0.6 — Content requests to Edward
@@ -158,11 +161,16 @@ Claude transcribes from the image assets into Markdown, marking anything uncerta
 - [ ] Remove every `VERIFY` comment as it's resolved
 - [ ] Have **Edward** do a final read — he may want to revise copy he wrote a while ago
 
-### 0.5.5 — Promote to source of truth
+### 0.5.5 — Promote to source of truth ✅
 
-- [ ] Move verified files into `src/content/`
-- [ ] From here on, **the Markdown is canonical and the images are decoration.** Never re-derive content from an image again.
-- [ ] Note in the repo README that `starting-assets/` is archival
+- [x] Content promoted to `src/content/` as Astro Content Collections
+- [x] Structured data as JSON: `services.json`, `addons.json`, `fees.json`, `photos.json`
+- [x] Prose as Markdown: `pages/about.md`, `pages/service-area.md`, `pages/contact.md`
+- [x] **Schemas in `src/content.config.ts` validate at build time** — verified by negative test: a mistyped price fails the build naming the exact entry and field
+- [x] `content-draft/` retained as the derivation record; `src/content/` is canonical
+- [x] `starting-assets/` is archival — never re-derive content from an image again
+
+> Doing the schemas now rather than at Phase 5 means the CMS work later is just adding an editing UI over an already-validated shape, and Phase 3's estimator reads prices from data instead of hardcoding them.
 
 ---
 

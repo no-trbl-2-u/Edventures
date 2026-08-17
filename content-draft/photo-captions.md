@@ -1,91 +1,145 @@
 ---
-source: starting-assets/ filenames
-status: unverified — ALT TEXT IS INFERRED, NOT OBSERVED
+source: starting-assets/ — every image opened and described
+status: verified — alt text observed, not inferred
 ---
 
 # Photo captions & alt text
 
-## ⚠️ Read this first
-
-**The alt text below was inferred from filenames, not from looking at the photos.** It is a starting point for editing, not a description of what's actually in each image.
-
-Before shipping, someone must open each photo and confirm the alt text describes what's really there. Wrong alt text is worse than none — it actively misleads screen-reader users.
-
-- [ ] Open each photo and correct its alt text
-- [ ] Confirm the caption reads well publicly
-- [ ] Decide which photos make the gallery (not all 21 need to)
-- [x] ~~Resolve the "Harry" and "Hubert" question~~ — both are animals; Harry is Edward's cat
+**All 21 photos have been opened and described from what's actually in them.** The earlier filename-inferred draft has been replaced — it was wrong in at least one case (see `proud-cat-dad`).
 
 ---
 
-## Why the filenames matter
+## ⚠️ EXIF orientation — read before building the image pipeline
 
-The original filenames carry the captions — they're the only record of each animal's name. **Capture that before renaming destroys it.** That's what this file is for.
+Eight photos carry an **EXIF orientation tag**. They are *not* broken: browsers apply EXIF rotation automatically, so they display correctly on a web page as-is.
 
-## Renaming rules (Phase 0.5)
+**The hazard is the optimization step.** Many resize pipelines read raw pixels and discard EXIF, which bakes in the wrong rotation — the images would come out sideways *after* processing, having looked fine before.
 
-- Lowercase, hyphens, no spaces, no ampersands
-- **Normalize `.JPG` → `.jpg`.** Case-sensitive Linux hosts will 404 on a mismatch — this bites three files below.
+| File | EXIF orientation |
+|---|---|
+| `Kisses from Jackie.jpeg` | Rotate 90° CW |
+| `Kisses from Tecate.jpeg` | Rotate 90° CW |
+| `Me & Regina.jpeg` | Rotate 90° CW |
+| `Me & Taco.jpeg` | Rotate 90° CW |
+| `Me and Goy Pouting.jpeg` | Rotate 90° CW |
+| `Proud Cat Dad.jpeg` | Rotate 90° CW |
+| `Selfie with Tecate.jpeg` | Rotate 90° CW |
+| `ME and Clancy.jpeg` | Rotate 180° |
+| `Stellaluna and I.jpeg` | Rotate 180° |
+
+**Required:** whatever resizes these must *apply* EXIF rotation, then strip the tag. In `sharp`, a bare `.rotate()` with no argument does exactly this. Verify visually after processing — this class of bug is invisible until someone looks.
+
+*(`Cuddling with Auggy.jpg` and `Playing with Xenon.jpg` have no EXIF block at all — fine, they're already upright.)*
+
+---
+
+## The animals
+
+Names come from the filenames; species and appearance are observed.
+
+| Name | Animal |
+|---|---|
+| Jackie | Black Labrador |
+| Auggy | Beagle/hound, tan and white |
+| Zoe | Cream chihuahua — **see note below** |
+| Xenon | Large black dog, boxer/cane corso type |
+| Taco | Tan chihuahua |
+| Clancy | Brown dog, pit/lab type |
+| Goy | Long-haired chihuahua or papillon, brown and white |
+| Harry | **Edward's own cat** — grey/brown tabby |
+| Hubert | Orange and white tabby cat |
+| Stellaluna | Grey tabby cat |
+| Tecate | Fluffy grey and white cat |
+| Regina | Orange tabby cat |
+| Angel | Tabby/calico cat — **now passed away** |
 
 ---
 
 ## The photos
 
-| # | Original filename | New slug | Draft caption | Inferred alt text |
+| # | Original | Slug | Caption | Alt text (observed) |
 |---|---|---|---|---|
-| 1 | `A fun day with Cows.jpeg` | `a-fun-day-with-cows.jpg` | A fun day with cows | ⚠️ Edward with cows — **verify: is this a farm visit, or a dog named Cows?** |
-| 2 | `Angel and I, RIP.jpg` | `angel-and-i.jpg` | Angel | ⚠️ Edward with Angel — **see memorial note below** |
-| 3 | `Cuddling with Auggy.jpg` | `cuddling-with-auggy.jpg` | Cuddling with Auggy | Edward cuddling with Auggy |
-| 4 | `Harry and I.jpg` | `harry-and-i.jpg` | Harry and I | Edward with Harry, his cat |
-| 5 | `Jackie and I.jpg` | `jackie-and-i.jpg` | Jackie and I | Edward with Jackie |
-| 6 | `Kisses from Jackie.jpeg` | `kisses-from-jackie.jpg` | Kisses from Jackie | Jackie licking Edward's face |
-| 7 | `Kisses from Tecate.jpeg` | `kisses-from-tecate.jpg` | Kisses from Tecate | Tecate licking Edward's face |
-| 8 | `ME and Clancy.jpeg` | `me-and-clancy.jpg` | Clancy and I | Edward with Clancy |
-| 9 | `ME and Stellaluna.JPG` | `me-and-stellaluna.jpg` | Stellaluna and I | Edward with Stellaluna |
-| 10 | `Me & Regina.jpeg` | `me-and-regina.jpg` | Regina and I | Edward with Regina |
-| 11 | `Me & Taco.jpeg` | `me-and-taco.jpg` | Taco and I | Edward with Taco |
-| 12 | `Me and Goy Pouting.jpeg` | `me-and-goy-pouting.jpg` | Goy, pouting | Edward with Goy, who is pouting |
-| 13 | `My godchild Hubert.jpeg` | `hubert.jpg` | Hubert | Hubert, an animal in Edward's care |
-| 14 | `My son Harry and I.jpg` | `my-son-harry-and-i.jpg` | Harry and I | Edward with Harry, his cat |
-| 15 | `Playing with Xenon.jpg` | `playing-with-xenon.jpg` | Playing with Xenon | Edward playing with Xenon |
-| 16 | `Proud Cat Dad.jpeg` | `proud-cat-dad.jpg` | Proud cat dad | Edward holding a cat |
-| 17 | `Selfie with Tecate.jpeg` | `selfie-with-tecate.jpg` | Selfie with Tecate | Selfie of Edward with Tecate |
-| 18 | `Smooches.JPG` | `smooches.jpg` | Smooches | Edward being kissed by a pet |
-| 19 | `Stellaluna and I.jpeg` | `stellaluna-and-i.jpg` | Stellaluna and I | Edward with Stellaluna |
-| 20 | `Stellaluna at the Park.JPG` | `stellaluna-at-the-park.jpg` | Stellaluna at the park | Stellaluna at a park |
-| 21 | `Zoe and I.jpg` | `zoe-and-i.jpg` | Zoe and I | Edward with Zoe |
-
-**Uppercase-extension files (must be normalized):** #9, #18, #20.
-
-**Duplicate-subject candidates:** #9 and #19 are both "Stellaluna and I" — likely near-duplicates. Compare and keep the better one. #4 and #14 may also overlap.
+| 1 | `Smooches.JPG` | `smooches.jpg` | Smooches | Edward in a grey hoodie, eyes closed, kissing the head of a tan-and-white speckled hound who is curled against his chest |
+| 2 | `Stellaluna at the Park.JPG` | `stellaluna-at-the-park.jpg` | Stellaluna at the park | Edward in sunglasses holding Stellaluna, a grey tabby cat, on the grass at Rittenhouse Square, city buildings behind them |
+| 3 | `Zoe and I.jpg` | `zoe-and-i.jpg` | Zoe and I | Edward holding Zoe, a small cream chihuahua in a blue harness, outside Penn Medicine Rittenhouse |
+| 4 | `Jackie and I.jpg` | `jackie-and-i.jpg` | Jackie and I | Edward cheek to cheek with Jackie, a black Labrador with her tongue out, on a sofa by a sunlit window |
+| 5 | `Cuddling with Auggy.jpg` | `cuddling-with-auggy.jpg` | Cuddling with Auggy | Auggy, a tan and white hound, asleep across Edward's lap while he strokes her head |
+| 6 | `My son Harry and I.jpg` | `my-son-harry-and-i.jpg` | My son Harry | Edward holding Harry, a large grey tabby cat, in a bright room with framed art and a trailing houseplant |
+| 7 | `Harry and I.jpg` | `harry-and-i.jpg` | Harry and I | Edward in a maroon cap on a sofa beside Harry, a grey tabby cat stretched out on the cushion next to him |
+| 8 | `My godchild Hubert.jpeg` | `hubert.jpg` | My godchild Hubert | Edward leaning in to kiss Hubert, an orange and white tabby cat perched against his shoulder |
+| 9 | `Angel and I, RIP.jpg` | `angel-and-i.jpg` | Angel | Edward in a pink backwards cap, eyes closed, holding Angel, a tabby and white cat, against his cheek |
+| 10 | `ME and Stellaluna.JPG` | `me-and-stellaluna.jpg` | Stellaluna and I | Edward holding Stellaluna, a grey tabby cat, against his chest indoors |
+| 11 | `Stellaluna and I.jpeg` | `stellaluna-and-i.jpg` | Stellaluna and I | Edward lying on a blue blanket beside Stellaluna, a grey tabby cat, both looking up at the camera |
+| 12 | `Kisses from Tecate.jpeg` | `kisses-from-tecate.jpg` | Kisses from Tecate | Tecate, a fluffy grey and white cat, pressing her nose to Edward's face in a wood-panelled room |
+| 13 | `Selfie with Tecate.jpeg` | `selfie-with-tecate.jpg` | Selfie with Tecate | Edward grinning next to Tecate, a fluffy grey and white cat, who is looking straight at the camera |
+| 14 | `Me & Regina.jpeg` | `me-and-regina.jpg` | Regina and I | Edward kissing the head of Regina, an orange tabby cat draped over his arm |
+| 15 | `Me & Taco.jpeg` | `me-and-taco.jpg` | Taco and I | Taco, a small tan chihuahua, resting on Edward's shoulder and leaning against his head |
+| 16 | `Playing with Xenon.jpg` | `playing-with-xenon.jpg` | Playing with Xenon | Xenon, a large black dog, gripping one end of a rope toy in a play bow while Edward holds the other end |
+| 17 | `A fun day with Cows.jpeg` | `a-fun-day-with-cows.jpg` | A fun day with cows | Edward in sunglasses beside a black and white horned cow leaning over a fence in a green field |
+| 18 | `Proud Cat Dad.jpeg` | `proud-cat-dad.jpg` | Proud cat dad | Edward wearing a black cap embroidered "CAT DAD," standing on a tree-lined Philadelphia street |
+| 19 | `Me and Goy Pouting.jpeg` | `me-and-goy-pouting.jpg` | Goy, pouting | Edward beside Goy, a long-haired brown and white chihuahua wearing a pink collar, in a dimly lit room |
+| 20 | `ME and Clancy.jpeg` | `me-and-clancy.jpg` | Clancy and I | Edward outdoors with Clancy, a brown dog in a pink collar, mid-motion and out of focus |
+| 21 | `Kisses from Jackie.jpeg` | `kisses-from-jackie.jpg` | Kisses from Jackie | Jackie, a black Labrador, licking a person's face on a sofa |
 
 ---
 
-## Flags needing Edward's input
+## Correction from the inferred draft
 
-### Harry and Hubert — resolved ✅
+**`Proud Cat Dad.jpeg` contains no cat.** The earlier filename-inferred alt text said "Edward holding a cat." It's actually Edward alone on a Philadelphia street wearing a hat that reads "CAT DAD."
 
-**Both are animals**, per TJ. **Harry is Edward's own cat.** No privacy concern; both are publishable.
-
-This is better than neutral — it's usable material:
-
-- [ ] Use the Harry photos on the **About page**, captioned as his own cat. A pet sitter who is visibly a devoted pet owner is more persuasive than one who only appears with clients' animals.
-- [ ] "My son Harry" is how Edward actually talks about him. Consider keeping that voice in the caption — *"My son Harry"* — rather than flattening it to "Edward's cat." It's warm and true to the brand.
-- [ ] Hubert's slug drops "my godchild"; revisit if Edward wants that phrasing kept as a caption.
-
-### `Angel and I, RIP.jpg` — memorial photo
-
-The filename indicates Angel has passed away.
-
-TJ has confirmed Edward has permission for all client pets shown. This flag is not about permission — it's about **placement**. A memorial photo on a sales page can land wrong, and it may be painful for the family to encounter unexpectedly.
-
-- [ ] Edward's call. Options: leave it out; include it in the gallery unremarked; or give it an intentional spot on the About page as part of his story. The middle option is the one to avoid — it's the only one that reads as careless.
-- [ ] Note the slug drops the `, RIP` — a public URL ending in `rip` is not the right register.
+A screen-reader user would have been told to expect an animal that isn't there. Worth noting as the concrete reason filename-derived alt text isn't safe to ship.
 
 ---
 
-## Notes for implementation
+## Curation for the gallery
 
-- Alt text should describe the image, not repeat the caption. If the caption already says "Kisses from Jackie," the alt can be `Jackie, a golden retriever, licking Edward's face` — once someone has actually looked.
-- These are candid phone photos of mixed quality and aspect ratio. The gallery design must flatter imperfect photos rather than demand studio ones (see `design.prompt.md` §8).
-- Every photo needs the Phase 0.5 pipeline: WebP + JPEG fallback, max 1600px, under 200KB.
+Not all 21 should go in. Ranked by what they do for the site:
+
+### Lead with these
+
+- **`smooches.jpg`** — the best photograph in the set by some margin. Soft natural light, genuine tenderness, clean composition. **Strong hero candidate for the home page.**
+- **`stellaluna-at-the-park.jpg`** — visibly Rittenhouse Square. Proves *Philadelphia* better than any copy could, and a cat happily outdoors reads as real competence.
+- **`zoe-and-i.jpg`** — Penn Medicine Rittenhouse is legible in the background. More local proof, and a working-day feel.
+- **`jackie-and-i.jpg`** — warm, sharp, cheerful. Easy crowd-pleaser.
+
+### About page
+
+- **`my-son-harry-and-i.jpg`** and **`harry-and-i.jpg`** — Harry is Edward's own cat. A sitter who's visibly a devoted pet owner is more persuasive than one who only appears with clients' animals.
+- **`proud-cat-dad.jpg`** — personality, and the only photo that reads as "him," not "him with an animal." Useful as a small portrait.
+
+### Fine for the gallery
+
+`cuddling-with-auggy.jpg`, `hubert.jpg`, `me-and-regina.jpg`, `me-and-taco.jpg`, `playing-with-xenon.jpg`, `kisses-from-tecate.jpg`, `selfie-with-tecate.jpg`, `me-and-stellaluna.jpg`, `stellaluna-and-i.jpg`
+
+### Recommend leaving out
+
+- **`me-and-clancy.jpg`** — badly out of focus. Poor quality reads as carelessness, and there are 20 better options.
+- **`kisses-from-jackie.jpg`** — blurry, awkwardly framed, and the person in it may not even be Edward. `jackie-and-i.jpg` shows the same dog far better.
+- **`me-and-goy-pouting.jpg`** — very dim and muddy. Lovely if Edward can find a brighter shot of Goy.
+- **`a-fun-day-with-cows.jpg`** — genuinely charming, but cows aren't the service. Possibly a fun About-page aside; it would only confuse a gallery of client pets.
+
+---
+
+## Two things for Edward
+
+### Zoe's eye
+
+In `Zoe and I.jpg`, Zoe's left eye appears closed or absent. **I'm not confident enough from one photo to describe it**, and getting it wrong in alt text would be worse than staying general.
+
+- [ ] Confirm with Edward. If Zoe is a special-needs dog, that's a meaningful trust signal — clients with elderly or disabled pets look hard for a sitter who's handled it. Worth mentioning with her owner's blessing, and worth describing plainly rather than tiptoeing.
+- [ ] If not, the current neutral alt text stands as written.
+
+### Angel
+
+`Angel and I, RIP.jpg` is a tender photograph — Edward's eyes closed, holding her to his cheek. Placement is still his call (E1 in `go-back-to-ed.md`). Having now seen it: it's far better suited to a deliberate spot in his story than to a grid of client photos.
+
+The slug drops the `, RIP` — a public URL ending in `rip` is the wrong register.
+
+---
+
+## Implementation notes
+
+- Alt text above describes the image; captions name the animal. They shouldn't duplicate each other.
+- Photos are candid and mixed-aspect. The gallery must flatter imperfect phone photos rather than demand studio ones.
+- Pipeline: apply EXIF rotation → strip EXIF → resize (1600px gallery / 800px inline / 400px thumb) → WebP with JPEG fallback → target under 200KB.
+- **Stripping EXIF also removes GPS coordinates.** Several of these were taken at clients' homes. Do not publish location metadata.

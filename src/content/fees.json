@@ -1,0 +1,6 @@
+[
+  { "id": "additional-dog", "name": "Additional dog", "amount": 7, "auto": false },
+  { "id": "additional-cat", "name": "Additional cat", "amount": 5, "auto": false },
+  { "id": "holiday", "name": "Holiday visit", "amount": 15, "auto": true },
+  { "id": "last-minute", "name": "Last-minute booking (under 24 hrs notice)", "amount": 8, "auto": true }
+]

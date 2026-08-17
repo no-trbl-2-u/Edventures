@@ -1,0 +1,170 @@
+[
+  {
+    "id": "smooches",
+    "src": "smooches.jpg",
+    "caption": "Smooches",
+    "alt": "Edward in a grey hoodie, eyes closed, kissing the head of a tan-and-white speckled hound curled against his chest",
+    "placement": "hero",
+    "needsExifRotation": false
+  },
+  {
+    "id": "stellaluna-at-the-park",
+    "src": "stellaluna-at-the-park.jpg",
+    "caption": "Stellaluna at the park",
+    "alt": "Edward in sunglasses holding Stellaluna, a grey tabby cat, on the grass at Rittenhouse Square with city buildings behind them",
+    "placement": "gallery",
+    "needsExifRotation": false
+  },
+  {
+    "id": "zoe-and-i",
+    "src": "zoe-and-i.jpg",
+    "caption": "Zoe and I",
+    "alt": "Edward holding Zoe, a small cream chihuahua in a blue harness, outside Penn Medicine Rittenhouse",
+    "placement": "gallery",
+    "needsExifRotation": false
+  },
+  {
+    "id": "jackie-and-i",
+    "src": "jackie-and-i.jpg",
+    "caption": "Jackie and I",
+    "alt": "Edward cheek to cheek with Jackie, a black Labrador with her tongue out, on a sofa by a sunlit window",
+    "placement": "gallery",
+    "needsExifRotation": false
+  },
+  {
+    "id": "my-son-harry-and-i",
+    "src": "my-son-harry-and-i.jpg",
+    "caption": "My son Harry",
+    "alt": "Edward holding Harry, a large grey tabby cat, in a bright room with framed art and a trailing houseplant",
+    "placement": "about",
+    "needsExifRotation": false
+  },
+  {
+    "id": "harry-and-i",
+    "src": "harry-and-i.jpg",
+    "caption": "Harry and I",
+    "alt": "Edward in a maroon cap on a sofa beside Harry, a grey tabby cat stretched out on the cushion next to him",
+    "placement": "about",
+    "needsExifRotation": false
+  },
+  {
+    "id": "proud-cat-dad",
+    "src": "proud-cat-dad.jpg",
+    "caption": "Proud cat dad",
+    "alt": "Edward wearing a black cap embroidered \"CAT DAD\", standing on a tree-lined Philadelphia street",
+    "placement": "about",
+    "needsExifRotation": true
+  },
+  {
+    "id": "cuddling-with-auggy",
+    "src": "cuddling-with-auggy.jpg",
+    "caption": "Cuddling with Auggy",
+    "alt": "Auggy, a tan and white hound, asleep across Edward's lap while he strokes her head",
+    "placement": "gallery",
+    "needsExifRotation": false
+  },
+  {
+    "id": "hubert",
+    "src": "hubert.jpg",
+    "caption": "My godchild Hubert",
+    "alt": "Edward leaning in to kiss Hubert, an orange and white tabby cat perched against his shoulder",
+    "placement": "gallery",
+    "needsExifRotation": false
+  },
+  {
+    "id": "me-and-regina",
+    "src": "me-and-regina.jpg",
+    "caption": "Regina and I",
+    "alt": "Edward kissing the head of Regina, an orange tabby cat draped over his arm",
+    "placement": "gallery",
+    "needsExifRotation": true
+  },
+  {
+    "id": "me-and-taco",
+    "src": "me-and-taco.jpg",
+    "caption": "Taco and I",
+    "alt": "Taco, a small tan chihuahua, resting on Edward's shoulder and leaning against his head",
+    "placement": "gallery",
+    "needsExifRotation": true
+  },
+  {
+    "id": "playing-with-xenon",
+    "src": "playing-with-xenon.jpg",
+    "caption": "Playing with Xenon",
+    "alt": "Xenon, a large black dog, gripping one end of a rope toy in a play bow while Edward holds the other end",
+    "placement": "gallery",
+    "needsExifRotation": false
+  },
+  {
+    "id": "kisses-from-tecate",
+    "src": "kisses-from-tecate.jpg",
+    "caption": "Kisses from Tecate",
+    "alt": "Tecate, a fluffy grey and white cat, pressing her nose to Edward's face in a wood-panelled room",
+    "placement": "gallery",
+    "needsExifRotation": true
+  },
+  {
+    "id": "selfie-with-tecate",
+    "src": "selfie-with-tecate.jpg",
+    "caption": "Selfie with Tecate",
+    "alt": "Edward grinning next to Tecate, a fluffy grey and white cat looking straight at the camera",
+    "placement": "gallery",
+    "needsExifRotation": true
+  },
+  {
+    "id": "me-and-stellaluna",
+    "src": "me-and-stellaluna.jpg",
+    "caption": "Stellaluna and I",
+    "alt": "Edward holding Stellaluna, a grey tabby cat, against his chest indoors",
+    "placement": "gallery",
+    "needsExifRotation": false
+  },
+  {
+    "id": "stellaluna-and-i",
+    "src": "stellaluna-and-i.jpg",
+    "caption": "Stellaluna and I",
+    "alt": "Edward lying on a blue blanket beside Stellaluna, a grey tabby cat, both looking up at the camera",
+    "placement": "gallery",
+    "needsExifRotation": true
+  },
+  {
+    "id": "angel-and-i",
+    "src": "angel-and-i.jpg",
+    "caption": "Angel",
+    "alt": "Edward in a pink backwards cap, eyes closed, holding Angel, a tabby and white cat, against his cheek",
+    "placement": "excluded",
+    "needsExifRotation": false
+  },
+  {
+    "id": "a-fun-day-with-cows",
+    "src": "a-fun-day-with-cows.jpg",
+    "caption": "A fun day with cows",
+    "alt": "Edward in sunglasses beside a black and white horned cow leaning over a fence in a green field",
+    "placement": "excluded",
+    "needsExifRotation": false
+  },
+  {
+    "id": "me-and-goy-pouting",
+    "src": "me-and-goy-pouting.jpg",
+    "caption": "Goy, pouting",
+    "alt": "Edward beside Goy, a long-haired brown and white chihuahua wearing a pink collar, in a dimly lit room",
+    "placement": "excluded",
+    "needsExifRotation": true
+  },
+  {
+    "id": "me-and-clancy",
+    "src": "me-and-clancy.jpg",
+    "caption": "Clancy and I",
+    "alt": "Edward outdoors with Clancy, a brown dog in a pink collar, mid-motion and out of focus",
+    "placement": "excluded",
+    "needsExifRotation": true
+  },
+  {
+    "id": "kisses-from-jackie",
+    "src": "kisses-from-jackie.jpg",
+    "caption": "Kisses from Jackie",
+    "alt": "Jackie, a black Labrador, licking a person's face on a sofa",
+    "placement": "excluded",
+    "needsExifRotation": true
+  }
+]
