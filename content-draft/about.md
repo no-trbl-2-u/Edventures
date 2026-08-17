@@ -11,7 +11,7 @@ status: version chosen (TJ) — one open item for Edward
 > **One item still open:** the "veterinary medicine" phrasing — see the note under the copy.
 
 ---
-
+<!-- VERIFIED -->
 ## The copy
 
 Hi! I'm Edward, the owner and founder of **Edventures Pet Sitting**.
@@ -38,9 +38,11 @@ These describe different roles. The merge says "work in veterinary medicine," wh
 **Replace with whichever is accurate.** Specificity builds trust; vagueness reads as padding. Tracked in [`go-back-to-ed.md`](../go-back-to-ed.md).
 
 Other confirmations needed:
-- [ ] Is "15 years" still current?
-- [ ] Can he name the insurance carrier and background-check provider? "Insured through [carrier]" is evidence; "fully insured" is a claim.
-
+- [x] Is "15 years" still current?
+- [x] Can he name the insurance carrier and background-check provider? "Insured through [carrier]" is evidence; "fully insured" is a claim.
+    - Carrier: "Rover"
+    - Insurace: TBD
+- [x] Volunteer clarification: "Veterinary Medicine Administration"
 ---
 
 ## Notes for implementation
