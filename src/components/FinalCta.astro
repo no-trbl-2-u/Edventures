@@ -1,0 +1,76 @@
+---
+import { Image } from "astro:assets";
+import paw from "../assets/brand/paw.png";
+import Icon from "./Icon.astro";
+import { SITE } from "../lib/site";
+
+interface Props {
+  heading?: string;
+  body?: string;
+  /** Render as an italic pull-quote instead of a display heading. */
+  quiet?: boolean;
+}
+const {
+  heading = "Tell me about your pet.",
+  body = "Send a request and I'll confirm within a few hours. No account, no deposit, no app to download.",
+  quiet = false,
+} = Astro.props;
+---
+
+<section class="shell-narrow cta">
+  {!quiet && <Image src={paw} alt="" width={22} densities={[1, 2]} class="cta-paw" />}
+
+  {
+    quiet ? (
+      <p class="cta-quiet">{heading}</p>
+    ) : (
+      <>
+        <h2 class="display cta-heading">{heading}</h2>
+        <p class="lede cta-body">{body}</p>
+      </>
+    )
+  }
+
+  <div class="btn-row cta-actions">
+    <a href="/book" class="btn btn-primary">Book a visit</a>
+    <a href={SITE.phoneHref} class="btn btn-ghost">
+      <Icon name="message-square" size={18} />Call or text
+    </a>
+  </div>
+</section>
+
+<style>
+  .cta {
+    padding-block: clamp(48px, 7vw, 96px);
+    text-align: center;
+  }
+  .cta-paw {
+    margin: 0 auto 18px;
+    display: block;
+    width: 22px;
+    height: auto;
+  }
+  .cta-heading {
+    margin: 0;
+    font-size: clamp(30px, 5.4vw, 50px);
+    line-height: 1.06;
+  }
+  .cta-body {
+    margin: 14px auto 0;
+    max-width: 46ch;
+  }
+  .cta-quiet {
+    margin: 0 auto;
+    font-family: var(--font-display);
+    font-size: clamp(21px, 3.6vw, 28px);
+    font-style: italic;
+    color: var(--color-brand-green);
+    line-height: 1.45;
+    max-width: 34ch;
+    text-wrap: pretty;
+  }
+  .cta-actions {
+    justify-content: center;
+    margin-top: 28px;
+  }
+</style>

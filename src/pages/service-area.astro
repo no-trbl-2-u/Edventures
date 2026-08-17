@@ -1,0 +1,141 @@
+---
+/**
+ * The service-area page (Roadmap 2.6.2).
+ *
+ * Kept as its own page rather than folded into /contact, reversing the original
+ * Phase 1.1 recommendation. The content is thin, but "dog walker Fairmount" is
+ * a query people type and a bare zip code is not -- so the neighbourhood names
+ * carry the page. One page listing all eleven; emphatically NOT one page per
+ * zip code, which is a doorway-page pattern and against Google's guidelines.
+ */
+import Base from "../layouts/Base.astro";
+import Icon from "../components/Icon.astro";
+import FinalCta from "../components/FinalCta.astro";
+import { SERVICE_AREA, SITE } from "../lib/site";
+import { breadcrumbs } from "../lib/structured-data";
+
+const structuredData = [
+  breadcrumbs([
+    { name: "Home", path: "/" },
+    { name: "Service Area", path: "/service-area" },
+  ]),
+];
+---
+
+<Base
+  title="Service Area"
+  description={`Edventures Pet Sitting covers eleven ${SITE.city} zip codes, from Fairmount to Pennsport. Other areas by appointment.`}
+  structuredData={structuredData}
+>
+  <section class="shell page-head">
+    <span class="eyebrow">Where Edward works</span>
+    <h1 class="heading-brand page-title">Service Area</h1>
+    <p class="lede page-lede">
+      Eleven zip codes across Center City, South and West {SITE.city}. If you're just outside
+      them, ask anyway — the answer is usually yes.
+    </p>
+  </section>
+
+  <section class="shell area-list">
+    <ul class="hoods">
+      {
+        SERVICE_AREA.map((area) => (
+          <li class="hood">
+            <span class="hood-zip">{area.zip}</span>
+            <span class="hood-name">{area.neighborhood}</span>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="card outside">
+      <span class="roundel roundel-sm"><Icon name="map-pin" size={24} /></span>
+      <div>
+        <h2 class="heading-brand outside-title">Just outside the line?</h2>
+        <p class="outside-body">
+          Other areas are considered by appointment and a travel fee may apply. Text Edward with
+          your address and he'll tell you straight away.
+        </p>
+        <a href={SITE.phoneHref} class="btn btn-ghost outside-btn">
+          <Icon name="message-square" size={18} />Text {SITE.phone}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <FinalCta />
+</Base>
+
+<style>
+  .page-head {
+    padding-top: clamp(32px, 5vw, 64px);
+    text-align: center;
+  }
+  .page-title {
+    margin: 12px 0 0;
+    font-size: clamp(32px, 6vw, 56px);
+    letter-spacing: 0.05em;
+    line-height: 1.05;
+  }
+  .page-lede {
+    margin: 14px auto 0;
+    max-width: 52ch;
+  }
+
+  .area-list {
+    padding-block: clamp(28px, 4vw, 48px) clamp(20px, 3vw, 40px);
+  }
+
+  .hoods {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: clamp(10px, 1.4vw, 14px);
+  }
+  .hood {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    background: var(--color-brand-cream);
+    border: 1px solid var(--color-brand-rule);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .hood-zip {
+    font: 500 15px ui-monospace, Menlo, monospace;
+    color: var(--color-brand-brown);
+    flex: none;
+  }
+  .hood-name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 20px;
+    letter-spacing: 0.03em;
+    color: var(--color-brand-green);
+  }
+
+  .outside {
+    margin-top: clamp(20px, 3vw, 32px);
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+  }
+  .outside-title {
+    margin: 0;
+    font-size: 22px;
+  }
+  .outside-body {
+    margin: 8px 0 0;
+    font-size: 16px;
+    color: rgb(26 26 24 / 0.8);
+    max-width: 52ch;
+  }
+  .outside-btn {
+    margin-top: 16px;
+    font-size: 15px;
+    padding: 13px 20px;
+    min-height: 48px;
+  }
+</style>

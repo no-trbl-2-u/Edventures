@@ -138,6 +138,30 @@ Obsolete now that prices are published. Worth updating before it's reprinted.
 
 ---
 
+## G. Raised by the website build
+
+The Claude Design comp proposed copy that reads better than ours but describes things Edward may or may not actually do. **We shipped the verified wording instead**, because a promise made on the homepage becomes a promise on the first booking. Each of these is a straight yes/no — if yes, the better copy goes in.
+
+### 🟡 G1. Does he send an update after each visit?
+The comp's dog-walk card reads *"Leash manners, water, and a note when I leave."* If he really does leave a note or send a text after every walk, **say so** — it's one of the strongest differentiators a solo walker has over an agency. If he doesn't, it can't go on the site.
+
+### 🟡 G2. Does he send a photo before bed on overnight stays?
+Same question, from the overnight card: *"I stay at your place, keep the routine, and send a photo before bed."* Lovely if true. A complaint waiting to happen if not.
+
+### 🟢 G3. Should the site say "Insured"?
+Currently it does **not** — the trust strip and footer list *15 years · CPR & First-Aid Certified · Background checked* only. The design comp included an "Insured" badge, and the flyer claims it, but this stays off until A3 is resolved. **A published insurance claim that turns out to be wrong is a much bigger problem than a missing badge.** One line to add back once there's a policy number.
+
+### 🟢 G4. Which dates count as holidays?
+Beyond B5 (which holidays carry the fee), the booking form now applies the +$15 automatically, so it needs **actual dates**. There's a standard list in `src/lib/booking.ts` (New Year's, Memorial Day, July 4th, Labor Day, Thanksgiving, Christmas Eve/Day, New Year's Eve) — he just needs to strike out any he doesn't charge for and add any he does.
+
+### 🟢 G5. Is he happy for AI assistants to read the site?
+`robots.txt` currently **allows** GPTBot, ClaudeBot, PerplexityBot and friends, and the site publishes an `llms.txt` summary. Reasoning: he wants to be findable, and there's no proprietary content to protect — being the answer when someone asks an assistant *"who walks dogs in Rittenhouse?"* is worth more than withholding six pages of public copy. It's his call and a one-line reversal.
+
+### 🟢 G6. Zoe's eye
+Still open from the photo pass. In `Zoe and I.jpg` her left eye appears closed or absent. The alt text stays general until he confirms. If she's a special-needs dog and her owner is happy for it to be mentioned, **that's a genuine trust signal** — "he looks after a blind chihuahua" says more than any badge.
+
+---
+
 ## Answered ✅
 
 - **"15 years of experience"** — confirmed current

@@ -1,0 +1,75 @@
+---
+import Base from "../layouts/Base.astro";
+import Icon from "../components/Icon.astro";
+import PawDivider from "../components/PawDivider.astro";
+import { NAV, SITE } from "../lib/site";
+---
+
+<Base
+  title="Page not found"
+  description={`That page doesn't exist. Find dog walking, cat visits and overnight pet sitting in ${SITE.city}, or text Edward on ${SITE.phone}.`}
+>
+  <section class="shell-narrow notfound">
+    <PawDivider class="notfound-paw" />
+    <h1 class="display notfound-title">That page has wandered off.</h1>
+    <p class="lede notfound-body">
+      The link may be old, or we may have moved something. Everything is one tap away:
+    </p>
+
+    <nav class="notfound-links" aria-label="Site">
+      <a href="/">Home</a>
+      {NAV.map((item) => <a href={item.href}>{item.shortLabel}</a>)}
+    </nav>
+
+    <div class="btn-row notfound-actions">
+      <a href="/book" class="btn btn-primary">Book a visit</a>
+      <a href={SITE.phoneHref} class="btn btn-ghost">
+        <Icon name="message-square" size={18} />Call or text
+      </a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .notfound {
+    padding-block: clamp(56px, 9vw, 120px);
+    text-align: center;
+  }
+  .notfound-paw::before,
+  .notfound-paw::after {
+    display: none;
+  }
+  .notfound-title {
+    margin: 18px 0 0;
+    font-size: clamp(30px, 5.6vw, 50px);
+  }
+  .notfound-body {
+    margin: 14px auto 0;
+    max-width: 44ch;
+  }
+  .notfound-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 28px;
+  }
+  .notfound-links a {
+    font: 500 15px var(--font-body);
+    color: var(--color-brand-green);
+    text-decoration: none;
+    border: 1px solid rgb(22 62 31 / 0.25);
+    border-radius: 999px;
+    padding: 11px 18px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .notfound-links a:hover {
+    background: rgb(22 62 31 / 0.06);
+  }
+  .notfound-actions {
+    justify-content: center;
+    margin-top: 28px;
+  }
+</style>

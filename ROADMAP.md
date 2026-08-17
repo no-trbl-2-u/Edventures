@@ -38,7 +38,7 @@ These are settled. Everything below follows from them.
 | Hosting | Cloudflare Pages or Vercel | Free tier, git-push deploys, automatic HTTPS. | $0 |
 | Form backend | One serverless function on the same host | Needed to send the booking email. Avoids a third-party form service. | $0 |
 | Transactional email | Resend or Postmark | Reliable delivery of booking requests to Edward's inbox. Free tier covers this volume. | $0 |
-| Domain | e.g. `edventurespetsitting.com` | The one real expense. | ~$12/yr |
+| Domain | `edventures.pet` | The one real expense. | ~$12/yr |
 | Analytics | Cloudflare Web Analytics or Plausible | Cookie-free — no consent banner needed. | $0 |
 
 **Simpler alternative:** hand-written HTML/CSS, no build step. Viable for ~6 pages, but you'll regret it at Phase 5. Astro's learning curve is about an afternoon.
@@ -97,12 +97,16 @@ npx astro add react
 
 ### 0.2 — Domain
 
-**Decided: `edventures.pet`.** (TJ, 2026-08-17. Supersedes the `edventurespetsitting.com` recommendation below.) `.pet` is on Cloudflare Registrar's supported list — registry operator Afilias — so it can be bought at cost and DNS is automatic.
-
-- [x] `site` in `astro.config.mjs` set to `https://edventures.pet`
-- [x] Purchase via Cloudflare Registrar — **bought 2026-08-17**
+- [x] **Registered: `edventures.pet`** — bought through Cloudflare Registrar on 2026-08-17. Shorter and more memorable than the `.com` we'd planned, and the TLD does some of the explaining for you. (`.pet` is on Cloudflare's supported list, registry operator Afilias, so it sells at cost and the zone lands in the account with DNS ready.)
+- [x] Canonical form is the **apex**, `https://edventures.pet`. Set in `astro.config.mjs` and `SITE.url`; those two must stay in step.
 - [ ] Point DNS at the Pages project
-- [ ] Verify HTTPS resolves and `www` redirects to apex (or vice versa — pick one, be consistent)
+- [ ] Verify HTTPS resolves and `www` redirects to apex — serving both splits ranking signal
+
+> **Propagation.** `edventures.pet` returned `NXDOMAIN` at 8.8.8.8 shortly after purchase — normal for a fresh registration. Recheck that it resolves before attaching the custom domain in Pages; attaching early just produces a confusing error.
+
+> **The handle no longer matches the domain.** Social is `@edventurespetsitting`; the site is `edventures.pet`. Not a problem, but it makes the NAP work in 2.6.2 matter more, not less — the business *name* is the thing that has to be byte-identical across the site, Google Business Profile, Instagram and Facebook. The domain isn't part of that match.
+>
+> Worth grabbing `edventurespetsitting.com` later as a redirect if it's cheap and free — it's what people will guess from the Instagram handle.
 
 > **Consequence to handle in 2.6.** The domain no longer contains "petsitting" and no longer matches the IG/FB handle `@edventurespetsitting`. Not a ranking problem — exact-match domains stopped mattering years ago — but it does mean the Google Business Profile, the site title, and the `<h1>` have to carry the "pet sitting Philadelphia" keywords the domain used to. Also make sure the handle and the domain appear together everywhere, so the two identities are visibly one business.
 
@@ -128,25 +132,32 @@ npx astro add react
 
 ### 0.4 — Logo
 
-- [ ] Ask Edward's designer for the logo as **SVG**. Raster will look soft in the header and favicon.
-- [ ] If no SVG exists: trace it, or use `LOGO.png` at 3× and accept the tradeoff
-- [ ] Produce favicon set: `favicon.svg`, `favicon.ico` (32px), `apple-touch-icon.png` (180px)
-- [ ] Produce a horizontal lockup for the site header (the stacked logo is too tall for a nav bar)
+Derived by [`scripts/brand-assets.mjs`](scripts/brand-assets.mjs) — `npm run brand`. `LOGO.png` is dark artwork on an opaque white card; the script knocks the white out to alpha and crops the pieces.
 
-### 0.5 — Photo pipeline
+- [ ] **Still ask Edward's designer for the SVG** (go-back-to-ed.md, D2). Everything below is raster and will stay slightly soft.
+- [x] Interim: `lockup`, `mark`, `mark-initial`, `paw` — plus cream `-light` variants for the green footer and dark panels
+- [x] Favicons at 32/180/192/512 + `og-default.png` (1200×630)
+- [x] Header lockup: the mark supplies the "E", type supplies "DVENTURES" — the stacked logo is far too tall for a nav bar
+- [ ] Re-run `npm run brand` against the SVG when it arrives; nothing else changes
 
-- [ ] Create `src/assets/photos/`
-- [ ] Rename all photos to web-safe slugs — lowercase, hyphens, no spaces
-  - [ ] `Kisses from Jackie.jpeg` → `kisses-from-jackie.jpg`
-  - [ ] **Watch the uppercase extensions:** `ME and Stellaluna.JPG`, `Smooches.JPG`, `Stellaluna at the Park.JPG` — case-sensitive Linux hosts will 404 on `.JPG` if referenced as `.jpg`
-- [ ] Build a slug → caption mapping file (the original filenames carry the captions — preserve that information before renaming destroys it)
-- [ ] **Apply EXIF rotation, then strip the tag.** Nine photos carry orientation tags (listed in [photo-captions.md](content-draft/photo-captions.md)). They display correctly in browsers today, but a naive resize bakes in the wrong rotation — they'd break *during* optimization. In `sharp`, a bare `.rotate()` handles it.
-- [ ] Stripping EXIF also removes **GPS coordinates** — several photos were taken at clients' homes. Do not publish location metadata.
-- [ ] Convert to WebP with JPEG fallback
-- [ ] Resize: max 1600px wide for gallery, 800px for inline, 400px for thumbnails
-- [ ] Target under 200KB each. ~21 phone-camera photos will otherwise make the gallery painful on mobile.
-- [ ] Verify orientation visually after processing — this bug is invisible until someone looks
-- [ ] Copy `First Aid Certificate.pdf` to `public/` for direct linking
+> **No `favicon.svg`.** The logo exists only as raster, so a "vector" favicon would mean a bitmap in an SVG wrapper — all of the file size, none of the sharpness. PNG at four sizes until the real vector shows up.
+
+### 0.5 — Photo pipeline ✅
+
+Implemented as [`scripts/photos.mjs`](scripts/photos.mjs) — `npm run photos`.
+
+- [x] Create `src/assets/photos/`
+- [x] Rename all photos to web-safe slugs — lowercase, hyphens, no spaces
+  - [x] Uppercase extensions (`ME and Stellaluna.JPG`, `Smooches.JPG`, `Stellaluna at the Park.JPG`) normalised to `.jpg` — a case-sensitive Linux host would have 404'd on these
+- [x] Slug → source mapping lives in the script; captions and alt text in `src/content/photos.json`
+- [x] **EXIF rotation applied, then stripped.** Nine photos carried tag 274; `sharp`'s bare `.rotate()` handles it. The script cross-checks each file against `needsExifRotation` in `photos.json` and warns on drift, so the data can't quietly go stale.
+- [x] **GPS stripped.** 11 of the originals carried GPS coordinates — several taken inside clients' homes. Verified 0/21 processed files retain any EXIF.
+- [x] WebP with JPEG fallback + responsive widths — handled by Astro's `<Image>`, not baked into the source files
+- [x] Resize: capped at 1600px; Astro emits 400/800/1200 variants per usage
+- [x] Verify orientation visually after processing
+- [x] Copy `First Aid Certificate.pdf` to `public/` for direct linking
+
+> **The GPS check nearly gave a false all-clear.** The first version searched the EXIF buffer for the string `"GPS"` and reported zero hits on every file — EXIF stores numeric tag IDs, not names. The real check parses the TIFF header for tag `0x8825` and finds 11. A privacy check that always passes is worse than no check.
 
 ### 0.6 — Content requests to Edward
 
@@ -263,23 +274,27 @@ Claude transcribes from the image assets into Markdown, marking anything uncerta
 
 *Goal: a complete, live site that converts. No booking form yet.*
 
-### 2.1 — Shared layout
+### 2.1 — Shared layout ✅
 
-- [ ] `src/layouts/Base.astro` — html shell, meta tags, font loading
-- [ ] `Header.astro` — logo, nav, CTA button, mobile hamburger
-- [ ] `Footer.astro` — contact, socials, service area, copyright
-- [ ] `SEO.astro` — per-page title, description, Open Graph tags
-- [ ] Reusable components: `Button`, `Card`, `TrustBadge`, `PhotoGrid`, `Testimonial`
+- [x] `src/layouts/Base.astro` — shell, meta, fonts, JSON-LD, skip link
+- [x] `Header.astro` — brand lockup, nav, CTA. Mobile menu is a `<details>`/`<summary>`: keyboard accessible, announces its own state, zero JS
+- [x] `Footer.astro` — contact, socials, service area, trust line
+- [x] SEO folded into `Base.astro` rather than a separate `SEO.astro` — one place a page can get a canonical or description wrong, not two
+- [x] Reusable: `Icon`, `Photo`, `TrustStrip`, `Ribbon`, `PawDivider`, `FinalCta`, `MobileActionBar`
+- [x] Icons inlined from `lucide-static` at build time instead of the design's CDN `<script>` — keeps static pages at 0 KB JS and removes a third-party request
 
-### 2.2 — Pages
+> Lucide has dropped its brand marks over trademark concerns, so Instagram and Facebook live in `src/icons/` as filled paths. `Icon.astro` checks there first and flips `fill`/`stroke` accordingly.
 
-- [ ] Home
-- [ ] About (bio + photos + First Aid certificate link)
-- [ ] Services (service list + price table)
-- [ ] Gallery
-- [ ] Contact (phone, email, socials, zip codes, FAQ)
-- [ ] `/book` placeholder — "To book, text or email" until Phase 3
-- [ ] 404 page
+### 2.2 — Pages ✅
+
+- [x] Home — letterhead hero, trust strip, services, about teaser, testimonials, service area, CTA
+- [x] About (bio from `src/content/pages/about.md` + photos + First Aid certificate link)
+- [x] Services (price cards from the content collections, incl. additional fees)
+- [x] Gallery (CSS-columns masonry, no JS)
+- [x] Contact (phone, email, socials, zips, FAQ)
+- [x] **`/service-area`** — added for local SEO, see 2.6.2
+- [x] `/book` — full booking form, arrived early via the design (Phase 3 below)
+- [x] 404 page
 
 ### 2.3 — Responsive pass
 
@@ -311,11 +326,11 @@ Claude transcribes from the image assets into Markdown, marking anything uncerta
 
 *The site is a static brochure. Nearly all of the SEO win here is **local** SEO, and most of it happens off-site.*
 
-**2.6.1 — Technical foundation (table stakes)**
+**2.6.1 — Technical foundation (table stakes)** ✅
 
-- [ ] `sitemap.xml` — use `@astrojs/sitemap`, generated at build so it can't go stale
-- [ ] `robots.txt` — allow everything, point at the sitemap. Nothing here needs hiding.
-- [ ] Canonical `<link>` on every page, absolute URL — prevents `www`/apex and trailing-slash variants splitting ranking signal
+- [x] `sitemap.xml` — `@astrojs/sitemap`, generated at build so it can't go stale
+- [x] `robots.txt` — generated by `src/pages/robots.txt.ts`, points at the sitemap
+- [x] Canonical `<link>` on every page, absolute URL — prevents `www`/apex and trailing-slash variants splitting ranking signal
 - [ ] Pick apex-vs-`www` once (0.2) and 301 the other; never serve both
 - [ ] Unique `<title>` per page, under ~60 chars, each ending `· Edventures Pet Sitting`
 - [ ] Unique meta description per page, 140–160 chars, written as ad copy rather than a summary — it's the click-through pitch
@@ -376,13 +391,15 @@ Claude transcribes from the image assets into Markdown, marking anything uncerta
 
 *People increasingly find local services by asking an assistant instead of searching. The site should answer well when a model reads it — and the work overlaps almost entirely with 2.6.*
 
-**2.7.1 — `llms.txt`**
+**2.7.1 — `llms.txt`** ✅
 
-- [ ] Publish `/llms.txt` — a Markdown summary of the business for language models: what Edventures does, services with real prices, service area, contact details, and links to the key pages
-- [ ] Generate it **from the content collections at build time**, so prices can never drift from the site
-- [ ] Keep it short and factual. It's a briefing document, not marketing copy.
+- [x] `/llms.txt` published from `src/pages/llms.txt.ts`
+- [x] Generated **from the content collections at build time**, so prices can never drift from the site
+- [x] Short and factual — a briefing document, not marketing copy
+- [x] Includes a "Not yet published" section naming the policies that don't exist yet, with an explicit *do not infer them*. An assistant inventing a cancellation policy is a customer conversation Edward has to walk back.
+- [x] States the negatives too: no insulin, not insured. Constraints are what get invented otherwise.
 - [ ] Optionally publish `/llms-full.txt` with the full page text concatenated
-- [ ] Serve as `text/plain; charset=utf-8`
+- [x] Served as `text/plain; charset=utf-8`
 
 > `llms.txt` is a community convention, not a standard, and support is uneven. It costs ~20 lines of build script and can't hurt — but don't treat it as the main mechanism. Clean semantic HTML is what actually gets read today.
 
@@ -396,10 +413,9 @@ Claude transcribes from the image assets into Markdown, marking anything uncerta
 
 **2.7.3 — Crawler policy (a decision, not a default)**
 
-- [ ] Decide whether to allow AI crawlers in `robots.txt`: `GPTBot`, `ClaudeBot`, `PerplexityBot`, `Google-Extended`, `CCBot`
-- [ ] **Recommendation: allow them.** A pet-sitting business wants to be discoverable, and there's no proprietary content to protect. The trade-off that makes publishers block these does not apply here.
-- [ ] Note the distinction: `Google-Extended` controls *training* use, not Search indexing — blocking it does not remove the site from Google
-- [ ] Confirm the decision with Edward; it's his business, and it's a one-line reversal either way
+- [x] Decided: **allow them** — `GPTBot`, `ClaudeBot`, `Claude-Web`, `PerplexityBot`, `Google-Extended`, `CCBot`. A pet-sitting business wants to be discoverable and has no proprietary content to protect; the trade-off that makes publishers block these doesn't apply.
+- [x] Reasoning recorded in `src/pages/robots.txt.ts`, including that `Google-Extended` governs *training*, not Search — blocking it would not remove the site from Google
+- [ ] **Confirm with Edward** (go-back-to-ed.md, G5); it's his business and a one-line reversal
 
 **2.7.4 — Verify**
 
@@ -424,15 +440,22 @@ Claude transcribes from the image assets into Markdown, marking anything uncerta
 
 The UI is a calendar; the backend is an email. **There is no availability to compute, so there is no hard problem.** Edward remains the source of truth.
 
-### 3.1 — Data model (do this first)
+### 3.1 — Data model (do this first) ✅
 
-- [ ] Define `BookingRequest` as a TypeScript type in **one file**, `src/types/booking.ts`
-- [ ] Define the service catalog as data (id, name, durations, prices) — derived from `pricing.md`, not hardcoded in the form
-- [ ] Define add-ons as data (medication +$5, nail trim +$8)
-- [ ] Define surcharge rules as data (additional dog +$7, additional cat +$5, holiday +$15, last-minute +$8)
-- [ ] Define the served-zip list as data
+Lives in [`src/lib/booking.ts`](src/lib/booking.ts).
+
+- [x] `BookingRequest` defined in **one file**
+- [x] Service catalog as data, built from the content collections by `src/lib/catalog.ts` — the form reads prices, it doesn't contain them
+- [x] Add-ons as data (medication +$5 / free overnight, nail trim +$8)
+- [x] Surcharge rules as data (additional dog +$7, cat +$5, holiday +$15, last-minute +$8)
+- [x] Served-zip list as data, in `src/lib/site.ts` alongside neighbourhood names
 
 > This single step is what makes Phases 4 and 6 swaps instead of rewrites. Don't skip it.
+
+**Two date rules worth not rediscovering later:**
+
+- Dates are handled as local calendar dates, never timestamps. `new Date("2026-08-17")` parses as **UTC** and lands on the 16th anywhere west of Greenwich — a walk on the 17th must be on the 17th regardless of the reader's clock.
+- A range charges *nights* for overnights and *visits* for everything else. Aug 22–25 is **3 nights** but **4 visits** — the departure day is a departure, not a stay.
 
 ### 3.2 — Form fields
 
@@ -445,41 +468,45 @@ The UI is a calendar; the backend is an email. **There is no availability to com
 | Logistics | Home entry method; first-time client?; emergency contact; vet name & phone |
 | Consent | Checkbox agreeing to the cancellation policy |
 
-### 3.3 — Time windows, not exact times
+### 3.3 — Time windows, not exact times ✅
 
-- [ ] Offer windows: Morning 7–11, Midday 11–2, Afternoon 2–6, Evening 6–9
-- [ ] Confirm these windows match Edward's actual working day
-- [ ] Add a free-text "flexibility notes" field
+- [x] Windows: Morning 7–11, Midday 11–2, Afternoon 2–6, Evening 6–9
+- [ ] **Confirm these match Edward's actual working day** (go-back-to-ed.md, C1) — the only unverified thing on the form
+- [x] Free-text "flexibility notes" field
 
 > Windows match how walks actually get scheduled and set honest expectations. Exact-minute selection implies a precision Edward can't guarantee.
 
-### 3.4 — Multi-step UX
+### 3.4 — Multi-step UX ✅
 
-- [ ] Step 1: Service & add-ons
-- [ ] Step 2: Schedule
-- [ ] Step 3: Pet details
-- [ ] Step 4: Your info & logistics
-- [ ] Progress indicator
-- [ ] Preserve state when navigating back
-- [ ] Persist to `localStorage` so a dropped connection doesn't lose the form
+- [x] Steps 1–4: service & add-ons / schedule / pet / you
+- [x] Progress indicator, clickable to jump between steps
+- [x] State preserved when navigating back
+- [x] Persisted to `localStorage`, with a visible "picked up where you left off / start over"
 
 > A single page with 20 fields kills mobile conversion.
 
-### 3.5 — Live price estimate
+### 3.5 — Live price estimate ✅
 
-- [ ] Calculate as options are selected, from the Phase 3.1 catalog
-- [ ] Auto-flag the last-minute surcharge when the date is under 24h out (+$8)
-- [ ] Auto-flag holiday pricing (+$15) — needs a holiday date list
-- [ ] Label clearly as **an estimate, not a quote**
-- [ ] Show the line-item breakdown, not just a total
+- [x] Calculates from the Phase 3.1 catalog as options are selected
+- [x] Auto-applies the last-minute surcharge under 24h (+$8), measured from 9am on the requested day — measuring from midnight would wave through an 11pm request for tomorrow
+- [x] Auto-applies holiday pricing (+$15) from a date list in `booking.ts`
+- [ ] **Edward to confirm the holiday dates** (go-back-to-ed.md, G4)
+- [x] Labelled clearly as **an estimate, not a quote**
+- [x] Line-item breakdown, not just a total
 
-### 3.6 — Zip code handling
+> **Fixed during the build:** picking Overnight pre-selects medication (free with overnights). Switching back to a walk used to keep it selected and silently add $5 the customer never asked for. The form now tracks whether *it* added the add-on or the customer did, and only removes its own.
 
-- [ ] Validate client-side against the 11 served zips
-- [ ] **Do not block out-of-area submissions.** Show *"We may still be able to help — travel fees may apply"* and let them submit.
-- [ ] Flag out-of-area requests visibly in Edward's email
+### 3.6 — Zip code handling ✅
+
+- [x] Validated client-side against the 11 served zips
+- [x] **Out-of-area never blocks.** Shows *"Edward may still be able to help — travel fees may apply"* and lets them submit.
+- [ ] Flag out-of-area requests visibly in Edward's email — waits on 3.9
 
 > Turning away a nearby customer is worse than a slightly awkward email.
+
+> ## ⚠️ The form cannot send yet.
+>
+> 3.1–3.6 and 3.8 are built; **3.7 is not**, so there is no endpoint to POST to. Until `PUBLIC_BOOKING_ENDPOINT` is set, submitting lands on the failure screen, which puts Edward's phone number in front of the customer. That is deliberate — a visible hand-off beats a silent drop — but **`/book` should not be promoted as a working booking form until 3.7, 3.10 and 3.11 are done.**
 
 ### 3.7 — Backend
 
@@ -493,10 +520,10 @@ The UI is a calendar; the backend is an email. **There is no availability to com
 
 ### 3.8 — Spam protection
 
-- [ ] Honeypot field
-- [ ] Cloudflare Turnstile
-- [ ] Minimum time-to-submit check (bots submit instantly)
-- [ ] **No image CAPTCHA.** Don't punish real customers.
+- [x] Honeypot field — positioned off-screen rather than `display:none`, which some bots skip
+- [ ] Cloudflare Turnstile — waits on 3.7
+- [x] Minimum time-to-submit check (5s; bots submit instantly)
+- [x] **No image CAPTCHA.** Don't punish real customers.
 
 ### 3.9 — Edward's notification email
 

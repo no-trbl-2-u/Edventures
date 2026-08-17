@@ -18,6 +18,15 @@ const services = defineCollection({
     id: z.string(),
     name: z.string(),
     blurb: z.string(),
+    /** Lucide icon name used on the service cards. */
+    icon: z.string(),
+    /** True when the service is a single flat price rather than a set of
+     *  durations the customer picks between. */
+    flatRate: z.boolean().default(false),
+    /** Line-item wording on the estimate for flat-rate services. */
+    baseLabel: z.string().optional(),
+    /** Caveat shown under the price block, e.g. the cat-visit tier note. */
+    note: z.string().optional(),
     /** Duration in minutes -> price in whole dollars. */
     tiers: z.array(z.object({ minutes: z.number().int().positive(), price: z.number().positive() })),
     order: z.number().int(),

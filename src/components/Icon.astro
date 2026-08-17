@@ -1,0 +1,81 @@
+---
+/**
+ * Inlines a Lucide icon at build time.
+ *
+ * The design comp loads lucide from a CDN and calls `createIcons()` on every
+ * render. Reading the SVG off disk instead keeps the static pages at zero
+ * JavaScript, removes a third-party request from the critical path, and means
+ * icons still appear if unpkg is having a bad day.
+ */
+import { readFileSync } from "node:fs";
+
+interface Props {
+  name: string;
+  size?: number;
+  /** Decorative by default; pass a label when the icon is the only content. */
+  label?: string;
+  class?: string;
+}
+
+const { name, size = 20, label, class: className } = Astro.props;
+
+// Cached across the build so a page with thirty icons does thirty map lookups,
+// not thirty disk reads.
+const cache = ((globalThis as any).__iconCache ??= new Map<string, { inner: string; filled: boolean }>());
+
+/**
+ * Lucide dropped its brand marks (Instagram, Facebook) for trademark reasons,
+ * so those two live in src/icons/. They are filled paths rather than strokes,
+ * which is why the caller can't just swap names blindly - the flag rides along
+ * with the icon.
+ */
+function loadIcon(iconName: string) {
+  if (cache.has(iconName)) return cache.get(iconName)!;
+
+  let svg: string | undefined;
+  let filled = false;
+
+  try {
+    svg = readFileSync(`src/icons/${iconName}.svg`, "utf8");
+    filled = true;
+  } catch {
+    try {
+      svg = readFileSync(`node_modules/lucide-static/icons/${iconName}.svg`, "utf8");
+    } catch {
+      throw new Error(
+        `Icon "${iconName}" not found. Checked src/icons/ and node_modules/lucide-static/icons/.`,
+      );
+    }
+  }
+
+  // Strip the file's own sizing/color so the caller controls both via CSS.
+  const inner = svg
+    .replace(/^[\s\S]*?<svg[^>]*>/, "")
+    .replace(/<\/svg>\s*$/, "")
+    .trim();
+
+  const entry = { inner, filled };
+  cache.set(iconName, entry);
+  return entry;
+}
+
+const { inner, filled } = loadIcon(name);
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill={filled ? "currentColor" : "none"}
+  stroke={filled ? "none" : "currentColor"}
+  stroke-width={filled ? undefined : 2}
+  stroke-linecap={filled ? undefined : "round"}
+  stroke-linejoin={filled ? undefined : "round"}
+  class={className}
+  style={`width:${size}px;height:${size}px;flex:none`}
+  role={label ? "img" : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : "true"}
+  set:html={inner}
+/>

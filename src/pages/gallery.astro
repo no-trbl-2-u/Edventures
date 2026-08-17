@@ -1,0 +1,93 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+import Photo from "../components/Photo.astro";
+import FinalCta from "../components/FinalCta.astro";
+import { byPlacement, type PhotoData } from "../lib/photos";
+import { SITE } from "../lib/site";
+import { breadcrumbs } from "../lib/structured-data";
+
+const photos = (await getCollection("photos")).map((p) => p.data as PhotoData);
+const gallery = byPlacement(photos, "gallery");
+
+const structuredData = [
+  breadcrumbs([
+    { name: "Home", path: "/" },
+    { name: "Gallery", path: "/gallery" },
+  ]),
+];
+---
+
+<Base
+  title="Gallery"
+  description={`Photographs of the ${SITE.city} dogs and cats Edward looks after, taken on ordinary visits and shared with permission.`}
+  structuredData={structuredData}
+>
+  <section class="shell page-head">
+    <span class="eyebrow">Real clients, real days</span>
+    <h1 class="heading-brand page-title">Gallery</h1>
+    <p class="lede page-lede">
+      Every animal here belongs to a {SITE.city} client, photographed on an ordinary visit.
+      Shared with permission.
+    </p>
+  </section>
+
+  <section class="shell gallery-wrap">
+    {/* CSS columns give a masonry layout with no JavaScript and no fixed
+        row heights, so portrait and landscape photos both keep their crop. */}
+    <div class="masonry">
+      {gallery.map((photo) => <Photo photo={photo} width={560} showCaption class="masonry-item" />)}
+    </div>
+    <p class="note gallery-note">
+      {gallery.length} photos. Captions and alt text verified against the originals.
+    </p>
+  </section>
+
+  <FinalCta />
+</Base>
+
+<style>
+  .page-head {
+    padding-top: clamp(32px, 5vw, 64px);
+    text-align: center;
+  }
+  .page-title {
+    margin: 12px 0 0;
+    font-size: clamp(32px, 6vw, 56px);
+    letter-spacing: 0.05em;
+    line-height: 1.05;
+  }
+  .page-lede {
+    margin: 14px auto 0;
+    max-width: 50ch;
+  }
+
+  .gallery-wrap {
+    padding-block: clamp(28px, 4vw, 48px) clamp(48px, 7vw, 90px);
+  }
+
+  .masonry {
+    columns: 2;
+    column-gap: clamp(10px, 1.6vw, 18px);
+  }
+  .masonry-item {
+    /* Without this a figure can be split across two columns mid-image. */
+    break-inside: avoid;
+    margin-bottom: clamp(10px, 1.6vw, 18px);
+  }
+
+  @media (min-width: 700px) {
+    .masonry {
+      columns: 3;
+    }
+  }
+  @media (min-width: 1100px) {
+    .masonry {
+      columns: 4;
+    }
+  }
+
+  .gallery-note {
+    margin-top: 8px;
+  }
+</style>

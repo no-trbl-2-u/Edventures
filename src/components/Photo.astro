@@ -1,0 +1,58 @@
+---
+/**
+ * A photo in the brand's matted frame, with its caption.
+ * Alt text always comes from photos.json - see src/lib/photos.ts.
+ */
+import { Image } from "astro:assets";
+import type { ResolvedPhoto } from "../lib/photos";
+
+interface Props {
+  photo: ResolvedPhoto;
+  /** CSS aspect-ratio for the crop, e.g. "4/5". Omit to keep the native ratio. */
+  ratio?: string;
+  /** Rendered width hint for srcset generation. */
+  width?: number;
+  showCaption?: boolean;
+  /** `eager` for anything above the fold; everything else stays lazy. */
+  loading?: "lazy" | "eager";
+  objectPosition?: string;
+  /** White mat instead of cream, for use on cream backgrounds. */
+  onCream?: boolean;
+  class?: string;
+}
+
+const {
+  photo,
+  ratio,
+  width = 800,
+  showCaption = false,
+  loading = "lazy",
+  objectPosition,
+  onCream = false,
+  class: className,
+} = Astro.props;
+---
+
+<figure class:list={["photo", className]}>
+  <div class:list={["frame", onCream && "frame-on-cream"]}>
+    <div class="frame-inner" style={ratio ? `aspect-ratio:${ratio}` : undefined}>
+      <Image
+        src={photo.image}
+        alt={photo.alt}
+        width={width}
+        widths={[400, 800, 1200]}
+        sizes="(min-width: 1000px) 33vw, 100vw"
+        loading={loading}
+        decoding={loading === "eager" ? "sync" : "async"}
+        style={objectPosition ? `object-position:${objectPosition}` : undefined}
+      />
+    </div>
+  </div>
+  {showCaption && <figcaption class="caption">{photo.caption}</figcaption>}
+</figure>
+
+<style>
+  .photo {
+    margin: 0;
+  }
+</style>

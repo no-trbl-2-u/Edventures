@@ -1,28 +1,99 @@
 ---
+/**
+ * Page shell: head, header, footer, mobile action bar.
+ *
+ * SEO (Roadmap 2.6) lives here rather than in a separate component so there is
+ * exactly one place a page can get a canonical, a description or an OG tag
+ * wrong. Structured data is generated from the content collections by
+ * src/lib/structured-data.ts -- never hand-written, so the markup and the
+ * visible prices cannot drift apart.
+ */
 import "../styles/global.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import MobileActionBar from "../components/MobileActionBar.astro";
+import { SITE } from "../lib/site";
 
 interface Props {
   title: string;
-  description?: string;
+  description: string;
+  /** JSON-LD objects to emit. Home page passes LocalBusiness + services. */
+  structuredData?: unknown[];
+  /** Suppress the sticky mobile CTA bar on the booking page - it would sit on
+   *  top of the form's own submit button. */
+  hideActionBar?: boolean;
+  /** Path to a page-specific share image, relative to the site root. */
+  ogImage?: string;
 }
 
 const {
   title,
-  description = "Professional pet sitting, dog walking, and cat visits in Philadelphia. 15 years of experience. Insured, CPR and First-Aid certified.",
+  description,
+  structuredData = [],
+  hideActionBar = false,
+  ogImage = "/og-default.png",
 } = Astro.props;
+
+// Canonical must be absolute and must match the apex/www choice made in 0.2,
+// or the two variants split ranking signal between them.
+const canonical = new URL(Astro.url.pathname, SITE.url).href.replace(/(.)\/$/, "$1");
+const ogImageUrl = new URL(ogImage, SITE.url).href;
+
+const fullTitle = title === SITE.name ? title : `${title} · ${SITE.name}`;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
+
+    <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonical} />
+
+    {/* No SVG favicon: the logo is raster-only until Edward's designer supplies
+        the vector (Roadmap 0.4). PNG at several sizes beats a bitmap in an SVG
+        wrapper. */}
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="icon" href="/favicon-192.png" sizes="192x192" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <meta name="geo.region" content="US-PA" />
+    <meta name="geo.placename" content={SITE.city} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    {
+      structuredData.map((data) => (
+        <script is:inline type="application/ld+json" set:html={JSON.stringify(data)} />
+      ))
+    }
   </head>
+
   <body>
-    <slot />
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div style="min-height:100vh;display:flex;flex-direction:column">
+      <Header />
+      <main id="main" style="flex:1">
+        <slot />
+      </main>
+      <Footer />
+    </div>
+    {!hideActionBar && <MobileActionBar />}
   </body>
 </html>

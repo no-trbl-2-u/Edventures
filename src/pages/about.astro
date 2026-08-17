@@ -1,0 +1,244 @@
+---
+/**
+ * About Edward.
+ *
+ * The prose is rendered from src/content/pages/about.md, which is the verified
+ * bio. The Claude Design comp rewrote it and, in doing so, reintroduced two
+ * claims we had deliberately removed: "fully insured" (unverified -- see
+ * go-back-to-ed.md A3) and "work in veterinary medicine" phrased so the
+ * hands-on-care claim attributes to what is actually an administrative role.
+ * The layout below is the comp's; the words are the checked ones.
+ */
+import { getCollection, getEntry, render } from "astro:content";
+import Base from "../layouts/Base.astro";
+import Icon from "../components/Icon.astro";
+import Photo from "../components/Photo.astro";
+import PawDivider from "../components/PawDivider.astro";
+import FinalCta from "../components/FinalCta.astro";
+import { resolvePhoto, type PhotoData } from "../lib/photos";
+import { SITE } from "../lib/site";
+import { breadcrumbs } from "../lib/structured-data";
+
+const about = await getEntry("pages", "about");
+const { Content } = await render(about!);
+
+const photos = (await getCollection("photos")).map((p) => p.data as PhotoData);
+const byId = (id: string) => resolvePhoto(photos.find((p) => p.id === id)!);
+
+const portrait = byId("selfie-with-tecate");
+// The comp's strip included `me-and-goy-pouting`, which is marked `excluded`
+// for lighting. Swapped for a sharp one rather than shipping a photo our own
+// curation pass rejected.
+const strip = [
+  byId("kisses-from-tecate"),
+  byId("cuddling-with-auggy"),
+  byId("stellaluna-at-the-park"),
+  byId("a-fun-day-with-cows"),
+];
+const crew = [byId("my-son-harry-and-i"), byId("hubert")];
+const angel = byId("angel-and-i");
+
+const structuredData = [
+  breadcrumbs([
+    { name: "Home", path: "/" },
+    { name: "About", path: "/about" },
+  ]),
+];
+---
+
+<Base title="About Edward" description={about!.data.description} structuredData={structuredData}>
+  <section class="shell intro">
+    <div>
+      <span class="eyebrow">About</span>
+      <h1 class="display intro-title">Hi, I'm {SITE.owner}.</h1>
+      <p class="script intro-sub">
+        Owner and founder of {SITE.name}, in {SITE.city}.
+      </p>
+    </div>
+    <Photo photo={portrait} ratio="5/4" width={560} objectPosition="50% 30%" />
+  </section>
+
+  <section class="shell-prose bio">
+    <Content />
+
+    <div class="cert">
+      <span class="roundel roundel-sm"><Icon name="heart-pulse" size={24} /></span>
+      <div class="cert-copy">
+        <p class="cert-title">Pet CPR &amp; First Aid certificate</p>
+        <p class="cert-sub">Read it yourself — it's a claim worth checking.</p>
+      </div>
+      <a href="/First Aid Certificate.pdf" target="_blank" rel="noopener" class="btn btn-ghost cert-btn">
+        <Icon name="file-text" size={16} />View certificate
+      </a>
+    </div>
+  </section>
+
+  <section class="shell strip">
+    {strip.map((photo) => <Photo photo={photo} ratio="4/5" width={300} showCaption />)}
+  </section>
+
+  <section class="band">
+    <div class="shell crew">
+      <div>
+        <span class="eyebrow">My own crew</span>
+        <h2 class="display crew-title">Harry and Hubert keep me honest.</h2>
+        <p class="crew-body">
+          I'm a pet owner before I'm a pet sitter. Everything I ask of your routine is something
+          I run at home first — the slow introductions, the medication reminders, the patience
+          with a cat who wants nothing to do with me on day one.
+        </p>
+      </div>
+      <div class="crew-photos">
+        {crew.map((photo) => <Photo photo={photo} ratio="1/1" width={300} showCaption onCream />)}
+      </div>
+    </div>
+  </section>
+
+  {/* Angel is placed apart from the gallery on purpose - a memorial mixed into
+      a grid of client pets reads as filler. */}
+  <section class="shell-narrow memory">
+    <Photo photo={angel} ratio="3/4" width={320} />
+    <div>
+      <span class="eyebrow">In memory</span>
+      <h2 class="display memory-title">Angel</h2>
+      <p class="memory-body">
+        Some of the animals I've cared for aren't here anymore. Angel is one of them, and I think
+        about her often. Fifteen years in this work means being part of a family's whole story
+        with their pet — the beginning and the end of it.
+      </p>
+      <p class="note">
+        Placement is Edward's call (go-back-to-ed.md, E1) — shown here as an intentional, quiet
+        moment rather than mixed into the gallery.
+      </p>
+    </div>
+  </section>
+
+  <PawDivider class="closing-divider" />
+
+  <FinalCta heading="I can't wait to meet you and your furry family." quiet />
+</Base>
+
+<style>
+  .intro {
+    padding-top: clamp(32px, 5vw, 64px);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: clamp(24px, 4vw, 52px);
+    align-items: center;
+  }
+  .intro-title {
+    margin: 12px 0 0;
+    font-size: clamp(34px, 6.4vw, 62px);
+    line-height: 1.02;
+  }
+  .intro-sub {
+    margin: 16px 0 0;
+    font-size: clamp(19px, 3vw, 24px);
+    line-height: 1.4;
+  }
+
+  .bio {
+    padding-top: clamp(32px, 5vw, 60px);
+  }
+  /* Rendered markdown - style by element, since the content file has no classes. */
+  .bio :global(p) {
+    margin: 0 0 1.15em;
+    font-size: 18.5px;
+    line-height: 1.72;
+    color: var(--color-brand-ink);
+    text-wrap: pretty;
+  }
+  .bio :global(p:last-child) {
+    margin-bottom: 0;
+  }
+  .bio :global(strong) {
+    font-weight: 600;
+  }
+
+  .cert {
+    margin: 26px 0;
+    background: var(--color-brand-cream);
+    border: 1px solid rgb(78 50 22 / 0.18);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+  }
+  .cert-copy {
+    flex: 1;
+    min-width: 180px;
+  }
+  .cert-title {
+    margin: 0;
+    font: 600 15.5px var(--font-body);
+    color: var(--color-brand-green);
+  }
+  .cert-sub {
+    margin: 3px 0 0;
+    font: 400 13.5px var(--font-body);
+    color: rgb(26 26 24 / 0.7);
+  }
+  .cert-btn {
+    font-size: 14.5px;
+    padding: 12px 18px;
+    min-height: 46px;
+  }
+
+  .strip {
+    padding-block: clamp(32px, 5vw, 56px);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: clamp(12px, 1.8vw, 18px);
+  }
+
+  .crew {
+    padding-block: clamp(40px, 5.5vw, 76px);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: clamp(24px, 4vw, 52px);
+    align-items: center;
+  }
+  .crew-title {
+    margin: 12px 0 0;
+    font-size: clamp(26px, 4.2vw, 38px);
+    line-height: 1.1;
+  }
+  .crew-body {
+    margin: 14px 0 0;
+    font-size: 16.5px;
+    color: rgb(26 26 24 / 0.82);
+    max-width: 44ch;
+    text-wrap: pretty;
+  }
+  .crew-photos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .memory {
+    padding-block: clamp(40px, 6vw, 80px);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: clamp(20px, 3vw, 36px);
+    align-items: center;
+  }
+  .memory-title {
+    margin: 10px 0 0;
+    font-size: clamp(24px, 3.6vw, 32px);
+    line-height: 1.12;
+  }
+  .memory-body {
+    margin: 12px 0 14px;
+    font-size: 16.5px;
+    color: rgb(26 26 24 / 0.82);
+    text-wrap: pretty;
+  }
+
+  .closing-divider {
+    max-width: 820px;
+    margin-inline: auto;
+  }
+</style>

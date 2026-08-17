@@ -1,30 +1,431 @@
 ---
+import { Image } from "astro:assets";
+import { getCollection } from "astro:content";
 import Base from "../layouts/Base.astro";
+import Icon from "../components/Icon.astro";
+import Photo from "../components/Photo.astro";
+import PawDivider from "../components/PawDivider.astro";
+import Ribbon from "../components/Ribbon.astro";
+import TrustStrip from "../components/TrustStrip.astro";
+import FinalCta from "../components/FinalCta.astro";
+import lockup from "../assets/brand/lockup.png";
+import { getCatalog } from "../lib/catalog";
+import { resolvePhoto, type PhotoData } from "../lib/photos";
+import { SERVED_ZIPS, SITE } from "../lib/site";
+import { localBusiness, serviceOffers } from "../lib/structured-data";
+
+const catalog = await getCatalog();
+const photos = (await getCollection("photos")).map((p) => p.data as PhotoData);
+const byId = (id: string) => resolvePhoto(photos.find((p) => p.id === id)!);
+
+// The hero photo is chosen by the `placement: "hero"` field rather than named
+// here, so re-curating the gallery doesn't mean editing markup.
+const hero = resolvePhoto(photos.find((p) => p.placement === "hero")!);
+
+const teaser = [byId("proud-cat-dad"), byId("my-son-harry-and-i"), byId("playing-with-xenon")];
+
+const medication = catalog.addons.find((a) => a.id === "medication")!;
+
+const structuredData = [localBusiness(), ...serviceOffers(catalog)];
 ---
 
-<Base title="Edventures Pet Sitting | Philadelphia">
-  <main class="mx-auto max-w-2xl px-6 py-24 text-center">
-    <h1 class="heading-brand text-5xl">Edventures Pet Sitting</h1>
-
-    <p class="mt-4 text-brand-brown tracking-widest uppercase text-sm">
-      Adventurous care. Tailored for your pet.
-    </p>
-
-    <div class="mt-12 rounded-lg border border-brand-brown/15 bg-brand-card p-8">
-      <p class="text-brand-ink">
-        Scaffold placeholder &mdash; Phase 0.1 complete.
-      </p>
-      <p class="mt-2 text-sm text-brand-ink/70">
-        Real pages land in Phase 2. Until then, to book a visit:
-      </p>
-      <p class="mt-6">
-        <a
-          href="tel:+16108884541"
-          class="inline-block rounded-md bg-brand-green px-6 py-3 text-brand-cream"
-        >
-          Text 610-888-4541
+<Base
+  title={SITE.name}
+  description={`Independent dog walking, cat visits and overnight pet sitting in ${SITE.city}. ${SITE.yearsExperience} years' experience, CPR and First-Aid certified. Book directly with Edward.`}
+  structuredData={structuredData}
+>
+  {/* ---------------- Hero: letterhead ---------------- */}
+  <section class="hero">
+    <div class="hero-inner">
+      <h1 class="sr-only">{SITE.name} — {SITE.tagline}</h1>
+      <Image src={lockup} alt={SITE.name} width={600} densities={[1, 2]} loading="eager" class="hero-lockup" />
+      <p class="hero-tagline">{SITE.tagline}</p>
+      <PawDivider class="hero-divider" />
+      <div class="btn-row hero-actions">
+        <a href="/book" class="btn btn-primary">Book a visit</a>
+        <a href={SITE.phoneHref} class="btn btn-ghost">
+          <Icon name="message-square" size={18} />{SITE.phone}
         </a>
-      </p>
+      </div>
     </div>
-  </main>
+    <TrustStrip variant="bleed" />
+  </section>
+
+  <section class="hero-photo-wrap">
+    <div class="hero-photo">
+      <div class="hero-photo-inner">
+        <Image
+          src={hero.image}
+          alt={hero.alt}
+          width={940}
+          widths={[600, 940, 1400]}
+          sizes="(min-width: 1000px) 940px, 100vw"
+          loading="eager"
+          fetchpriority="high"
+        />
+      </div>
+    </div>
+  </section>
+
+  {/* ---------------- Services ---------------- */}
+  <section class="shell section">
+    <Ribbon class="section-ribbon">Services</Ribbon>
+
+    <div class="auto-grid">
+      {
+        catalog.services.map((service) => (
+          <a href="/services" class="card card-link service-card">
+            <span class="roundel"><Icon name={service.icon} size={27} /></span>
+            <span class="heading-brand service-name">{service.name}</span>
+            <span class="service-blurb">{service.blurb}</span>
+            <span class="service-price">{service.fromLabel}</span>
+          </a>
+        ))
+      }
+
+      {/* Medication is an add-on in the data model, not a bookable service --
+          but customers look for it, so it earns a card of its own. */}
+      <a href="/services" class="card card-link service-card">
+        <span class="roundel"><Icon name="pill" size={27} /></span>
+        <span class="heading-brand service-name">Medication</span>
+        <span class="service-blurb">Pills, drops and topicals with any visit. {medication.note}</span>
+        <span class="service-price">+${medication.price} · free overnight</span>
+      </a>
+
+      <div class="panel-green ask-card">
+        <span class="heading-brand ask-heading">Not sure what you need?</span>
+        <span class="ask-body">
+          Send a text with your pet and your week. I'll tell you honestly what fits.
+        </span>
+        <a href={SITE.phoneHref} class="btn btn-on-green ask-btn">Text {SITE.phone}</a>
+      </div>
+    </div>
+  </section>
+
+  {/* ---------------- About teaser ---------------- */}
+  <section class="band">
+    <div class="shell about-teaser">
+      <div class="about-copy">
+        <span class="eyebrow">Meet Edward</span>
+        <h2 class="display about-heading">
+          {SITE.yearsExperience} years of getting to know animals as individuals.
+        </h2>
+        <p class="about-body">
+          Pet sitting, animal rescue and veterinary medicine administration — energetic, shy,
+          anxious, elderly, or needing a little extra care, I take the time to learn your pet
+          before I'm ever alone with them.
+        </p>
+        <a href="/about" class="about-link">Read Edward's story →</a>
+      </div>
+
+      <div class="teaser-grid">
+        <Photo photo={teaser[0]} ratio="3/5" width={420} onCream class="teaser-tall" />
+        <Photo photo={teaser[1]} ratio="1/1" width={300} onCream />
+        <Photo photo={teaser[2]} ratio="1/1" width={300} onCream />
+      </div>
+    </div>
+  </section>
+
+  {/* ---------------- Testimonials ---------------- */}
+  <section class="shell section">
+    <Ribbon class="section-ribbon">Kind Words</Ribbon>
+    <div class="auto-grid" style="--min:250px">
+      {
+        [
+          "Testimonial 1 — two or three sentences, in the client's own words.",
+          "Testimonial 2 — ideally one that mentions medication, an anxious pet, or a key handover.",
+          "Testimonial 3 — a repeat client is the most persuasive one to place last.",
+        ].map((text) => (
+          <figure class="testimonial">
+            <PawDivider size={16} class="testimonial-paw" />
+            <blockquote>{text}</blockquote>
+            <figcaption>First name · Neighborhood</figcaption>
+          </figure>
+        ))
+      }
+    </div>
+    <p class="note testimonial-note">
+      Placeholder slots — swap in real quotes with permission (go-back-to-ed.md, D1).
+    </p>
+  </section>
+
+  {/* ---------------- Service area ---------------- */}
+  <section class="area">
+    <div class="shell area-inner">
+      <div>
+        <span class="area-eyebrow"><Icon name="map-pin" size={15} />Proudly serving</span>
+        <h2 class="area-heading">{SITE.city}</h2>
+        <p class="area-body">
+          Eleven zip codes across Center City, South and West Philadelphia. Other areas by
+          appointment — travel fees may apply.
+        </p>
+        <a href="/service-area" class="area-link">See every neighborhood →</a>
+      </div>
+      <ul class="zip-grid">
+        {SERVED_ZIPS.map((zip) => <li class="zip zip-on-green">{zip}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <FinalCta />
 </Base>
+
+<style>
+  /* ---- Hero ---- */
+  .hero {
+    /* Fills the first screen minus the header, so the trust strip lands right
+       at the fold rather than below it. */
+    min-height: calc(100svh - 80px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(20px, 3vw, 40px) var(--spacing-gutter) 0;
+    text-align: center;
+  }
+  .hero-inner {
+    max-width: 760px;
+    margin-inline: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .hero-lockup {
+    height: min(300px, 34svh);
+    width: auto;
+    max-width: 72%;
+    display: block;
+    margin-inline: auto;
+    object-fit: contain;
+  }
+  .hero-tagline {
+    margin: clamp(14px, 2.4vw, 24px) 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(20px, 4.2vw, 30px);
+    font-weight: 500;
+    font-style: italic;
+    color: var(--color-brand-brown);
+    line-height: 1.35;
+    text-wrap: pretty;
+  }
+  .hero-divider {
+    margin: clamp(16px, 2.4vw, 26px) 0 0;
+  }
+  .hero-actions {
+    justify-content: center;
+    margin: clamp(18px, 2.8vw, 30px) 0 0;
+  }
+  .hero :global(.trust) {
+    margin-top: clamp(22px, 3vw, 32px);
+  }
+
+  /* Arched photo card echoing the flyer's rounded photo treatment. */
+  .hero-photo-wrap {
+    padding: 0 var(--spacing-gutter) clamp(36px, 5vw, 56px);
+  }
+  .hero-photo {
+    max-width: 940px;
+    margin: clamp(30px, 5vw, 54px) auto 0;
+    background: var(--color-brand-cream);
+    border: 1px solid var(--color-brand-rule);
+    border-radius: 340px 340px 12px 12px / 130px 130px 12px 12px;
+    padding: 10px;
+    overflow: hidden;
+  }
+  .hero-photo-inner {
+    border-radius: 332px 332px 8px 8px / 125px 125px 8px 8px;
+    overflow: hidden;
+    background: var(--color-brand-photo);
+    aspect-ratio: 16 / 10;
+  }
+  .hero-photo-inner :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 30%;
+    display: block;
+    filter: saturate(0.9) contrast(1.02);
+  }
+
+  /* ---- Services ---- */
+  .section-ribbon {
+    margin-bottom: clamp(26px, 4vw, 44px);
+  }
+  .service-card {
+    min-height: 172px;
+    padding: clamp(20px, 2.6vw, 28px);
+  }
+  .service-name {
+    font-size: 24px;
+    letter-spacing: 0.05em;
+  }
+  .service-blurb {
+    font: 400 14.5px/1.55 var(--font-body);
+    color: rgb(26 26 24 / 0.75);
+  }
+  .service-price {
+    font: 500 13px var(--font-body);
+    color: var(--color-brand-brown);
+    margin-top: auto;
+  }
+
+  .ask-card {
+    padding: clamp(20px, 2.6vw, 28px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+    min-height: 172px;
+  }
+  .ask-heading {
+    font-size: 23px;
+    letter-spacing: 0.07em;
+    color: var(--color-brand-cream);
+    line-height: 1.15;
+  }
+  .ask-body {
+    font: 400 14.5px/1.55 var(--font-body);
+    color: rgb(246 237 229 / 0.82);
+  }
+  .ask-btn {
+    align-self: flex-start;
+    margin-top: 4px;
+    font-size: 14.5px;
+    padding: 12px 18px;
+    min-height: 46px;
+  }
+
+  /* ---- About teaser ---- */
+  .about-teaser {
+    padding-block: clamp(40px, 5.5vw, 80px);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: clamp(24px, 4vw, 56px);
+    align-items: center;
+  }
+  .about-copy {
+    max-width: 520px;
+  }
+  .about-heading {
+    margin: 12px 0 0;
+    font-size: clamp(28px, 4.6vw, 44px);
+  }
+  .about-body {
+    margin: 16px 0 0;
+    font-size: 16.5px;
+    color: rgb(26 26 24 / 0.82);
+    text-wrap: pretty;
+  }
+  .about-link {
+    display: inline-block;
+    margin-top: 20px;
+    font: 600 15px var(--font-body);
+    color: var(--color-brand-green);
+    text-decoration: none;
+    border-bottom: 1.5px solid rgb(22 62 31 / 0.4);
+    padding: 6px 2px;
+  }
+  .about-link:hover {
+    border-color: var(--color-brand-green);
+  }
+
+  .teaser-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .teaser-tall {
+    grid-row: span 2;
+  }
+
+  /* ---- Testimonials ---- */
+  .testimonial {
+    margin: 0;
+    background: var(--color-brand-cream);
+    /* Dashed border marks these as unfilled slots, not shy real quotes. */
+    border: 1px dashed rgb(78 50 22 / 0.32);
+    border-radius: 12px;
+    padding: 26px;
+    min-height: 190px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .testimonial-paw {
+    justify-content: flex-start;
+  }
+  .testimonial-paw::before,
+  .testimonial-paw::after {
+    display: none;
+  }
+  .testimonial blockquote {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-style: italic;
+    color: rgb(26 26 24 / 0.42);
+    line-height: 1.45;
+  }
+  .testimonial figcaption {
+    margin-top: auto;
+    font: 500 11.5px ui-monospace, Menlo, monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgb(78 50 22 / 0.65);
+  }
+  .testimonial-note {
+    margin: 16px 0 0;
+  }
+
+  /* ---- Service area ---- */
+  .area {
+    background: var(--color-brand-green);
+    color: var(--color-brand-cream);
+  }
+  .area-inner {
+    padding-block: clamp(40px, 5.5vw, 76px);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: clamp(24px, 4vw, 52px);
+    align-items: center;
+  }
+  .area-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font: 500 11.5px var(--font-body);
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: rgb(246 237 229 / 0.7);
+  }
+  .area-heading {
+    margin: 12px 0 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(32px, 5.5vw, 54px);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1.03;
+  }
+  .area-body {
+    margin: 14px 0 0;
+    font-size: 16.5px;
+    color: rgb(246 237 229 / 0.8);
+    max-width: 42ch;
+    text-wrap: pretty;
+  }
+  .area-link {
+    display: inline-block;
+    margin-top: 14px;
+    font: 600 15px var(--font-body);
+    color: var(--color-brand-cream);
+  }
+  .zip-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+    gap: 8px;
+  }
+</style>

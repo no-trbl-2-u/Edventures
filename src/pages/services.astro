@@ -1,0 +1,262 @@
+---
+import { Image } from "astro:assets";
+import Base from "../layouts/Base.astro";
+import Icon from "../components/Icon.astro";
+import paw from "../assets/brand/paw.png";
+import { getCatalog, type PricingService } from "../lib/catalog";
+import { SITE } from "../lib/site";
+import { breadcrumbs, serviceOffers } from "../lib/structured-data";
+
+const catalog = await getCatalog();
+const services = catalog.services as PricingService[];
+
+const medication = catalog.addons.find((a) => a.id === "medication")!;
+const nailAddon = catalog.addons.find((a) => a.id === "nail-trim-addon")!;
+const nailTrim = services.find((s) => s.id === "nail-trim")!;
+const overnight = services.find((s) => s.id === "overnight")!;
+
+// Tiered services get a duration list; flat-rate ones are rendered by hand
+// below because their copy differs.
+const tiered = services.filter((s) => s.tiers.length > 0);
+
+const structuredData = [
+  ...serviceOffers(catalog),
+  breadcrumbs([
+    { name: "Home", path: "/" },
+    { name: "Services & Pricing", path: "/services" },
+  ]),
+];
+---
+
+<Base
+  title="Services & Pricing"
+  description={`Published prices for dog walks, cat visits, medication, nail trims and overnight pet sitting in ${SITE.city}. Flat rates, no online charges.`}
+  structuredData={structuredData}
+>
+  <section class="shell page-head">
+    <span class="eyebrow">{SITE.name}</span>
+    <h1 class="heading-brand page-title">Services &amp; Pricing</h1>
+    <p class="lede page-lede">
+      Published, flat and the same for everyone. Payment is handled directly with Edward —
+      nothing is charged online.
+    </p>
+  </section>
+
+  <section class="shell price-grid">
+    {
+      tiered.map((service) => (
+        <article class="card">
+          <div class="card-head">
+            <span class="roundel"><Icon name={service.icon} size={26} /></span>
+            <h2 class="heading-brand card-title">{service.name}</h2>
+          </div>
+          <div class="rule" />
+          <dl class="price-list">
+            {service.allTiers.map((tier) => (
+              <div class="price-row">
+                <dt>{tier.minutes} minutes</dt>
+                <dd>${tier.price}</dd>
+              </div>
+            ))}
+          </dl>
+          {service.note && <p class="card-note">{service.note}</p>}
+        </article>
+      ))
+    }
+
+    {/* Medication: an add-on, so it doesn't come from `services`. */}
+    <article class="card">
+      <div class="card-head">
+        <span class="roundel"><Icon name="pill" size={26} /></span>
+        <h2 class="heading-brand card-title card-title-tight">Medication<br />Administration</h2>
+      </div>
+      <div class="rule"></div>
+      <p class="flat-price">
+        <strong>${medication.price}</strong> add-on with any visit
+      </p>
+      <p class="with-paw">
+        <Image src={paw} alt="" width={15} densities={[1, 2]} />
+        Included free with overnight stays
+      </p>
+      {/* Stated plainly rather than buried: someone whose cat needs insulin
+          should find that out here, not after booking. */}
+      <p class="card-note card-note-em">{medication.note}</p>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <span class="roundel"><Icon name="scissors" size={26} /></span>
+        <h2 class="heading-brand card-title">Nail Trims</h2>
+      </div>
+      <div class="rule"></div>
+      <dl class="price-list">
+        <div class="price-row">
+          <dt>Stand-alone visit</dt>
+          <dd>${nailTrim.base}</dd>
+        </div>
+        <div class="price-row">
+          <dt>Add-on to any visit</dt>
+          <dd>${nailAddon.price}</dd>
+        </div>
+      </dl>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <span class="roundel"><Icon name="house" size={26} /></span>
+        <h2 class="heading-brand card-title">Overnight Stays</h2>
+      </div>
+      <div class="rule"></div>
+      <p class="flat-price">
+        Starting at <strong class="flat-price-lg">${overnight.base}</strong> per night
+      </p>
+      <p class="card-note">{overnight.note}</p>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <span class="roundel"><Icon name="calendar-days" size={26} /></span>
+        <h2 class="heading-brand card-title">Additional Fees</h2>
+      </div>
+      <div class="rule"></div>
+      <dl class="price-list">
+        {
+          catalog.fees.map((fee) => (
+            <div class="price-row price-row-fee">
+              <dt>{fee.name}</dt>
+              <dd>+${fee.amount}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <p class="card-note">Listed up front so nothing on your invoice is a surprise.</p>
+    </article>
+  </section>
+
+  <section class="shell estimate-cta-wrap">
+    <div class="panel-green estimate-cta">
+      <div>
+        <h2 class="heading-brand estimate-heading">See your estimate</h2>
+        <p class="estimate-body">
+          The booking form totals it up line by line as you choose — before you send anything.
+        </p>
+      </div>
+      <a href="/book" class="btn btn-on-green">Start a request</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .page-head {
+    padding-top: clamp(32px, 5vw, 64px);
+    text-align: center;
+  }
+  .page-title {
+    margin: 12px 0 0;
+    font-size: clamp(32px, 6vw, 56px);
+    letter-spacing: 0.05em;
+    line-height: 1.05;
+  }
+  .page-lede {
+    margin: 14px auto 0;
+    max-width: 52ch;
+  }
+
+  .price-grid {
+    padding-block: clamp(28px, 4vw, 52px) clamp(20px, 3vw, 32px);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: clamp(12px, 1.8vw, 20px);
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .card-title {
+    margin: 0;
+    font-size: 26px;
+  }
+  .card-title-tight {
+    font-size: 23px;
+    line-height: 1.1;
+  }
+  .rule {
+    height: 1px;
+    background: rgb(78 50 22 / 0.18);
+    margin: 18px 0;
+  }
+
+  .card-note {
+    margin: 16px 0 0;
+    font: 400 13.5px/1.55 var(--font-body);
+    color: rgb(26 26 24 / 0.62);
+  }
+  .card-note-em {
+    font-style: italic;
+  }
+
+  .flat-price {
+    margin: 0;
+    font: 400 15.5px var(--font-body);
+    color: var(--color-brand-ink);
+  }
+  .flat-price strong {
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--color-brand-green);
+  }
+  .flat-price-lg {
+    font-size: 22px !important;
+  }
+
+  .with-paw {
+    margin: 12px 0 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    font: 400 15.5px var(--font-body);
+    color: var(--color-brand-ink);
+  }
+  .with-paw :global(img) {
+    margin-top: 4px;
+    width: 15px;
+    height: auto;
+  }
+
+  /* Fees are secondary to the headline prices - brown rather than green,
+     and a step down in size. */
+  .price-row-fee dt {
+    font-size: 14px;
+    letter-spacing: 0.06em;
+  }
+  .price-row-fee dd {
+    font-size: 16px;
+    color: var(--color-brand-brown);
+  }
+
+  .estimate-cta-wrap {
+    padding-bottom: clamp(48px, 7vw, 90px);
+  }
+  .estimate-cta {
+    padding: clamp(24px, 3.5vw, 40px);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .estimate-heading {
+    margin: 0;
+    font-size: clamp(24px, 3.4vw, 32px);
+    letter-spacing: 0.05em;
+    color: var(--color-brand-cream);
+  }
+  .estimate-body {
+    margin: 8px 0 0;
+    font-size: 15.5px;
+    color: rgb(246 237 229 / 0.8);
+    max-width: 44ch;
+  }
+</style>
