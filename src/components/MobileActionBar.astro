@@ -1,0 +1,63 @@
+---
+/**
+ * Fixed bottom bar on phones.
+ *
+ * Pet-sitting traffic is overwhelmingly phone traffic, and for a good share of
+ * customers a text is a likelier conversion than a form. Both live here so
+ * neither is more than a thumb-reach away on any page.
+ */
+import Icon from "./Icon.astro";
+import { SITE } from "../lib/site";
+---
+
+<div class="action-bar">
+  <a href={SITE.phoneHref} class="bar-call">
+    <Icon name="message-square" size={18} />Call or text
+  </a>
+  <a href="/book" class="bar-book">Book a visit</a>
+</div>
+
+<style>
+  .action-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    background: rgb(255 255 255 / 0.97);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgb(78 50 22 / 0.2);
+    /* env() keeps the buttons clear of the iPhone home indicator. */
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    display: flex;
+    gap: 10px;
+  }
+
+  .bar-call,
+  .bar-book {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    font: 600 15.5px var(--font-body);
+    text-decoration: none;
+    border-radius: 9px;
+    min-height: 52px;
+  }
+  .bar-call {
+    flex: 1;
+    color: var(--color-brand-green);
+    border: 1.5px solid rgb(22 62 31 / 0.35);
+  }
+  .bar-book {
+    flex: 1.2;
+    color: var(--color-brand-cream);
+    background: var(--color-brand-green);
+  }
+
+  @media (min-width: 1000px) {
+    .action-bar {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,319 @@
+---
+import Base from "../layouts/Base.astro";
+import Icon from "../components/Icon.astro";
+import PawDivider from "../components/PawDivider.astro";
+import { SERVED_ZIPS, SITE } from "../lib/site";
+import { breadcrumbs, faqPage, type FaqItem } from "../lib/structured-data";
+
+/**
+ * Question-shaped headings, because that is how both people and language
+ * models look for policy (Roadmap 2.7.2).
+ *
+ * `placeholder: true` marks an answer Edward has not given yet. Those render
+ * visibly as scaffolding AND are withheld from the FAQ structured data -- an
+ * invented cancellation policy quoted confidently back to a customer by a
+ * search result or an assistant is worse than no answer at all, because Edward
+ * is the one who has to walk it back.
+ *
+ * The design comp stated the meet-and-greet answer as settled fact. It isn't
+ * (go-back-to-ed.md, B4), so it is marked here like the rest.
+ */
+const faqs: FaqItem[] = [
+  {
+    question: "Do we meet before the first booking?",
+    answer:
+      "Placeholder — whether a meet-and-greet is required, how long it takes, and whether it's free (go-back-to-ed.md, B4).",
+    placeholder: true,
+  },
+  {
+    question: "How do you handle keys and codes?",
+    answer:
+      "Placeholder — where keys are stored, how they're labelled, and how they're returned (go-back-to-ed.md, B2).",
+    placeholder: true,
+  },
+  {
+    question: "What if my pet needs a vet while I'm away?",
+    answer:
+      "Placeholder — who Edward calls, what authorization he needs from you, and who pays (go-back-to-ed.md, B3).",
+    placeholder: true,
+  },
+  {
+    question: "What's the cancellation policy?",
+    answer:
+      "Placeholder — notice required and any fee (go-back-to-ed.md, B1). This one gets linked from the booking form's consent checkbox.",
+    placeholder: true,
+  },
+  {
+    question: "How do I pay?",
+    answer:
+      "Directly with Edward — nothing is charged through this site. Prices are published in full on the services page.",
+  },
+  {
+    question: "Can you give insulin injections?",
+    answer:
+      "No — that's the one medication task Edward doesn't take on. Pills, drops and topicals are fine, and they're free with an overnight stay.",
+  },
+  {
+    question: "What areas do you serve?",
+    answer: `Eleven ${SITE.city} zip codes: ${SERVED_ZIPS.join(", ")}. Other areas are considered by appointment and travel fees may apply.`,
+  },
+];
+
+const structuredData = [
+  faqPage(faqs),
+  breadcrumbs([
+    { name: "Home", path: "/" },
+    { name: "Contact", path: "/contact" },
+  ]),
+].filter(Boolean);
+---
+
+<Base
+  title="Contact"
+  description={`Text or email Edventures Pet Sitting to book a walk, visit or overnight stay in ${SITE.city}. Texting is fastest.`}
+  structuredData={structuredData}
+>
+  <section class="shell page-head">
+    <PawDivider class="head-paw" />
+    <h1 class="heading-brand page-title">Contact</h1>
+    <p class="lede page-lede">
+      Texting is fastest. Edward answers between visits, so if it takes an hour, he's probably
+      holding a leash.
+    </p>
+  </section>
+
+  <address class="shell contact-grid">
+    <a href={SITE.phoneHref} class="contact-card contact-primary">
+      <span class="roundel-dark"><Icon name="message-square" size={24} /></span>
+      <span class="contact-label contact-label-light">Call or text</span>
+      <span class="contact-value contact-value-light">{SITE.phone}</span>
+    </a>
+
+    <a href={`mailto:${SITE.email}`} class="card card-link contact-card">
+      <span class="roundel roundel-sm"><Icon name="mail" size={24} /></span>
+      <span class="contact-label">Email</span>
+      <span class="contact-email">{SITE.email}</span>
+    </a>
+
+    <div class="card contact-card">
+      <span class="roundel roundel-sm"><Icon name="instagram" size={24} /></span>
+      <span class="contact-label">Follow along</span>
+      <span class="social-links">
+        <a href={SITE.instagram} rel="me noopener">
+          <Icon name="instagram" size={16} />{SITE.socialHandle}
+        </a>
+        <a href={SITE.facebook} rel="me noopener">
+          <Icon name="facebook" size={16} />{SITE.socialHandle}
+        </a>
+      </span>
+    </div>
+  </address>
+
+  <section class="shell area-wrap">
+    <div class="card area-card">
+      <h2 class="heading-brand area-title">
+        <Icon name="map-pin" size={20} class="area-icon" />Locations served
+      </h2>
+      <ul class="zip-grid">
+        {SERVED_ZIPS.map((zip) => <li class="zip">{zip}</li>)}
+      </ul>
+      <p class="area-note">
+        Other areas by appointment — travel fees may apply. Ask; the answer is usually yes.
+        <a href="/service-area">See every neighborhood →</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="shell-narrow faq">
+    <h2 class="heading-brand faq-title">Questions</h2>
+    <div class="faq-list">
+      {
+        faqs.map((faq) => (
+          <details class="faq-item">
+            <summary>
+              {faq.question}
+              <Icon name="plus" size={18} class="faq-plus" />
+              <Icon name="minus" size={18} class="faq-minus" />
+            </summary>
+            <p class:list={["faq-answer", faq.placeholder && "note"]}>{faq.answer}</p>
+          </details>
+        ))
+      }
+    </div>
+  </section>
+</Base>
+
+<style>
+  .page-head {
+    padding-top: clamp(32px, 5vw, 64px);
+    text-align: center;
+  }
+  .head-paw::before,
+  .head-paw::after {
+    display: none;
+  }
+  .page-title {
+    margin: 16px 0 0;
+    font-size: clamp(32px, 6vw, 56px);
+    letter-spacing: 0.05em;
+    line-height: 1.05;
+  }
+  .page-lede {
+    margin: 14px auto 0;
+    max-width: 46ch;
+  }
+
+  /* <address> is the right element for the business's own contact details;
+     the browser's default italic is not wanted. */
+  .contact-grid {
+    font-style: normal;
+    padding-top: clamp(28px, 4vw, 48px);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: clamp(12px, 1.8vw, 18px);
+  }
+  .contact-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 170px;
+    padding: clamp(22px, 3vw, 30px);
+    text-decoration: none;
+  }
+  .contact-primary {
+    background: var(--color-brand-green);
+    border-radius: 12px;
+  }
+  .contact-primary:hover {
+    background: var(--color-brand-green-dark);
+  }
+  .roundel-dark {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgb(246 237 229 / 0.14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-brand-cream);
+    flex: none;
+  }
+  .contact-label {
+    font: 500 11.5px var(--font-body);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-brand-brown);
+  }
+  .contact-label-light {
+    color: rgb(246 237 229 / 0.72);
+  }
+  .contact-value {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(24px, 3.4vw, 30px);
+    letter-spacing: 0.02em;
+  }
+  .contact-value-light {
+    color: var(--color-brand-cream);
+  }
+  .contact-email {
+    font: 500 15.5px var(--font-body);
+    color: var(--color-brand-green);
+    word-break: break-word;
+  }
+  .social-links {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .social-links a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font: 500 15px var(--font-body);
+    color: var(--color-brand-green);
+    text-decoration: none;
+    min-height: 32px;
+  }
+  .social-links a:hover {
+    color: var(--color-brand-brown);
+  }
+
+  .area-wrap {
+    padding-top: clamp(32px, 5vw, 60px);
+  }
+  .area-card {
+    padding: clamp(22px, 3vw, 34px);
+  }
+  .area-title {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: clamp(21px, 3vw, 27px);
+    letter-spacing: 0.07em;
+  }
+  .area-icon {
+    color: var(--color-brand-brown);
+  }
+  .zip-grid {
+    list-style: none;
+    margin: 20px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
+    gap: 8px;
+  }
+  .area-note {
+    margin: 16px 0 0;
+    font: 400 14.5px var(--font-body);
+    color: rgb(26 26 24 / 0.75);
+  }
+
+  .faq {
+    padding-block: clamp(36px, 5vw, 64px) clamp(48px, 7vw, 90px);
+  }
+  .faq-title {
+    margin: 0 0 20px;
+    font-size: clamp(24px, 3.6vw, 34px);
+    text-align: center;
+  }
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .faq-item {
+    background: var(--color-brand-cream);
+    border: 1px solid var(--color-brand-rule);
+    border-radius: 12px;
+    padding: 4px 20px;
+  }
+  .faq-item summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px 0;
+    font: 600 16px var(--font-body);
+    color: var(--color-brand-green);
+    min-height: 52px;
+  }
+  .faq-plus,
+  .faq-minus {
+    color: var(--color-brand-brown);
+  }
+  .faq-minus,
+  .faq-item[open] .faq-plus {
+    display: none;
+  }
+  .faq-item[open] .faq-minus {
+    display: block;
+  }
+  .faq-answer {
+    margin: 0 0 18px;
+    font-size: 15.5px;
+    line-height: 1.65;
+    color: rgb(26 26 24 / 0.82);
+  }
+</style>

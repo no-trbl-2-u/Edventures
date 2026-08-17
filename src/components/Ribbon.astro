@@ -1,0 +1,21 @@
+---
+/**
+ * The notched banner section heading, lifted from the printed flyer.
+ * Renders as a real heading element so the document outline stays correct.
+ */
+interface Props {
+  as?: "h2" | "h3";
+  class?: string;
+}
+const { as: Tag = "h2", class: className } = Astro.props;
+---
+
+<div class:list={["ribbon-row", className]}>
+  <Tag class="ribbon"><slot /></Tag>
+</div>
+
+<style>
+  .ribbon {
+    margin: 0;
+  }
+</style>

@@ -132,7 +132,7 @@
     "src": "angel-and-i.jpg",
     "caption": "Angel",
     "alt": "Edward in a pink backwards cap, eyes closed, holding Angel, a tabby and white cat, against his cheek",
-    "placement": "excluded",
+    "placement": "about",
     "needsExifRotation": false
   },
   {
@@ -140,7 +140,7 @@
     "src": "a-fun-day-with-cows.jpg",
     "caption": "A fun day with cows",
     "alt": "Edward in sunglasses beside a black and white horned cow leaning over a fence in a green field",
-    "placement": "excluded",
+    "placement": "about",
     "needsExifRotation": false
   },
   {

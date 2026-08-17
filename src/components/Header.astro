@@ -1,0 +1,246 @@
+---
+/**
+ * Sticky header.
+ *
+ * The mobile menu is a <details>/<summary> rather than a scripted toggle: it is
+ * keyboard accessible, announces its own expanded state, and works before (or
+ * without) JavaScript. The design comp uses React state for this; a static
+ * brochure site doesn't need to.
+ */
+import { Image } from "astro:assets";
+import markInitial from "../assets/brand/mark-initial.png";
+import Icon from "./Icon.astro";
+import { NAV, SITE } from "../lib/site";
+
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => path === href || path === `${href}/`;
+---
+
+<header class="site-header">
+  <div class="header-bar">
+    <a href="/" class="brand" aria-label={`${SITE.name} — home`}>
+      <Image src={markInitial} alt="" width={68} densities={[1, 2]} class="brand-mark" />
+      <span class="brand-text">
+        <span class="brand-name">Dventures</span>
+        <span class="brand-sub">Pet Sitting</span>
+      </span>
+    </a>
+
+    <nav class="desktop-nav" aria-label="Main">
+      {
+        NAV.map((item) => (
+          <a href={item.href} class="nav-link" aria-current={isCurrent(item.href) ? "page" : undefined}>
+            {item.label}
+          </a>
+        ))
+      }
+      <a href={SITE.phoneHref} class="nav-call">Call or text</a>
+      <a href="/book" class="nav-book" aria-current={isCurrent("/book") ? "page" : undefined}>
+        Book a visit
+      </a>
+    </nav>
+
+    <div class="mobile-actions">
+      <a href={SITE.phoneHref} class="icon-btn" aria-label={`Call or text ${SITE.phone}`}>
+        <Icon name="phone" size={19} />
+      </a>
+      <details class="menu">
+        <summary class="icon-btn" aria-label="Menu">
+          <Icon name="menu" size={20} class="menu-open" />
+          <Icon name="x" size={20} class="menu-close" />
+        </summary>
+        <nav class="menu-panel" aria-label="Main">
+          <a href="/" aria-current={isCurrent("/") ? "page" : undefined}>Home</a>
+          {
+            NAV.map((item) => (
+              <a href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined}>
+                {item.shortLabel}
+              </a>
+            ))
+          }
+          <a href="/book" class="menu-book">Book a visit</a>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: rgb(255 255 255 / 0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--color-brand-rule);
+  }
+
+  .header-bar {
+    max-width: 1180px;
+    margin-inline: auto;
+    padding: 10px var(--spacing-gutter);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  /* Brand lockup: the mark supplies the "E", the text supplies the rest.
+     Baseline alignment is what makes the join read as one word. */
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 0;
+    padding: 4px 4px 2px;
+    margin-left: -4px;
+    margin-right: auto;
+    text-decoration: none;
+  }
+  .brand-mark {
+    height: clamp(27px, 3.4vw, 34px);
+    width: auto;
+    display: block;
+    margin-right: 1px;
+    align-self: center;
+  }
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+  }
+  .brand-name {
+    font-family: var(--font-display);
+    font-size: clamp(27px, 3.4vw, 34px);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--color-brand-green);
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .brand-sub {
+    font-family: var(--font-display);
+    font-size: clamp(9.5px, 1.1vw, 11px);
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    color: var(--color-brand-brown);
+    text-transform: uppercase;
+    margin-top: 5px;
+  }
+
+  .desktop-nav {
+    display: none;
+    align-items: center;
+    gap: 4px;
+  }
+  .nav-link,
+  .nav-call,
+  .nav-book {
+    font: 500 13.5px var(--font-body);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    text-decoration: none;
+    border-radius: 6px;
+  }
+  .nav-link {
+    color: var(--color-brand-ink);
+    padding: 9px 13px;
+  }
+  .nav-link:hover {
+    background: rgb(22 62 31 / 0.07);
+    color: var(--color-brand-green);
+  }
+  .nav-link[aria-current="page"] {
+    color: var(--color-brand-green);
+    background: rgb(22 62 31 / 0.07);
+  }
+  .nav-call {
+    color: var(--color-brand-green);
+    border: 1px solid rgb(22 62 31 / 0.3);
+    padding: 9px 15px;
+    margin-left: 8px;
+  }
+  .nav-call:hover {
+    background: rgb(22 62 31 / 0.07);
+  }
+  .nav-book {
+    font-weight: 600;
+    color: var(--color-brand-cream);
+    background: var(--color-brand-green);
+    padding: 11px 20px;
+    margin-left: 6px;
+  }
+  .nav-book:hover {
+    background: var(--color-brand-green-dark);
+    color: var(--color-brand-cream);
+  }
+
+  .mobile-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border: 1px solid rgb(22 62 31 / 0.3);
+    border-radius: 8px;
+    color: var(--color-brand-green);
+    background: none;
+    cursor: pointer;
+  }
+
+  .menu-close,
+  .menu[open] .menu-open {
+    display: none;
+  }
+  .menu[open] .menu-close {
+    display: block;
+  }
+
+  /* Full-width drop panel below the bar. */
+  .menu-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-top: 1px solid var(--color-brand-rule);
+    background: #fff;
+    padding: 8px var(--spacing-gutter) 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 12px 24px rgb(26 26 24 / 0.08);
+  }
+  .menu-panel a {
+    font: 500 16px var(--font-body);
+    color: var(--color-brand-ink);
+    text-decoration: none;
+    padding: 15px 4px;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgb(78 50 22 / 0.1);
+  }
+  .menu-panel a[aria-current="page"] {
+    color: var(--color-brand-green);
+  }
+  .menu-book {
+    margin-top: 14px;
+    justify-content: center;
+    font-weight: 600 !important;
+    color: var(--color-brand-cream) !important;
+    background: var(--color-brand-green);
+    border-radius: 8px;
+    border-bottom: 0 !important;
+    min-height: 54px;
+  }
+
+  @media (min-width: 1000px) {
+    .desktop-nav {
+      display: flex;
+    }
+    .mobile-actions {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,77 @@
+---
+/**
+ * The trust badges, paw-separated.
+ *
+ * The design comp includes an "Insured" badge. It is deliberately not here --
+ * see the note on TRUST_BADGES in src/lib/site.ts. Everything rendered is
+ * verified; nothing on this strip is a claim we can't back.
+ */
+import { Image } from "astro:assets";
+import paw from "../assets/brand/paw.png";
+import Icon from "./Icon.astro";
+import { TRUST_BADGES } from "../lib/site";
+
+interface Props {
+  /** Inside the letterhead hero the strip is full-bleed; standalone it's a band. */
+  variant?: "band" | "bleed";
+}
+const { variant = "band" } = Astro.props;
+---
+
+<div class:list={["trust", variant]}>
+  {
+    TRUST_BADGES.map((badge, i) => (
+      <>
+        {i > 0 && <Image src={paw} alt="" width={13} densities={[1, 2]} class="paw" />}
+        <span class="badge">
+          <Icon name={badge.icon} size={17} class="badge-icon" />
+          {badge.label}
+        </span>
+      </>
+    ))
+  }
+</div>
+
+<style>
+  .trust {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(10px, 2.4vw, 26px);
+    background: var(--color-brand-cream);
+    border-top: 1px solid var(--color-brand-rule);
+    border-bottom: 1px solid var(--color-brand-rule);
+    padding: clamp(16px, 2.6vw, 22px) var(--spacing-gutter);
+  }
+
+  .band {
+    max-width: 1180px;
+    margin-inline: auto;
+  }
+
+  /* Breaks out of the hero's horizontal padding to span the viewport. */
+  .bleed {
+    margin-inline: calc(-1 * var(--spacing-gutter));
+  }
+
+  .badge {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(15px, 2.2vw, 19px);
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--color-brand-green);
+  }
+  .badge-icon {
+    color: var(--color-brand-brown);
+  }
+  .paw {
+    width: 13px;
+    height: auto;
+    opacity: 0.75;
+  }
+</style>

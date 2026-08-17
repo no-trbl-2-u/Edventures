@@ -3,6 +3,8 @@
     "id": "dog-walk",
     "name": "Dog Walks",
     "blurb": "A walk at your dog's pace - or a jog, at no extra charge.",
+    "icon": "dog",
+    "flatRate": false,
     "tiers": [
       { "minutes": 15, "price": 15 },
       { "minutes": 30, "price": 25 },
@@ -14,6 +16,9 @@
     "id": "cat-visit",
     "name": "Cat Visits",
     "blurb": "Drop-in visits for feeding, litter, play, and company.",
+    "icon": "cat",
+    "flatRate": false,
+    "note": "Longer cat visits aren't a standard tier - text me if your cat needs one.",
     "tiers": [
       { "minutes": 15, "price": 18 },
       { "minutes": 30, "price": 25 }
@@ -24,6 +29,9 @@
     "id": "nail-trim",
     "name": "Nail Trims",
     "blurb": "Available as its own visit, or added to any other visit.",
+    "icon": "scissors",
+    "flatRate": true,
+    "baseLabel": "Stand-alone nail trim",
     "tiers": [{ "minutes": 15, "price": 20 }],
     "order": 3
   },
@@ -31,6 +39,10 @@
     "id": "overnight",
     "name": "Overnight Stays",
     "blurb": "In-home overnight care, so your pet keeps their own routine.",
+    "icon": "house",
+    "flatRate": true,
+    "baseLabel": "Overnight stay, per night",
+    "note": "Medication included. Additional pets and holiday dates are priced from the list below.",
     "tiers": [{ "minutes": 720, "price": 55 }],
     "order": 4
   }
