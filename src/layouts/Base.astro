@@ -34,9 +34,24 @@ const {
   ogImage = "/og-default.png",
 } = Astro.props;
 
-// Canonical must be absolute and must match the apex/www choice made in 0.2,
-// or the two variants split ranking signal between them.
-const canonical = new URL(Astro.url.pathname, SITE.url).href.replace(/(.)\/$/, "$1");
+/**
+ * Canonical URL.
+ *
+ * Must be absolute, must use the apex chosen in 0.2, and must be the URL the
+ * server actually serves -- a canonical that redirects is worse than none.
+ *
+ * With `build.format: 'file'` Astro reports pathnames like `/about.html` at
+ * build time, while Cloudflare Pages serves that file at `/about`. Strip the
+ * extension so the canonical, the sitemap, the internal links and the served
+ * URL are all the same string.
+ */
+const canonical = new URL(
+  Astro.url.pathname
+    .replace(/index\.html$/, "")
+    .replace(/\.html$/, "")
+    .replace(/(.)\/$/, "$1"),
+  SITE.url,
+).href.replace(/(.)\/$/, "$1");
 const ogImageUrl = new URL(ogImage, SITE.url).href;
 
 const fullTitle = title === SITE.name ? title : `${title} · ${SITE.name}`;
