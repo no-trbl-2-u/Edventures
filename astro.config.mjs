@@ -16,6 +16,19 @@ export default defineConfig({
   // booking form's serverless endpoint.
   output: 'static',
 
+  // One URL shape, no redirects.
+  //
+  // The default (directory format) writes about/index.html, which Cloudflare
+  // Pages serves at /about/ and 308-redirects /about to. That left the site
+  // disagreeing with itself in three places: canonical said /about, the
+  // sitemap said /about/, and the canonical URL itself redirected -- which is
+  // precisely the split ranking signal 2.6.1 exists to prevent.
+  //
+  // `format: 'file'` writes about.html, which Pages serves at /about with no
+  // redirect, matching the canonical and every internal link.
+  trailingSlash: 'never',
+  build: { format: 'file' },
+
   vite: {
     plugins: [tailwindcss()],
   },
