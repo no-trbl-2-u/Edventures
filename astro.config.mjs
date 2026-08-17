@@ -8,9 +8,9 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  // Update to the real domain once purchased (Phase 0.2).
-  // Used for sitemap and canonical URLs.
-  site: 'https://edventurespetsitting.com',
+  // Apex domain, registered Phase 0.2. Used for the sitemap and canonical URLs.
+  // Keep in sync with SITE.url in src/lib/site.ts.
+  site: 'https://edventures.pet',
 
   // Static output. Phase 3 adds the Cloudflare adapter for the
   // booking form's serverless endpoint.

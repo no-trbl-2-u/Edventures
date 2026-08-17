@@ -29,10 +29,13 @@ export const SITE = {
   socialHandle: "@edventurespetsitting",
 
   /**
-   * Set once the domain is bought (Roadmap 0.2). Canonical URLs, the sitemap
-   * and Open Graph image URLs all derive from it.
+   * Canonical origin. Canonical URLs, the sitemap, Open Graph image URLs and
+   * llms.txt all derive from it.
+   *
+   * Apex, not www -- picked once and enforced with a redirect, because serving
+   * both splits ranking signal between two addresses (Roadmap 2.6.1).
    */
-  url: "https://edventurespetsitting.com",
+  url: "https://edventures.pet",
 
   /** Years of experience, as claimed on the flyer and in the bio. */
   yearsExperience: 15,

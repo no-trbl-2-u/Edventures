@@ -38,7 +38,7 @@ These are settled. Everything below follows from them.
 | Hosting | Cloudflare Pages or Vercel | Free tier, git-push deploys, automatic HTTPS. | $0 |
 | Form backend | One serverless function on the same host | Needed to send the booking email. Avoids a third-party form service. | $0 |
 | Transactional email | Resend or Postmark | Reliable delivery of booking requests to Edward's inbox. Free tier covers this volume. | $0 |
-| Domain | e.g. `edventurespetsitting.com` | The one real expense. | ~$12/yr |
+| Domain | `edventures.pet` | The one real expense. | ~$12/yr |
 | Analytics | Cloudflare Web Analytics or Plausible | Cookie-free — no consent banner needed. | $0 |
 
 **Simpler alternative:** hand-written HTML/CSS, no build step. Viable for ~6 pages, but you'll regret it at Phase 5. Astro's learning curve is about an afternoon.
@@ -96,11 +96,14 @@ npx astro add react
 
 ### 0.2 — Domain
 
-- [ ] Check availability of `edventurespetsitting.com` (matches the IG/FB handle — strongly prefer this)
-- [ ] Fallbacks if taken: `edventurespetsitting.net`, `edventurespets.com`, `edventuresphilly.com`
-- [ ] Purchase (Cloudflare Registrar sells at cost — no markup, no renewal games)
+- [x] **Registered: `edventures.pet`** — shorter and more memorable than the `.com` we'd planned, and the TLD does some of the explaining for you.
+- [x] Canonical form is the **apex**, `https://edventures.pet`. Set in `astro.config.mjs` and `SITE.url`; those two must stay in step.
 - [ ] Point DNS at the host
-- [ ] Verify HTTPS resolves and `www` redirects to apex (or vice versa — pick one, be consistent)
+- [ ] Verify HTTPS resolves and `www` redirects to apex — serving both splits ranking signal
+
+> **The handle no longer matches the domain.** Social is `@edventurespetsitting`; the site is `edventures.pet`. Not a problem, but it makes the NAP work in 2.6.2 matter more, not less — the business *name* is the thing that has to be byte-identical across the site, Google Business Profile, Instagram and Facebook. The domain isn't part of that match.
+>
+> Worth grabbing `edventurespetsitting.com` later as a redirect if it's cheap and free — it's what people will guess from the Instagram handle.
 
 ### 0.3 — Brand tokens
 
