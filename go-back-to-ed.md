@@ -10,30 +10,21 @@ Each item has a **why** — worth having on hand, since several of these sound l
 
 ## A. Business facts
 
-### 🔴 A3. Insurance — the one item that blocks publishing the About page
+### 🟡 A3. Insurance — is he covered for work booked off-platform?
 
-His answer came back as **"Carrier: Rover · Insurance: TBD."** That raises two questions, and the second is the serious one.
+Background check is settled (Rover). **Insurance is still open, and separate.**
 
-**a) Does "Rover" answer the background check, or the insurance?**
-The question bundled both. Rover does both — it screens sitters via Checkr *and* offers coverage on its platform. Given "Insurance: TBD" sits directly beneath it, "Rover" probably answers the **background check**, but that's a guess about a factual claim going on a public website.
+The site currently says **nothing** about insurance. That's deliberate, and it isn't blocking — the About page ships fine without the claim, and every other claim on it is verified.
 
-**b) If his insurance is Rover's — does it cover bookings from this website?**
+Worth raising with him for his own sake rather than the website's:
 
-This is the real issue. **Rover's sitter coverage generally applies only to bookings arranged through Rover.** Work booked through his own site typically falls outside it.
+**If his only coverage is Rover's, it generally applies only to bookings arranged through Rover.** This website exists to take bookings *off* Rover. So work booked through the site may not be covered at all — a gap that's easy to miss, because from the sitter's side nothing about the job looks different.
 
-The entire purpose of this website is to take bookings *off* Rover. So if that's his only coverage, then *"fully insured"* would be wrong exactly where a customer relies on it most — and he'd be doing uninsured work without necessarily realizing it.
+- [ ] Does he carry pet-sitter liability insurance **independent of Rover**?
+- [ ] If yes — who's the carrier? We'll name them. *"Insured through [carrier]"* is evidence; "fully insured" is just an assertion.
+- [ ] If no — worth considering. Pet Sitters Associates, Kennel Pro, and Business Insurers of the Carolinas are the usual options for solo sitters, roughly **$200–350/year**. Modest against the downside of one bad afternoon.
 
-**This isn't a copywriting question, it's a business-risk one.** Worth asking plainly:
-
-- [ ] Does he have pet-sitter liability insurance **independent of Rover**?
-- [ ] If yes — who's the carrier? Name them on the site; it's evidence rather than a claim.
-- [ ] If no — he may want one. Pet Sitters Associates, Kennel Pro, and Business Insurers of the Carolinas are the common options for solo sitters, roughly **$200–350/year**. Modest against the downside.
-- [ ] **Until confirmed, the site will not say "insured."** The interim copy drops that phrase and keeps everything verified.
-
-*Not legal or insurance advice — just a gap worth him checking with whoever wrote his policy.*
-
-### 🟢 A4. Confirm the background-check wording
-If Rover is the source, *"background-checked through Rover"* is clearer than the current "background-check certified," which isn't really a thing.
+*Not legal or insurance advice — just a gap worth checking with whoever wrote his policy.*
 
 ### 🟢 A5. Is 610-888-4541 the right public number, and does it take texts from unknown numbers?
 The 610 area code is suburban PA rather than Philly's 215/267 — that's common and fine, just confirming it's the business line and not a personal one he'd rather not publish.
@@ -151,6 +142,7 @@ Obsolete now that prices are published. Worth updating before it's reprinted.
 
 - **"15 years of experience"** — confirmed current
 - **Veterinary role** — *Veterinary Medicine Administration*. Applied to the bio, with the sentence restructured so the hands-on-care claim attributes to pet sitting and rescue, and the vet-practice experience stands as its own credential.
+- **Background check** — through **Rover**. Phrased as "background-checked through Rover," which is clearer than "background-check certified" and names a provider customers recognize.
 - **Bio version** — merged draft is canonical
 - **"Walk or jog"** — jogging falls under Dog Walks, same price, not a separate service
 - **Harry and Hubert** — both animals; Harry is Edward's own cat

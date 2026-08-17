@@ -20,7 +20,7 @@ Once promoted, **the Markdown is canonical and the images are archival.** Never 
 
 | File | Source | Verified? |
 |---|---|---|
-| `about.md` | merged from both bios | ☑ version chosen — 1 open item (vet role) |
+| `about.md` | merged from both bios | ✅ **verified — ready to promote** |
 | `pricing.md` | `Price list.jpg` | ☐ **highest risk — check every digit** |
 | `services.md` | `Flyer.png` | ☑ jogging resolved — folds into Dog Walks |
 | `service-area.md` | `Locations served.jpg` | ☐ **check all 11 zips** |
@@ -30,6 +30,9 @@ Once promoted, **the Markdown is canonical and the images are archival.** Never 
 ## Resolved (TJ)
 
 - ✅ **Bio version** — the merged draft is canonical. Both originals archived in `about.md`.
+- ✅ **Vet role** — Veterinary Medicine Administration.
+- ✅ **Background check** — through Rover.
+- ⚠️ **Insurance** — still TBD. The bio deliberately omits any insurance claim rather than hedging it; every remaining claim is verified, so the page ships as written.
 - ✅ **"Walk or jog"** — jogging falls under Dog Walks. Not separately priced.
 - ✅ **Harry and Hubert** — both animals. Harry is Edward's own cat. Publishable.
 - ✅ **Holiday surcharge** — flat `+$15`. The flyer's `$15+` is a typo.

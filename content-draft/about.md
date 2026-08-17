@@ -1,6 +1,6 @@
 ---
 source: merged from starting-assets/About me.png and starting-assets/AboutMe.jpeg
-status: version chosen (TJ) — one open item for Edward
+status: verified — ready to promote to src/content/
 ---
 
 # About Me
@@ -8,9 +8,11 @@ status: version chosen (TJ) — one open item for Edward
 > **Version decision: MERGED.** TJ selected the merged bio below as canonical.
 > The two source drafts are preserved at the bottom for reference only.
 >
-> **Vet role: resolved** — "Veterinary Medicine Administration," applied to the copy below.
+> **Verified and ready to promote.** Every claim in the copy below is confirmed.
 >
-> **⚠️ One item still open — and it blocks publishing this page:** the *"fully insured"* claim. See the section under the copy. If his coverage is Rover's, it likely does not extend to bookings made through this website.
+> Vet role resolved as "Veterinary Medicine Administration"; background check confirmed as Rover.
+>
+> **Insurance is deliberately unmentioned** — see the note under the copy. That's a subtraction, not a blocker: the page ships fine without it, and the claim can be added later if independent coverage is confirmed.
 
 ---
 <!-- VERIFIED -->
@@ -20,16 +22,13 @@ Hi! I'm Edward, the owner and founder of **Edventures Pet Sitting**.
 
 Animals have always been a huge part of my life, and I bring **15 years of hands-on experience** caring for pets of all kinds. My background includes pet sitting, animal rescue, and veterinary medicine administration — so I've cared for animals with a wide range of personalities, needs, medical conditions, and routines, and I've seen how veterinary care works from the inside.
 
-<!-- ⚠️ DO NOT PUBLISH THIS PARAGRAPH AS-IS. "fully insured" is unconfirmed, and
-     "background-check certified" is awkward phrasing for what is probably a Rover
-     screening. See "Still open - the insurance claim" below. -->
+I'm **CPR and First-Aid certified** and **background-checked through Rover** — because your pets deserve the same level of care and attention I'd want for my own.
 
-I'm **CPR and First-Aid certified**, background-check certified, and fully insured — because your pets deserve the same level of care and attention I'd want for my own.
-
-<!-- Safe interim version, if the insurance question isn't resolved before build:
-     "I'm CPR and First-Aid certified and background-checked, because your pets
-     deserve the same level of care and attention I'd want for my own."
-     Drops only the unverified claim; keeps everything confirmed. -->
+<!-- Every claim in this paragraph is confirmed. The "fully insured" phrase from the
+     original drafts is deliberately absent pending the insurance question below.
+     Once independent coverage is confirmed, restore it as:
+     "I'm CPR and First-Aid certified, background-checked through Rover, and insured
+     through [carrier] - because your pets deserve..." -->
 
 
 I believe pet care is about more than simply feeding a pet or taking them for a walk. It's about building trust, keeping them comfortable and happy, and giving you peace of mind while you're away. Whether your pet is energetic, shy, anxious, elderly, or needs a little extra care, I take the time to get to know them as an individual.
@@ -49,35 +48,26 @@ Edward's answer: **Veterinary Medicine Administration.** Neither source draft ha
 
 ---
 
-## ⚠️ Still open — the insurance claim
+## ✅ Resolved — background check
 
-Edward's answer came back as:
+**Rover answers the background-check half.** Phrased as *"background-checked through Rover"* — clearer than the original "background-check certified," which isn't really a thing, and naming a recognizable provider is stronger than an unattributed claim.
 
-> Carrier: "Rover" · Insurance: TBD
+---
 
-**Two things need untangling before this ships**, because the bio currently states *"background-check certified, and fully insured"* as fact.
+## ⚠️ Still open — insurance
 
-### 1. Which claim does "Rover" answer?
+Insurance remains **TBD**, and separate from Rover.
 
-The question bundled two things. Rover plausibly answers either:
+The copy above **omits the "fully insured" phrase entirely** rather than hedging it. Every remaining claim on this page is confirmed, so the page is publishable as written.
 
-- **Background check** — Rover screens sitters (via Checkr). If that's the source, the honest phrasing is *"background-checked through Rover."*
-- **Insurance** — Rover does provide coverage to sitters on its platform.
+To restore the claim, one of these has to be true:
 
-Given "Insurance: TBD" sits right below it, **"Rover" most likely answers the background-check half** — but that's an inference, and it's a factual claim on a public website. Needs confirming.
+- He carries **pet-sitter liability insurance independent of Rover** — then name the carrier; *"insured through [carrier]"* is evidence, not assertion.
+- Or he doesn't, and the site continues to say nothing about insurance.
 
-### 2. If the insurance *is* through Rover — does it cover this website?
+**Worth him checking rather than assuming:** if his only coverage is Rover's, it generally applies solely to bookings arranged through Rover — and this website exists to take bookings off Rover. That gap is easy to miss.
 
-This is the one that matters. **Rover's sitter coverage generally applies only to bookings arranged through Rover.** A booking that comes in through his own site is typically outside it.
-
-If that's the situation, then *"fully insured"* on this website would be inaccurate precisely where customers rely on it most — and the whole point of the site is to take bookings *off* Rover.
-
-Not a wording problem. Either:
-
-- He carries **independent** pet-sitter liability insurance (Pet Sitters Associates, Kennel Pro, Business Insurers of the Carolinas — all common for solo sitters, roughly $200–350/yr), and we name it; **or**
-- He doesn't, and the site **must not claim to be insured**, however routine the phrase looks on a competitor's page.
-
-**Until this is confirmed, leave "fully insured" out of any published draft.** Tracked as A3 in [`go-back-to-ed.md`](../go-back-to-ed.md).
+Tracked as A3 in [`go-back-to-ed.md`](../go-back-to-ed.md).
 
 ---
 
