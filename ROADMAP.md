@@ -86,9 +86,10 @@ npx astro add react
 - [x] Add Tailwind 4 via `@tailwindcss/vite`; brand tokens live in `src/styles/global.css` `@theme`
 - [x] Verify `npm run build` passes and brand tokens compile to utilities
 - [x] Verify `npm run dev` serves 200 at localhost
-- [ ] Create the hosting account (Cloudflare Pages — better free tier, no bandwidth caps)
-- [ ] Connect the repo for auto-deploy on push to main
-- [ ] Confirm the first deploy succeeds on the host's temporary URL
+- [x] Cloudflare Pages project created (`edventures`)
+- [x] First deploy succeeded — **https://edventures-4ak.pages.dev**
+- [ ] **Connect the repo for auto-deploy on push to main.** Needs the GitHub OAuth handshake in the Pages dashboard; it can't be done from the CLI. Until then, deploys are manual: `npm run build && npm run deploy`.
+- [ ] Attach `edventures.pet` — see 0.2, blocked on a DNS token scope
 
 > **Local gotcha — nested worktrees.** The git worktrees live at `.claude/worktrees/…`, *inside* the main repo. Once `tsconfig.json` exists on `main`, a build inside a worktree walks up, finds the parent's `tsconfig.json`, and fails with `Tsconfig not found astro/tsconfigs/strict` if the parent has no `node_modules`. Fix: run `npm install` at the repo root too. A clean CI/Cloudflare checkout is unaffected.
 
@@ -98,8 +99,13 @@ npx astro add react
 
 - [x] **Registered: `edventures.pet`** — shorter and more memorable than the `.com` we'd planned, and the TLD does some of the explaining for you.
 - [x] Canonical form is the **apex**, `https://edventures.pet`. Set in `astro.config.mjs` and `SITE.url`; those two must stay in step.
-- [ ] Point DNS at the host
-- [ ] Verify HTTPS resolves and `www` redirects to apex — serving both splits ranking signal
+- [x] `edventures.pet` and `www.edventures.pet` attached to the Pages project
+- [ ] **Point DNS at the host — BLOCKED.** Both hostnames sit at `pending` because the DNS records don't exist. The API token in `.env` has Account→Pages (edit) and Zone→Read, but **not Zone→DNS→Edit**, so the records can't be created from here.
+  - Fix either way: add **Zone → DNS → Edit** for `edventures.pet` to the token, *or* click *Custom domains → Set up a domain* in the Pages dashboard, which writes the records for you.
+- [ ] Verify HTTPS resolves on the apex
+- [ ] `www` → apex 301. Both are attached to the project, so without a redirect Cloudflare will happily serve identical content on both — the exact duplicate-content split 2.6.1 warns about. A Single Redirect rule on the zone is the cheapest fix.
+
+> **URL shape is settled and should not change now.** The site serves `/about`, not `/about/` — no trailing slash, no redirect, canonical and sitemap in agreement. This was fixed *before* DNS went live deliberately: once the domain is public, changing URL shape means carrying redirects forever.
 
 > **The handle no longer matches the domain.** Social is `@edventurespetsitting`; the site is `edventures.pet`. Not a problem, but it makes the NAP work in 2.6.2 matter more, not less — the business *name* is the thing that has to be byte-identical across the site, Google Business Profile, Instagram and Facebook. The domain isn't part of that match.
 >
