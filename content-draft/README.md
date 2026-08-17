@@ -20,15 +20,24 @@ Once promoted, **the Markdown is canonical and the images are archival.** Never 
 
 | File | Source | Verified? |
 |---|---|---|
-| `about.md` | `About me.png` + `AboutMe.jpeg` | ☐ **needs a decision — see below** |
+| `about.md` | merged from both bios | ☑ version chosen — 1 open item (vet role) |
 | `pricing.md` | `Price list.jpg` | ☐ **highest risk — check every digit** |
-| `services.md` | `Flyer.png` | ☐ |
+| `services.md` | `Flyer.png` | ☑ jogging resolved — folds into Dog Walks |
 | `service-area.md` | `Locations served.jpg` | ☐ **check all 11 zips** |
 | `contact.md` | `Contact us.jpg` | ☐ |
-| `photo-captions.md` | filenames + images | ☐ |
+| `photo-captions.md` | filenames + images | ☐ alt text still inferred, not observed |
 
-## Open questions for Edward
+## Resolved (TJ)
 
-1. **Two different bios exist.** `About me.png` and `AboutMe.jpeg` are not duplicates — they're different drafts with different content. Which is current? See `about.md`.
-2. **The email typo.** `Contact us.jpg` reads `edventurespe**titting**@gmail.com`. Every other asset reads `edventurespe**tsitting**@gmail.com`. The transcription uses the correct spelling; the image should be fixed at the source before it's reused in print or social.
-3. **Who are Harry and Hubert?** Filenames say "My son Harry and I" and "My godchild Hubert" — unclear whether these are pets or people. Affects whether they belong in a client gallery. See `photo-captions.md`.
+- ✅ **Bio version** — the merged draft is canonical. Both originals archived in `about.md`.
+- ✅ **"Walk or jog"** — jogging falls under Dog Walks. Not separately priced.
+- ✅ **Harry and Hubert** — both animals. Harry is Edward's own cat. Publishable.
+- ✅ **Holiday surcharge** — flat `+$15`. The flyer's `$15+` is a typo.
+- ✅ **Email** — `edventurespetsitting@gmail.com` is canonical. `Contact us.jpg` has the typo and should be fixed at the source.
+- ✅ **Photo permissions** — Edward has permission for all client pets shown.
+
+## Still open
+
+Everything needing Edward is consolidated in [`../go-back-to-ed.md`](../go-back-to-ed.md).
+
+The one blocking item inside this folder: **alt text in `photo-captions.md` is inferred from filenames, not from looking at the photos.** Someone must open each image before it ships — wrong alt text misleads screen-reader users worse than none.

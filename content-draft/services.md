@@ -10,7 +10,7 @@ status: unverified
 - [ ] Five services listed — confirm nothing is missing
 - [ ] Trust claims: 15 years experience, Reliable, Caring, Insured, CPR & First Aid Certified
 - [ ] Tagline wording
-- [ ] **Is "walk or jog" a real service?** It appears in `AboutMe.jpeg` but on no flyer or price list.
+- [x] **"Walk or jog" — resolved by TJ.** Jogging falls under Dog Walks. Not a separate service, no separate pricing.
 
 ---
 
@@ -36,7 +36,7 @@ status: unverified
 ## The five services
 
 ### Dog Walks
-15, 30, or 60 minute walks.
+15, 30, or 60 minute walks. **Jogging available at no extra charge** — same pricing as a walk.
 
 ### Cat Visits
 15 or 30 minute drop-in visits.
@@ -54,13 +54,15 @@ In-home overnight care, starting at $55.
 
 ---
 
-## Possible sixth service — needs a decision
+## Jogging — resolved
 
-`AboutMe.jpeg` mentions **"walk or jog"** among the services offered. A running service appears nowhere else.
+`AboutMe.jpeg` mentioned "walk or jog." **Per TJ: jogging falls under Dog Walks** — same service, same price, no separate booking option.
 
-- [ ] Does Edward offer this?
-- [ ] If yes: it needs a price and a booking-form option. It's also a genuine differentiator worth featuring — few sitters offer it.
-- [ ] If no: remove the phrase from the bio.
+Worth surfacing anyway, because it's a real differentiator that few sitters offer:
+
+- [ ] Mention it in the Dog Walks description — *"Walk or jog, at your dog's pace"* or similar
+- [ ] Add a **pace preference** field to the booking form's pet section (walk / jog / whatever suits the dog) rather than a separate service type. Captures the same information without cluttering the service list.
+- [ ] Do **not** give it its own service card — it isn't separately priced, and implying otherwise invites confusion at payment time.
 
 ---
 

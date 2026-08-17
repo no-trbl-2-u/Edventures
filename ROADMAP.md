@@ -110,19 +110,13 @@ These are settled. Everything below follows from them.
 
 ### 0.6 — Content requests to Edward
 
-Send these as one message. This is usually the long pole — ask early.
+**→ Consolidated in [go-back-to-ed.md](go-back-to-ed.md).**
 
-- [ ] 3–5 testimonials: quote, first name, neighborhood, permission to publish
-- [ ] Insurance carrier name (the About copy claims "fully insured" — naming the carrier is stronger)
-- [ ] Background-check provider name
-- [ ] **Cancellation policy** — how much notice, is there a fee
-- [ ] **Key-handling policy** — how he receives, stores, and returns keys or codes
-- [ ] **Vet emergency policy** — what he does, who pays, what authorization he needs
-- [ ] Does he require a **meet-and-greet** before first booking? (Most sitters do — it changes the booking form.)
-- [ ] Operating hours / days, and whether he takes holiday bookings
-- [ ] Typical response time to a booking request (needed for the form's success message)
-- [ ] Confirm 610-888-4541 is the number he wants published
-- [ ] Confirm whether that number accepts SMS from strangers
+That file is the single working list of everything only Edward can answer — grouped by what it blocks (launch / booking form / polish), with the reasoning behind each so the conversation can be one sitting rather than five texts.
+
+- [ ] Walk Edward through `go-back-to-ed.md`
+- [ ] Record answers in that file and propagate them into `content-draft/`
+- [ ] Fix the three source-file errors in section F (the `Contact us.jpg` email typo is the urgent one — it may already be costing inquiries)
 
 ---
 

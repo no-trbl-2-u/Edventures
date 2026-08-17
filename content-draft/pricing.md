@@ -34,7 +34,7 @@ Read this twice. A wrong price on a live site is a real business problem.
 **Additional fees**
 - [ ] Additional dog = `+$7`
 - [ ] Additional cat = `+$5`
-- [ ] Holiday visits = `+$15` — note the image shows `$15+`, i.e. *fifteen or more*, not exactly fifteen
+- [x] Holiday visits = `+$15` — **resolved by TJ.** The image renders `$15+`, but the correct figure is a flat `+$15`.
 - [ ] Last-minute booking, under 24 hrs notice = `+$8`
 
 ---
@@ -85,10 +85,12 @@ Read this twice. A wrong price on a live site is a real business problem.
 |---|---|
 | Additional dog | +$7 |
 | Additional cat | +$5 |
-| Holiday visits | +$15 and up |
+| Holiday visits | +$15 |
 | Last-minute booking (under 24 hrs notice) | +$8 |
 
-<!-- VERIFY: The image reads "+ $15+" for holiday visits - the trailing plus appears intentional, meaning "fifteen or more". Transcribed as "and up". Confirm with Edward, and confirm WHICH holidays count. The booking form needs a concrete date list to auto-flag the surcharge. -->
+> **Note:** the source image renders this as `$15+`. Per TJ, the correct figure is a flat **+$15** — the trailing plus is a typo in the flyer and should be fixed at the source before that image is reused.
+
+<!-- VERIFY: Still needed - WHICH holidays count. The booking form needs a concrete date list to auto-apply the surcharge. Tracked in go-back-to-ed.md. -->
 
 ---
 

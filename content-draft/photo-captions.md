@@ -14,7 +14,7 @@ Before shipping, someone must open each photo and confirm the alt text describes
 - [ ] Open each photo and correct its alt text
 - [ ] Confirm the caption reads well publicly
 - [ ] Decide which photos make the gallery (not all 21 need to)
-- [ ] Resolve the "Harry" and "Hubert" question below
+- [x] ~~Resolve the "Harry" and "Hubert" question~~ — both are animals; Harry is Edward's cat
 
 ---
 
@@ -36,7 +36,7 @@ The original filenames carry the captions — they're the only record of each an
 | 1 | `A fun day with Cows.jpeg` | `a-fun-day-with-cows.jpg` | A fun day with cows | ⚠️ Edward with cows — **verify: is this a farm visit, or a dog named Cows?** |
 | 2 | `Angel and I, RIP.jpg` | `angel-and-i.jpg` | Angel | ⚠️ Edward with Angel — **see memorial note below** |
 | 3 | `Cuddling with Auggy.jpg` | `cuddling-with-auggy.jpg` | Cuddling with Auggy | Edward cuddling with Auggy |
-| 4 | `Harry and I.jpg` | `harry-and-i.jpg` | Harry and I | ⚠️ **see "Harry" note below** |
+| 4 | `Harry and I.jpg` | `harry-and-i.jpg` | Harry and I | Edward with Harry, his cat |
 | 5 | `Jackie and I.jpg` | `jackie-and-i.jpg` | Jackie and I | Edward with Jackie |
 | 6 | `Kisses from Jackie.jpeg` | `kisses-from-jackie.jpg` | Kisses from Jackie | Jackie licking Edward's face |
 | 7 | `Kisses from Tecate.jpeg` | `kisses-from-tecate.jpg` | Kisses from Tecate | Tecate licking Edward's face |
@@ -45,8 +45,8 @@ The original filenames carry the captions — they're the only record of each an
 | 10 | `Me & Regina.jpeg` | `me-and-regina.jpg` | Regina and I | Edward with Regina |
 | 11 | `Me & Taco.jpeg` | `me-and-taco.jpg` | Taco and I | Edward with Taco |
 | 12 | `Me and Goy Pouting.jpeg` | `me-and-goy-pouting.jpg` | Goy, pouting | Edward with Goy, who is pouting |
-| 13 | `My godchild Hubert.jpeg` | `hubert.jpg` | Hubert | ⚠️ **see "Hubert" note below** |
-| 14 | `My son Harry and I.jpg` | `my-son-harry-and-i.jpg` | Harry and I | ⚠️ **see "Harry" note below** |
+| 13 | `My godchild Hubert.jpeg` | `hubert.jpg` | Hubert | Hubert, an animal in Edward's care |
+| 14 | `My son Harry and I.jpg` | `my-son-harry-and-i.jpg` | Harry and I | Edward with Harry, his cat |
 | 15 | `Playing with Xenon.jpg` | `playing-with-xenon.jpg` | Playing with Xenon | Edward playing with Xenon |
 | 16 | `Proud Cat Dad.jpeg` | `proud-cat-dad.jpg` | Proud cat dad | Edward holding a cat |
 | 17 | `Selfie with Tecate.jpeg` | `selfie-with-tecate.jpg` | Selfie with Tecate | Selfie of Edward with Tecate |
@@ -63,18 +63,15 @@ The original filenames carry the captions — they're the only record of each an
 
 ## Flags needing Edward's input
 
-### "Harry" — pet or person?
+### Harry and Hubert — resolved ✅
 
-Two files: `Harry and I.jpg` and `My son Harry and I.jpg`. "My son" suggests either a human child or an affectionate term for his own pet.
+**Both are animals**, per TJ. **Harry is Edward's own cat.** No privacy concern; both are publishable.
 
-- [ ] If Harry is a **human child**, these almost certainly should not go in a public gallery of client work.
-- [ ] If Harry is **Edward's own pet**, they're great About-page material — showing he's a pet owner himself builds trust.
+This is better than neutral — it's usable material:
 
-### "Hubert" — godchild?
-
-`My godchild Hubert.jpeg` — same question. "Godchild" suggests a person, but is also a common affectionate term for a friend's pet.
-
-- [ ] Confirm before publishing.
+- [ ] Use the Harry photos on the **About page**, captioned as his own cat. A pet sitter who is visibly a devoted pet owner is more persuasive than one who only appears with clients' animals.
+- [ ] "My son Harry" is how Edward actually talks about him. Consider keeping that voice in the caption — *"My son Harry"* — rather than flattening it to "Edward's cat." It's warm and true to the brand.
+- [ ] Hubert's slug drops "my godchild"; revisit if Edward wants that phrasing kept as a caption.
 
 ### `Angel and I, RIP.jpg` — memorial photo
 
