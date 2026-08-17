@@ -6,7 +6,7 @@
 **Contact:** Text 610-888-4541 · edventurespetsitting@gmail.com · IG/FB @edventurespetsitting
 
 > **Canonical email is `edventurespetsitting@gmail.com`.**
-> `starting-assets/Contact us.jpg` contains a typo (`edventurespe**titting**`). Never copy the address from that file. Fix it at the source before that image is reused in print or social.
+> `starting-assets/Contact us.jpg` carried a typo (`edventurespe**titting**`) and has been **deleted**; [content-draft/contact.md](content-draft/contact.md) is now the record for that content. Recoverable from git history at `d300fbd`. Copies already posted to social or printed still need tracking down — see F1 in [go-back-to-ed.md](go-back-to-ed.md).
 
 > **Photo permissions: cleared.** Edward has permission for all client pets shown in `starting-assets/`.
 
@@ -118,7 +118,7 @@ That file is the single working list of everything only Edward can answer — gr
 
 - [ ] Walk Edward through `go-back-to-ed.md`
 - [ ] Record answers in that file and propagate them into `content-draft/`
-- [ ] Fix the three source-file errors in section F (the `Contact us.jpg` email typo is the urgent one — it may already be costing inquiries)
+- [ ] Fix the remaining source-file errors in section F, and track down any circulating copies of the deleted `Contact us.jpg` — that one is actively losing business
 
 ---
 
@@ -139,7 +139,7 @@ Claude transcribes from the image assets into Markdown, marking anything uncerta
 - [x] `pricing.md` ← from `Price list.jpg` — verified against two independent reads
 - [x] `services.md` ← from `Flyer.png` — five services + trust badges
 - [x] `service-area.md` ← from `Locations served.jpg` — 11 zip codes + travel-fee note
-- [x] `contact.md` ← from `Contact us.jpg` — with the email typo corrected
+- [x] `contact.md` ← from `Contact us.jpg` — email typo corrected; source image since deleted
 - [x] `photo-captions.md` — 21 photos, slug map, draft alt text
 
 ### 0.5.3 — Mark uncertainty

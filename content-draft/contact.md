@@ -1,7 +1,10 @@
 ---
-source: starting-assets/Contact us.jpg
+source: starting-assets/Contact us.jpg (REMOVED — see note)
 status: unverified
 ---
+
+> **This file is now the only record of that content.**
+> `Contact us.jpg` was deleted because its email address was misspelled. The details below were transcribed before removal, with the spelling corrected. The original is still recoverable from git history at commit `d300fbd` if it's ever needed.
 
 # Contact
 
@@ -23,25 +26,25 @@ status: unverified
 
 ---
 
-## ⚠️ Email typo in the source image
+## ✅ Email typo — resolved by deleting the source image
 
-`Contact us.jpg` reads:
+`Contact us.jpg` read:
 
 ```
 edventurespetitting@gmail.com
 ```
 
-That is missing the `s` in "sitting" — `pe-titting` rather than `pet-sitting`.
+Missing the `s` in "sitting" — `pe-titting` rather than `pet-sitting`. Anyone typing that address off the image would have sent mail into the void.
 
-Every other asset (`Flyer.png`, `Price list.jpg`) reads:
+Every other asset (`Flyer.png`, `Price list.jpg`) reads correctly:
 
 ```
 edventurespetsitting@gmail.com
 ```
 
-**The corrected spelling is used above**, per TJ's confirmation that `edventurespetsitting@gmail.com` is canonical.
+**Resolution:** TJ removed the image from `starting-assets/` rather than correcting it, since its content is fully captured here and the file's only unique contribution was the error.
 
-**Action:** the source image should be fixed before it is reused in print or on social media, otherwise customers will bounce mail into the void.
+**Still worth checking with Edward:** whether that image was ever posted to Instagram or Facebook, or printed. Deleting our copy doesn't recall the ones already in circulation — and that's where the actual lost inquiries would come from. Tracked as F1 in [`../go-back-to-ed.md`](../go-back-to-ed.md).
 
 ---
 

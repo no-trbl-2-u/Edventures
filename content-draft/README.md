@@ -24,7 +24,7 @@ Once promoted, **the Markdown is canonical and the images are archival.** Never 
 | `pricing.md` | `Price list.jpg` | ☐ **highest risk — check every digit** |
 | `services.md` | `Flyer.png` | ☑ jogging resolved — folds into Dog Walks |
 | `service-area.md` | `Locations served.jpg` | ☐ **check all 11 zips** |
-| `contact.md` | `Contact us.jpg` | ☐ |
+| `contact.md` | `Contact us.jpg` *(deleted)* | ☐ — **now the only record of that content** |
 | `photo-captions.md` | filenames + images | ☐ alt text still inferred, not observed |
 
 ## Resolved (TJ)
@@ -33,7 +33,7 @@ Once promoted, **the Markdown is canonical and the images are archival.** Never 
 - ✅ **"Walk or jog"** — jogging falls under Dog Walks. Not separately priced.
 - ✅ **Harry and Hubert** — both animals. Harry is Edward's own cat. Publishable.
 - ✅ **Holiday surcharge** — flat `+$15`. The flyer's `$15+` is a typo.
-- ✅ **Email** — `edventurespetsitting@gmail.com` is canonical. `Contact us.jpg` has the typo and should be fixed at the source.
+- ✅ **Email** — `edventurespetsitting@gmail.com` is canonical. `Contact us.jpg` carried the typo and has been **deleted** from `starting-assets/`; `contact.md` is now the record. Recoverable from git history at `d300fbd`.
 - ✅ **Photo permissions** — Edward has permission for all client pets shown.
 
 ## Still open

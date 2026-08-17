@@ -118,8 +118,17 @@ Changes the caption entirely. Genuinely unclear from the filename.
 
 Not website work — these are his originals, and the errors will keep propagating into print and social if they aren't fixed at the source.
 
-### 🔴 F1. `Contact us.jpg` has a typo in the email address
-It reads `edventurespe**titting**@gmail.com` — missing the `s`. Every other asset has it right. **Anyone who types the address off that image sends mail into the void.** Highest-value fix on this list; it may already have cost him inquiries.
+### 🔴 F1. The `Contact us.jpg` email typo — where else is that image?
+It read `edventurespe**titting**@gmail.com` — missing the `s`. **Anyone who typed the address off that image sent mail into the void.**
+
+We've deleted our copy, so it can't reach the website. **But that doesn't recall the copies already out there**, and that's where the real damage would be:
+
+- [ ] Was it ever posted to **Instagram** or **Facebook**? Delete or replace those posts.
+- [ ] Was it ever **printed** — flyers, cards, a noticeboard?
+- [ ] Was it sent directly to any clients?
+- [ ] Worth checking whether `edventurespetitting@gmail.com` is registerable — if it's free, **claiming it and forwarding to the real inbox** would recover any misdirected mail permanently. Cheap insurance.
+
+Still the highest-value item on this list. It may already have cost him inquiries, and unlike everything else here, it's actively losing business right now.
 
 ### 🟢 F2. `Price list.jpg` renders holiday visits as `$15+`
 Confirmed the real figure is a flat **+$15**. The trailing plus should come off.
