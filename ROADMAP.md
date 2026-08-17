@@ -86,21 +86,27 @@ npx astro add react
 - [x] Add Tailwind 4 via `@tailwindcss/vite`; brand tokens live in `src/styles/global.css` `@theme`
 - [x] Verify `npm run build` passes and brand tokens compile to utilities
 - [x] Verify `npm run dev` serves 200 at localhost
-- [ ] Create the hosting account (Cloudflare Pages — better free tier, no bandwidth caps)
-- [ ] Connect the repo for auto-deploy on push to main
+- [x] Create the hosting account (Cloudflare Pages — better free tier, no bandwidth caps)
+- [x] Connect the GitHub integration (TJ, 2026-08-17)
+- [ ] Create the Pages project and set build command `npm run build`, output dir `dist`
 - [ ] Confirm the first deploy succeeds on the host's temporary URL
 
 > **Local gotcha — nested worktrees.** The git worktrees live at `.claude/worktrees/…`, *inside* the main repo. Once `tsconfig.json` exists on `main`, a build inside a worktree walks up, finds the parent's `tsconfig.json`, and fails with `Tsconfig not found astro/tsconfigs/strict` if the parent has no `node_modules`. Fix: run `npm install` at the repo root too. A clean CI/Cloudflare checkout is unaffected.
 
-> **Deploy subtasks deferred.** They depend on 0.2 (the domain isn't purchased yet) and creating a Pages project publishes a public URL — worth a deliberate go-ahead rather than a side effect. Credentials are in `.env` in the primary worktree and confirmed git-ignored.
+> **Credentials — the `.env` token is R2, not Pages.** `.env` in the primary worktree (git-ignored, confirmed) holds a valid 32-hex `CLOUDFLARE_ACCOUNT_ID` alongside S3-compatible R2 keys and an `r2.cloudflarestorage.com` endpoint. `CLOUDFLARE_API_TOKEN` is 53 chars — not the 40-char shape of a standard Cloudflare API token — and `GET /user/tokens/verify` returns `1000 Invalid API Token`. It is an R2 object-storage credential, so it carries no Pages or DNS scope regardless. **This does not block deploys:** the GitHub↔Pages integration builds on Cloudflare's side and needs no token. A token is only needed for driving Pages/DNS from the CLI — scopes `Account · Cloudflare Pages · Edit` and `Zone · DNS · Edit` on `edventures.pet`.
 
 ### 0.2 — Domain
 
-- [ ] Check availability of `edventurespetsitting.com` (matches the IG/FB handle — strongly prefer this)
-- [ ] Fallbacks if taken: `edventurespetsitting.net`, `edventurespets.com`, `edventuresphilly.com`
-- [ ] Purchase (Cloudflare Registrar sells at cost — no markup, no renewal games)
-- [ ] Point DNS at the host
+**Decided: `edventures.pet`.** (TJ, 2026-08-17. Supersedes the `edventurespetsitting.com` recommendation below.) `.pet` is on Cloudflare Registrar's supported list — registry operator Afilias — so it can be bought at cost and DNS is automatic.
+
+- [x] `site` in `astro.config.mjs` set to `https://edventures.pet`
+- [x] Purchase via Cloudflare Registrar — **bought 2026-08-17**
+- [ ] Point DNS at the Pages project
 - [ ] Verify HTTPS resolves and `www` redirects to apex (or vice versa — pick one, be consistent)
+
+> **Consequence to handle in 2.6.** The domain no longer contains "petsitting" and no longer matches the IG/FB handle `@edventurespetsitting`. Not a ranking problem — exact-match domains stopped mattering years ago — but it does mean the Google Business Profile, the site title, and the `<h1>` have to carry the "pet sitting Philadelphia" keywords the domain used to. Also make sure the handle and the domain appear together everywhere, so the two identities are visibly one business.
+
+*Original recommendation, kept for the record:* `edventurespetsitting.com` (matches the handle); fallbacks `edventurespetsitting.net`, `edventurespets.com`, `edventuresphilly.com`.
 
 ### 0.3 — Brand tokens
 
