@@ -61,6 +61,8 @@ These are settled. Everything below follows from them.
 - [ ] Connect the repo for auto-deploy on push to main
 - [ ] Confirm the first deploy succeeds on the host's temporary URL
 
+> **Local gotcha — nested worktrees.** The git worktrees live at `.claude/worktrees/…`, *inside* the main repo. Once `tsconfig.json` exists on `main`, a build inside a worktree walks up, finds the parent's `tsconfig.json`, and fails with `Tsconfig not found astro/tsconfigs/strict` if the parent has no `node_modules`. Fix: run `npm install` at the repo root too. A clean CI/Cloudflare checkout is unaffected.
+
 > **Deploy subtasks deferred.** They depend on 0.2 (the domain isn't purchased yet) and creating a Pages project publishes a public URL — worth a deliberate go-ahead rather than a side effect. Credentials are in `.env` in the primary worktree and confirmed git-ignored.
 
 ### 0.2 — Domain
