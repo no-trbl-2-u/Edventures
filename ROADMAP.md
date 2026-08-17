@@ -51,14 +51,17 @@ These are settled. Everything below follows from them.
 
 ### 0.1 — Repository & hosting
 
-- [ ] Initialize the project structure on the `claude/dog-walking-website-roadmap` branch
-- [ ] Create `.gitignore` (node_modules, `.env`, `dist`, `.astro`)
-- [ ] Scaffold Astro: `npm create astro@latest` — choose "Empty", TypeScript strict
-- [ ] Add Tailwind: `npx astro add tailwind`
-- [ ] Verify `npm run dev` serves a blank page at localhost
-- [ ] Create the hosting account (Cloudflare Pages recommended — better free tier, no bandwidth caps)
+- [x] Initialize the project structure on the `claude/dog-walking-website-roadmap` branch
+- [x] Create `.gitignore` — covers `.env`, `.dev.vars`, `node_modules`, `dist`, `.astro`, `.wrangler`
+- [x] Scaffold Astro 7 (built by hand — `npm create astro` requires an empty directory and would have clobbered `README.md` and `starting-assets/`)
+- [x] Add Tailwind 4 via `@tailwindcss/vite`; brand tokens live in `src/styles/global.css` `@theme`
+- [x] Verify `npm run build` passes and brand tokens compile to utilities
+- [x] Verify `npm run dev` serves 200 at localhost
+- [ ] Create the hosting account (Cloudflare Pages — better free tier, no bandwidth caps)
 - [ ] Connect the repo for auto-deploy on push to main
 - [ ] Confirm the first deploy succeeds on the host's temporary URL
+
+> **Deploy subtasks deferred.** They depend on 0.2 (the domain isn't purchased yet) and creating a Pages project publishes a public URL — worth a deliberate go-ahead rather than a side effect. Credentials are in `.env` in the primary worktree and confirmed git-ignored.
 
 ### 0.2 — Domain
 
@@ -131,29 +134,23 @@ Claude transcribes from the image assets into Markdown, marking anything uncerta
 
 ### 0.5.1 — Set up
 
-- [ ] Create `content-draft/` at the repo root (separate from `src/` — this is a working area, not shipped code)
-- [ ] Add a `README.md` in that folder explaining these are unverified drafts pending review
+- [x] Create `content-draft/` at the repo root (separate from `src/` — a working area, not shipped code)
+- [x] Add a `README.md` explaining these are unverified drafts pending review
 
 ### 0.5.2 — Transcribe
 
-- [ ] `about.md` ← from `About me.png` — Edward's full bio. Mostly clean text; should transcribe accurately.
-- [ ] `pricing.md` ← from `Price list.jpg` — structured table
-  - [ ] Dog walks: 15/30/60 min
-  - [ ] Cat visits: 15/30 min
-  - [ ] Medication administration + the insulin exclusion note
-  - [ ] Nail trims: stand-alone vs add-on
-  - [ ] Overnight stays
-  - [ ] Additional fees: extra dog, extra cat, holiday, last-minute
-- [ ] `services.md` ← from `Flyer.png` — the five services + trust badges
-- [ ] `service-area.md` ← from `Locations served.jpg` — 11 zip codes + the "other areas by appointment, travel fees may apply" note
-- [ ] `contact.md` ← from `Contact us.jpg` — **with the email typo corrected**
-- [ ] `photo-captions.md` — every photo's slug, its source filename, and a draft alt-text description
+- [x] `about.md` — **both bios.** `About me.png` and `AboutMe.jpeg` turned out to be *different drafts*, not duplicates. Both transcribed verbatim, plus a proposed merge. Needs Edward's decision.
+- [x] `pricing.md` ← from `Price list.jpg` — verified against two independent reads
+- [x] `services.md` ← from `Flyer.png` — five services + trust badges
+- [x] `service-area.md` ← from `Locations served.jpg` — 11 zip codes + travel-fee note
+- [x] `contact.md` ← from `Contact us.jpg` — with the email typo corrected
+- [x] `photo-captions.md` — 21 photos, slug map, draft alt text
 
 ### 0.5.3 — Mark uncertainty
 
-- [ ] Flag every uncertain reading inline as `<!-- VERIFY: ... -->`
-- [ ] Specifically flag anything where a digit could be misread — **every price and every zip code**. A wrong price on a live site is a real business problem.
-- [ ] Add a `## Verification checklist` at the top of `pricing.md` and `service-area.md` listing each number for TJ to tick off
+- [x] Flag every uncertain reading inline as `<!-- VERIFY: ... -->`
+- [x] Verification checklists at the top of `pricing.md`, `service-area.md`, and `contact.md`
+- [x] Every price and zip code listed individually for tick-off
 
 ### 0.5.4 — TJ's review pass
 
