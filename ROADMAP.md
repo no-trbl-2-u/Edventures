@@ -102,8 +102,8 @@ npx astro add react
 - [x] `edventures.pet` and `www.edventures.pet` attached to the Pages project
 - [ ] **Point DNS at the host — BLOCKED.** Both hostnames sit at `pending` because the DNS records don't exist. The API token in `.env` has Account→Pages (edit) and Zone→Read, but **not Zone→DNS→Edit**, so the records can't be created from here.
   - Fix either way: add **Zone → DNS → Edit** for `edventures.pet` to the token, *or* click *Custom domains → Set up a domain* in the Pages dashboard, which writes the records for you.
+- [x] `www` → apex 301 shipped as `public/_redirects` — version-controlled and travels with the repo, rather than a zone rule that can drift from a dashboard setting nobody remembers changing
 - [ ] Verify HTTPS resolves on the apex
-- [ ] `www` → apex 301. Both are attached to the project, so without a redirect Cloudflare will happily serve identical content on both — the exact duplicate-content split 2.6.1 warns about. A Single Redirect rule on the zone is the cheapest fix.
 
 > **URL shape is settled and should not change now.** The site serves `/about`, not `/about/` — no trailing slash, no redirect, canonical and sitemap in agreement. This was fixed *before* DNS went live deliberately: once the domain is public, changing URL shape means carrying redirects forever.
 

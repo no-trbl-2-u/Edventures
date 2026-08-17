@@ -1,0 +1,13 @@
+# Cloudflare Pages redirects.
+#
+# www -> apex, 301. Both hostnames are attached to the Pages project, so
+# without this Cloudflare serves byte-identical content on both and the
+# ranking signal splits between two addresses (Roadmap 2.6.1).
+#
+# This lives in the build rather than as a zone Redirect Rule on purpose: it is
+# version-controlled, it travels with the repo, and it cannot silently drift
+# from a dashboard setting nobody remembers changing.
+#
+# The `!` forces the redirect even though a matching static file exists.
+# :splat carries the rest of the path through, so deep links survive.
+https://www.edventures.pet/* https://edventures.pet/:splat 301!

@@ -82,8 +82,18 @@ Flyer says "flexible scheduling," which may or may not mean Christmas.
 
 ## D. Content he needs to supply
 
-### 🔴 D1. Three to five testimonials
-Quote, first name, neighborhood, and **permission to publish**. For a solo pet sitter these do more convincing than anything we write. The site can launch with placeholders and swap them in, but not for long.
+### 🟡 D1. Testimonials — two in, one slot open
+**Live on the homepage:** Anthony Allen (Auggie, boxer) and Dana DiTullio (Xenon, Cane Corso). Published under full names.
+
+Three things still worth chasing:
+
+- [ ] **A third quote.** Neither of the two mentions **medication, an anxious pet, or a key handover** — which are exactly the worries that stop someone booking a stranger. A quote covering one of those is worth more than a fourth "he's great".
+- [ ] **Neighborhoods.** The schema has an optional `neighborhood` field, currently unused. *"Anthony · Fairmount"* is a local-SEO signal and reads as more real than a bare name. Needs each client's OK.
+- [ ] **Confirm full names are fine to publish.** They're on the site now; some people would rather be "Anthony A." One-line change if so.
+
+> **Their quotes corrected two things we had wrong.** Our alt text called Auggie "a tan and white hound" — he's a **boxer** — and Xenon "a large black dog" — he's a **Cane Corso**. Both fixed. Owners describing their own dogs beat anything inferred from a photograph, which is a good argument for asking the *other* owners what their pets actually are.
+>
+> Note the spelling: Edward's filename says **Auggy**, Anthony writes **Auggie**. We've gone with the owner's spelling in the caption and alt text. Worth a quick check that Edward's happy with that.
 
 ### 🟢 D2. Logo as an SVG
 If his designer has the vector file, the header and favicon will be noticeably crisper. `LOGO.png` works, just softer on retina screens.
