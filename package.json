@@ -13,7 +13,8 @@
     "astro": "astro",
     "brand": "node scripts/brand-assets.mjs",
     "photos": "node scripts/photos.mjs",
-    "assets": "npm run brand && npm run photos"
+    "assets": "npm run brand && npm run photos",
+    "deploy": "astro build && wrangler pages deploy dist --project-name edventures --branch main"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.2",
