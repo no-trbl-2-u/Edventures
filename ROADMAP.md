@@ -43,6 +43,35 @@ These are settled. Everything below follows from them.
 
 **Simpler alternative:** hand-written HTML/CSS, no build step. Viable for ~6 pages, but you'll regret it at Phase 5. Astro's learning curve is about an afternoon.
 
+### Why Astro and not Next.js
+
+TJ is a React developer, so this deserves a real answer rather than a preference.
+
+**On SEO — SSR does not help here, and would marginally hurt.** The belief that SSR aids SEO comes from the era when the alternative was a client-rendered SPA shipping an empty `<div id="root">`. Astro is not that: it renders to **static HTML at build time and ships zero JavaScript by default**. Static output is the ceiling SSR is trying to reach, not a step below it.
+
+| | Astro (static) | Next (SSR) |
+|---|---|---|
+| Crawler receives | Final HTML from the CDN edge | Final HTML from a server render |
+| TTFB | ~10–30ms | ~100–300ms (cold start + render) |
+| JS shipped | 0 KB | ~90 KB framework baseline |
+| Breaks if the server hiccups | No server exists | Yes |
+
+SSR earns its keep when HTML must differ per request — logged-in dashboards, personalized feeds, live inventory. Every page here is identical for every visitor. (Next *can* static-export, but then it's Astro with a larger dependency tree and a hydration payload.)
+
+**The blunter point:** framework choice is close to irrelevant to the actual ranking problem. Edventures competes for "dog walker near me" in ~11 zip codes. That is decided by **Google Business Profile, review count and recency, NAP consistency, and local structured data** — not rendering strategy. See the post-launch checklist; GBP outranks everything else on this page.
+
+**On maintenance — this is the stronger argument.** TJ maintains this indefinitely, for free, on a site that will rarely change. What matters is *churn*, not developer experience. Astro's static output means **nothing runs in production**: no server to patch, no Node version to keep current, no cold starts. Next has been through several substantial architectural migrations; none are hard, but you'd be absorbing them at 11pm on a site that hasn't changed since launch.
+
+**React skills transfer directly.** Astro supports React components as first-class islands:
+
+```
+npx astro add react
+```
+
+`<BookingForm client:load />` is then a real React component with hooks and state, while the rest of the site stays zero-JS. That is exactly the right shape for Phase 3 — the multi-step form is the *one* place interactivity is warranted.
+
+- [ ] Add `@astrojs/react` at the start of Phase 3, not before — the static pages don't need it
+
 ---
 
 # Phase 0 — Setup & asset preparation
@@ -189,7 +218,7 @@ Claude transcribes from the image assets into Markdown, marking anything uncerta
 /contact          Phone, email, socials, service area, FAQ
 ```
 
-- [ ] Decide: separate `/service-area` page, or fold the zip codes into `/contact`? (Recommend folding — the content is thin, and a dedicated page helps local SEO only marginally.)
+- [x] Decide: separate `/service-area` page, or fold the zip codes into `/contact`? → **Keep it separate.** Reversed from the original "fold it in" recommendation on local-SEO grounds — see 2.6.2. "Dog walker Fairmount" is a query people type, and a page naming all 11 neighborhoods as text is the thing that answers it. This is the rare case where a thin page pays for itself.
 - [ ] Decide: separate `/gallery`, or fold photos into `/about`? (Recommend keeping separate — there are ~25 good photos and they're genuinely persuasive.)
 
 ### 1.2 — Wireframes
@@ -272,7 +301,107 @@ Claude transcribes from the image assets into Markdown, marking anything uncerta
 - [ ] Lighthouse mobile: target 90+ on all four categories
 - [ ] Verify on a throttled 3G connection
 
-### 2.6 — Launch
+### 2.6 — SEO
+
+*The site is a static brochure. Nearly all of the SEO win here is **local** SEO, and most of it happens off-site.*
+
+**2.6.1 — Technical foundation (table stakes)**
+
+- [ ] `sitemap.xml` — use `@astrojs/sitemap`, generated at build so it can't go stale
+- [ ] `robots.txt` — allow everything, point at the sitemap. Nothing here needs hiding.
+- [ ] Canonical `<link>` on every page, absolute URL — prevents `www`/apex and trailing-slash variants splitting ranking signal
+- [ ] Pick apex-vs-`www` once (0.2) and 301 the other; never serve both
+- [ ] Unique `<title>` per page, under ~60 chars, each ending `· Edventures Pet Sitting`
+- [ ] Unique meta description per page, 140–160 chars, written as ad copy rather than a summary — it's the click-through pitch
+- [ ] One `h1` per page containing the real subject, not the logo
+- [ ] Descriptive `alt` on every image (already sourced from `photos.json`) — also feeds Google Images, which matters more than expected for pet businesses
+- [ ] Verify no page is orphaned — every page reachable from the nav or footer
+
+**2.6.2 — Local SEO (where the actual ranking comes from)**
+
+- [ ] **NAP consistency.** Name, address/service area, and phone must be byte-identical across the site, Google Business Profile, Instagram, and Facebook. Formatting mismatches (`610-888-4541` vs `(610) 888-4541`) genuinely weaken local signal — pick one format and record it here.
+- [ ] Put the phone number in the footer of every page as real text, not an image, inside a `tel:` link
+- [ ] Keep a real `/service-area` page after all, listing all 11 zip codes with neighborhood names as text — this is the one case where a thin page earns its keep, because "dog walker Fairmount" is a query people actually type
+  - [ ] Supersedes the 1.1 recommendation to fold it into `/contact`; the SEO value outweighs the thinness
+  - [ ] **Do not** generate one page per zip code. That's doorway-page territory and is against Google's guidelines.
+- [ ] Name Philadelphia and the neighborhoods naturally in body copy — the photos taken at Rittenhouse Square are genuine local proof, caption them as such
+- [ ] Target realistic queries: `dog walker philadelphia`, `cat sitter rittenhouse`, `overnight pet sitting philadelphia`, `dog walker near me`
+
+**2.6.3 — Structured data**
+
+- [ ] `LocalBusiness` JSON-LD on the homepage — ideally the `ProfessionalService` subtype
+  - [ ] `name`, `telephone`, `email`, `url`, `image`, `logo`
+  - [ ] `areaServed` as the 11 postal codes
+  - [ ] `sameAs` → Instagram and Facebook URLs
+  - [ ] `openingHoursSpecification` — **blocked on C1** (Edward's real hours)
+  - [ ] `priceRange` (e.g. `$$`)
+- [ ] `Service` schema per offering, with `offers` carrying the real prices from `services.json`
+- [ ] `FAQPage` schema on `/contact` once the FAQ is written
+- [ ] `BreadcrumbList` on interior pages
+- [ ] Generate all JSON-LD **from the content collections**, never hand-written — otherwise the markup and the visible prices drift apart, which is both an SEO penalty and a customer-facing lie
+- [ ] Validate every page in Google's Rich Results Test
+
+**2.6.4 — Social / sharing**
+
+- [ ] Open Graph tags: `og:title`, `og:description`, `og:image` (1200×630), `og:url`, `og:type`
+- [ ] `twitter:card` = `summary_large_image`
+- [ ] Per-page OG images where it's cheap — the hero photo for `/`, a pet photo for `/gallery`
+- [ ] Test a real paste into Facebook Messenger and iMessage. Links to this site will overwhelmingly be *texted*, and a broken preview costs more here than a ranking position.
+
+**2.6.5 — Off-site (highest leverage, lowest effort)**
+
+- [ ] **Google Business Profile** — claim, verify, complete 100%. For a local service business this outperforms the entire website.
+- [ ] Set GBP as a **service-area business** (no storefront address) — Edward should not publish his home address
+- [ ] Upload the best 10 photos to GBP; it weights recent photo activity
+- [ ] Ask satisfied clients for Google reviews — review count and recency are the dominant local ranking factor
+- [ ] Bing Places (cheap, five minutes, non-zero traffic)
+- [ ] Link the site from the IG and FB bios
+- [ ] Consistent listings on Yelp and Nextdoor — Nextdoor is disproportionately effective for neighborhood pet care
+
+**2.6.6 — Measurement**
+
+- [ ] Google Search Console: verify the domain, submit the sitemap
+- [ ] Check the Core Web Vitals report after two weeks of real traffic
+- [ ] Track which queries actually surface the site, and rewrite titles to match reality
+
+> **Expectation setting.** A new domain ranks for essentially nothing for the first 1–3 months regardless of technical quality. Google Business Profile can start producing calls in *days*. If time is short, do 2.6.5 before 2.6.1.
+
+### 2.7 — AI readiness
+
+*People increasingly find local services by asking an assistant instead of searching. The site should answer well when a model reads it — and the work overlaps almost entirely with 2.6.*
+
+**2.7.1 — `llms.txt`**
+
+- [ ] Publish `/llms.txt` — a Markdown summary of the business for language models: what Edventures does, services with real prices, service area, contact details, and links to the key pages
+- [ ] Generate it **from the content collections at build time**, so prices can never drift from the site
+- [ ] Keep it short and factual. It's a briefing document, not marketing copy.
+- [ ] Optionally publish `/llms-full.txt` with the full page text concatenated
+- [ ] Serve as `text/plain; charset=utf-8`
+
+> `llms.txt` is a community convention, not a standard, and support is uneven. It costs ~20 lines of build script and can't hurt — but don't treat it as the main mechanism. Clean semantic HTML is what actually gets read today.
+
+**2.7.2 — Make the real pages machine-legible**
+
+- [ ] Prices, hours, and service area must exist as **text in the HTML** — never in an image, never assembled by JavaScript. (Phase 0.5 already fixed this; the rule is: don't regress it.)
+- [ ] Semantic landmarks: `<main>`, `<nav>`, `<article>`, `<address>` for contact details
+- [ ] Question-shaped headings on `/contact` — *"Do you administer medication?"*, *"What areas do you serve?"* — models extract answers far more reliably from an explicit Q&A structure
+- [ ] Keep the structured data from 2.6.3 accurate; it's the highest-confidence source a model has
+- [ ] State constraints explicitly rather than implying them — the insulin exclusion, the 24-hour last-minute threshold, the `+$15` holiday surcharge. An assistant that confidently invents a policy creates a real customer conversation Edward has to walk back.
+
+**2.7.3 — Crawler policy (a decision, not a default)**
+
+- [ ] Decide whether to allow AI crawlers in `robots.txt`: `GPTBot`, `ClaudeBot`, `PerplexityBot`, `Google-Extended`, `CCBot`
+- [ ] **Recommendation: allow them.** A pet-sitting business wants to be discoverable, and there's no proprietary content to protect. The trade-off that makes publishers block these does not apply here.
+- [ ] Note the distinction: `Google-Extended` controls *training* use, not Search indexing — blocking it does not remove the site from Google
+- [ ] Confirm the decision with Edward; it's his business, and it's a one-line reversal either way
+
+**2.7.4 — Verify**
+
+- [ ] Ask a few assistants *"who walks dogs in Rittenhouse, Philadelphia?"* after launch and see whether the site surfaces
+- [ ] Paste the live URL into an assistant and ask it to state the prices and service area — **wrong answers here are a content bug, not an AI quirk**
+- [ ] Re-check after any price change
+
+### 2.8 — Launch
 
 - [ ] Final content review with Edward
 - [ ] Deploy to the real domain
@@ -467,20 +596,17 @@ Scoped only so earlier phases don't paint you into a corner. This is a real appl
 ### Before launch (end of Phase 2)
 
 - [ ] Favicon + Apple touch icon
-- [ ] Open Graph tags + share image — the flyer works well; links get texted and posted to Facebook constantly
-- [ ] `sitemap.xml`
-- [ ] `robots.txt`
-- [ ] Unique meta description per page
-- [ ] LocalBusiness structured data (`schema.org`) with service area and hours
+- [ ] **SEO — see 2.6.** Sitemap, robots, canonicals, per-page meta, structured data, and Open Graph now live there in full rather than as a checklist afterthought.
+- [ ] **AI readiness — see 2.7.**
 - [ ] Privacy policy — the booking form collects home addresses and phone numbers, so this isn't optional
 - [ ] Terms / service agreement + cancellation policy, linked from the form
 - [ ] Test on a real iPhone and a real Android, not a resized desktop browser
 
 ### After launch
 
-- [ ] **Google Business Profile.** For a local service business this drives more traffic than the website itself — the highest-leverage single post-launch task.
-- [ ] Link the site from the IG and FB bios
-- [ ] Submit the sitemap to Google Search Console
+- [ ] **Google Business Profile.** For a local service business this drives more traffic than the website itself — the highest-leverage single post-launch task. Full steps in 2.6.5.
+- [ ] Remaining off-site listings and measurement — 2.6.5 and 2.6.6
+- [ ] Verify how assistants answer questions about the business — 2.7.4
 - [ ] Uptime monitoring on the homepage and the form endpoint
 - [ ] Analytics — track book-page visits and form completion rate
 
@@ -513,3 +639,5 @@ Scoped only so earlier phases don't paint you into a corner. This is a real appl
 | Published prices go stale | Single source-of-truth content file from Phase 0.5; CMS at Phase 5 |
 | Double-booking | Deferred entirely by the Phase 3 design — Edward is the source of truth until Phase 6 |
 | Logo looks soft on retina | Get the SVG in Phase 0.4, before design work depends on it |
+| Structured data / `llms.txt` drifts from the real prices, so search results and AI answers quote a stale number | Generate both from the content collections at build time (2.6.3, 2.7.1) — never hand-write them |
+| Site ranks for nothing and the project reads as a failure | Google Business Profile (2.6.5) produces calls in days; a new domain takes 1–3 months regardless. Do the off-site work first. |
