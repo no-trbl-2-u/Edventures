@@ -69,6 +69,29 @@ const photos = defineCollection({
   }),
 });
 
+/**
+ * Real client testimonials. Names are published with permission (Roadmap 0.6 /
+ * go-back-to-ed.md D1).
+ *
+ * `quote` is the client's own wording and should stay that way -- tidying a
+ * customer's voice into marketing copy is how testimonials stop sounding like
+ * people. Only outright misspellings get corrected, and only at the source.
+ */
+const testimonials = defineCollection({
+  loader: file("src/content/testimonials.json"),
+  schema: z.object({
+    id: z.string(),
+    quote: z.string(),
+    name: z.string(),
+    petName: z.string(),
+    /** Breed as the owner describes it, not as we'd guess from a photo. */
+    petType: z.string(),
+    /** Neighborhood, once Edward confirms it's OK to publish. */
+    neighborhood: z.string().optional(),
+    order: z.number().int(),
+  }),
+});
+
 const pages = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./src/content/pages" }),
   schema: z.object({
@@ -77,4 +100,4 @@ const pages = defineCollection({
   }),
 });
 
-export const collections = { services, addons, fees, photos, pages };
+export const collections = { services, addons, fees, photos, testimonials, pages };
