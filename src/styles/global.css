@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------
+   Edventures Pet Sitting - brand tokens
+   Sampled directly from starting-assets/Flyer.png and LOGO.png.
+   See design.prompt.md for the full rationale.
+   --------------------------------------------------------------- */
+
+@theme {
+  /* Palette */
+  --color-brand-green: #163e1f;
+  --color-brand-green-muted: #353f23;
+  --color-brand-cream: #f6ede5;
+  --color-brand-card: #fbf7f2;
+  --color-brand-brown: #4e3216;
+  --color-brand-ink: #1a1a18;
+
+  /* Typography
+     Display serif is set in letterspaced small caps throughout the
+     brand material - that treatment is a signature, not decoration. */
+  --font-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Base */
+
+body {
+  background-color: var(--color-brand-cream);
+  color: var(--color-brand-ink);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+/* The brand's heading treatment: display serif, letterspaced small caps. */
+.heading-brand {
+  font-family: var(--font-display);
+  font-variant-caps: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--color-brand-green);
+}
+
+/* Visible focus states on every interactive element (Phase 2.4). */
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--color-brand-green);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
