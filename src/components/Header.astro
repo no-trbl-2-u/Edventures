@@ -85,33 +85,37 @@ const isCurrent = (href: string) => path === href || path === `${href}/`;
   }
 
   /* Brand lockup: the mark supplies the "E", the text supplies the rest.
-     Baseline alignment is what makes the join read as one word.
+     `align-items: baseline` on `.brand` is what keeps them lined up -- for a
+     block-level replaced element like this image, its baseline is its own
+     bottom edge, so the mark's bottom edge always sits on the text baseline
+     no matter how tall the mark is. That's what "still lined up" means here:
+     shared baseline, not matched height.
 
-     `--brand-cap` sizes the mark image to the text's CAP HEIGHT rather than
-     its font-size -- but "the text's cap height" and "the mark image's own
-     height" are not the same ratio, and conflating them is what actually
-     made the E read as misaligned/undersized here.
+     `--brand-cap` sizes the mark to the text's CAP HEIGHT rather than its
+     font-size -- but "the text's cap height" and "the mark image's own
+     height" are not the same ratio, and conflating them is what previously
+     made the E read as undersized (see git history for the full measurement
+     if this needs revisiting).
 
      `mark-initial.png` isn't a bare E glyph. It's an E with a dog composited
      on top of it and a cat reaching up beside it (the standalone brand mark,
      also used for the favicon) -- the green E itself only occupies the
      bottom ~66.7% of the file's height (rows 162-491 of 493 px; the dog eats
-     the top third). Scaling the WHOLE image to 0.641 * the text's em -- the
-     ratio for a bare capital letter -- scales the visible E down to roughly
-     0.641 * 0.667 =~ 43% of cap height, and the dog above it. Hence: small,
-     low-looking E crowded under a tiny dog, not a clean stand-in for the
-     letter.
+     the top third). `--brand-cap: 0.960` (0.641 / 0.667) is the ratio that
+     puts the E-shaped portion of the image at the text's true cap height --
+     i.e. the point where mark and text would read as the same size.
 
-     `--brand-cap` is corrected here to 0.641 / 0.667 =~ 0.960 so that the
-     E-shaped PORTION of the scaled image lands at true cap height; the dog
-     rides above it, into the ascender zone, same as it would sitting over a
-     real capital E. If this image is ever re-cropped or replaced (Roadmap
-     0.4 wants the real SVG from Edward's designer), re-measure that
-     fraction rather than reusing 0.960 blind -- it's specific to this
-     file's crop, not a font metric. */
+     `--brand-mark-boost` is a deliberate art-direction choice on top of
+     that: the mark is meant to dominate, with the wordmark playing a
+     smaller supporting role beside it, so the mark is scaled up past cap
+     height (dog rides higher into the ascender zone) while `--brand-size`
+     (the text) is scaled down from where it was. Baseline alignment holds
+     regardless of this ratio -- it only changes how much the mark
+     overshoots the text vertically, not whether they're lined up. */
   .brand {
-    --brand-size: clamp(27px, 3.4vw, 34px);
+    --brand-size: clamp(21px, 2.7vw, 26px);
     --brand-cap: 0.960;
+    --brand-mark-boost: 1.55;
     display: flex;
     align-items: baseline;
     gap: 0;
@@ -121,10 +125,10 @@ const isCurrent = (href: string) => path === href || path === `${href}/`;
     text-decoration: none;
   }
   .brand-mark {
-    height: calc(var(--brand-size) * var(--brand-cap));
+    height: calc(var(--brand-size) * var(--brand-cap) * var(--brand-mark-boost));
     width: auto;
     display: block;
-    margin-right: 1px;
+    margin-right: 3px;
   }
   .brand-text {
     display: flex;
