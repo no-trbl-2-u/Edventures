@@ -355,6 +355,13 @@ const endpoint = import.meta.env.PUBLIC_BOOKING_ENDPOINT ?? "/api/booking";
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Without this, a real finger tap that has any perceptible movement --
+       which a scripted tap doesn't, but a human tap always does -- can be
+       read by the browser as the start of a scroll and cancelled instead of
+       registering as a click. The day cells sit in a dense 7-column grid
+       with only 2px between them, on an otherwise scrollable page, which is
+       exactly the layout where that ambiguity bites hardest. */
+    touch-action: manipulation;
   }
   .cal-day:hover:not(:disabled):not(.is-in-range) {
     background: rgb(22 62 31 / 0.08);
@@ -414,6 +421,7 @@ const endpoint = import.meta.env.PUBLIC_BOOKING_ENDPOINT ?? "/api/booking";
     padding: 11px 18px;
     cursor: pointer;
     min-height: 44px;
+    touch-action: manipulation;
     white-space: nowrap;
   }
   .cal-chip-active {

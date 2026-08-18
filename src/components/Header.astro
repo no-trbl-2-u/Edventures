@@ -87,19 +87,31 @@ const isCurrent = (href: string) => path === href || path === `${href}/`;
   /* Brand lockup: the mark supplies the "E", the text supplies the rest.
      Baseline alignment is what makes the join read as one word.
 
-     Two things have to hold for that, and both are easy to break:
+     `--brand-cap` sizes the mark image to the text's CAP HEIGHT rather than
+     its font-size -- but "the text's cap height" and "the mark image's own
+     height" are not the same ratio, and conflating them is what actually
+     made the E read as misaligned/undersized here.
 
-     1. The mark is sized to the text's CAP HEIGHT, not to its font-size. A
-        capital letter fills about 64% of its em in Cormorant Garamond, so a
-        34px-tall E next to 34px text is half again too big and hangs below
-        the line. `--brand-cap` is that ratio, measured from the font.
-     2. Nothing may set `align-self` on the mark. It previously said `center`,
-        which silently opted the image out of the baseline alignment above and
-        centred it against the whole two-line block instead -- dropping the E
-        15px below the baseline of the word it is supposed to begin. */
+     `mark-initial.png` isn't a bare E glyph. It's an E with a dog composited
+     on top of it and a cat reaching up beside it (the standalone brand mark,
+     also used for the favicon) -- the green E itself only occupies the
+     bottom ~66.7% of the file's height (rows 162-491 of 493 px; the dog eats
+     the top third). Scaling the WHOLE image to 0.641 * the text's em -- the
+     ratio for a bare capital letter -- scales the visible E down to roughly
+     0.641 * 0.667 =~ 43% of cap height, and the dog above it. Hence: small,
+     low-looking E crowded under a tiny dog, not a clean stand-in for the
+     letter.
+
+     `--brand-cap` is corrected here to 0.641 / 0.667 =~ 0.960 so that the
+     E-shaped PORTION of the scaled image lands at true cap height; the dog
+     rides above it, into the ascender zone, same as it would sitting over a
+     real capital E. If this image is ever re-cropped or replaced (Roadmap
+     0.4 wants the real SVG from Edward's designer), re-measure that
+     fraction rather than reusing 0.960 blind -- it's specific to this
+     file's crop, not a font metric. */
   .brand {
     --brand-size: clamp(27px, 3.4vw, 34px);
-    --brand-cap: 0.641;
+    --brand-cap: 0.960;
     display: flex;
     align-items: baseline;
     gap: 0;
@@ -209,11 +221,15 @@ const isCurrent = (href: string) => path === href || path === `${href}/`;
     cursor: pointer;
   }
 
-  .menu-close,
-  .menu[open] .menu-open {
+  /* :global() because Icon.astro renders its own <svg> root, which never
+     picks up this file's data-astro-cid scoping attribute -- without it these
+     rules never match, and the hamburger and the close X render on top of
+     each other at once. Same bug as the FAQ +/- in contact.astro. */
+  :global(.menu-close),
+  .menu[open] :global(.menu-open) {
     display: none;
   }
-  .menu[open] .menu-close {
+  .menu[open] :global(.menu-close) {
     display: block;
   }
 

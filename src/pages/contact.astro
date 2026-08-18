@@ -299,15 +299,20 @@ const structuredData = [
     color: var(--color-brand-green);
     min-height: 52px;
   }
-  .faq-plus,
-  .faq-minus {
+  /* :global() because Icon.astro renders its own <svg> root, which never
+     receives this file's data-astro-cid scoping attribute. Without it, these
+     rules silently never match at all -- both icons render, always, at
+     once. That's the "weirdly spaced" plus/minus: two icons side by side
+     with the flex gap between them, not a spacing bug. */
+  :global(.faq-plus),
+  :global(.faq-minus) {
     color: var(--color-brand-brown);
   }
-  .faq-minus,
-  .faq-item[open] .faq-plus {
+  :global(.faq-minus),
+  .faq-item[open] :global(.faq-plus) {
     display: none;
   }
-  .faq-item[open] .faq-minus {
+  .faq-item[open] :global(.faq-minus) {
     display: block;
   }
   .faq-answer {
