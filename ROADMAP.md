@@ -356,10 +356,11 @@ Every indexable page measured at every width below — 35 page-widths, 894 inter
 
 ### 2.5 — Performance pass
 
-- [ ] Lazy-load gallery images below the fold
-- [ ] Preload the hero image
-- [ ] Subset fonts, `font-display: swap`
-- [ ] Lighthouse mobile: target 90+ on all four categories
+- [x] Lazy-load gallery images below the fold — all 15 gallery images lazy; on the home page 12 of 14 are lazy and the 2 eager ones are the only images at or above the fold
+- [x] Preload the hero image — and the hint was on the wrong one. `fetchpriority="high"` sat on the hero *photo*, which measures 930px (mobile) and 962px (desktop) from the top and is therefore below the fold at both, while the lockup — the largest above-the-fold element at 258×300, and so the LCP candidate — got default priority. Swapped. The photo stays `eager`, since it is just past the fold and would otherwise pop in on scroll
+- [x] `font-display: swap` — via `&display=swap` on the Google Fonts request
+- [ ] Subset fonts — still loading Cormorant Garamond (4 weights) and Inter (3) from `fonts.googleapis.com`, which costs two preconnects and a render-blocking third-party stylesheet. Self-hosting a subset would remove all three, but it means vendoring font binaries into the repo, so it wants a decision rather than a quiet commit
+- [ ] Lighthouse mobile: target 90+ on all four categories — needs a real browser run against the live origin; the checks above were computed from the DOM and the built output, which is not the same measurement
 - [ ] Verify on a throttled 3G connection
 
 ### 2.6 — SEO

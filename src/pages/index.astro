@@ -56,7 +56,18 @@ const structuredData = [localBusiness(), ...serviceOffers(catalog)];
           means a screen reader opens on the service and the city rather than on
           a name that means nothing yet. */}
       <h1 class="sr-only">Dog walking, cat visits and overnight pet sitting in {SITE.city}</h1>
-      <Image src={lockup} alt={SITE.name} width={600} densities={[1, 2]} loading="eager" class="hero-lockup" />
+      {/* The masthead is the largest above-the-fold element at every width
+          (258x300 on mobile, 259x300 on desktop) and therefore the LCP
+          candidate, so it is the one that gets the priority hint. */}
+      <Image
+        src={lockup}
+        alt={SITE.name}
+        width={600}
+        densities={[1, 2]}
+        loading="eager"
+        fetchpriority="high"
+        class="hero-lockup"
+      />
       <p class="hero-tagline">{SITE.tagline}</p>
       <PawDivider class="hero-divider" />
       <div class="btn-row hero-actions">
@@ -78,8 +89,12 @@ const structuredData = [localBusiness(), ...serviceOffers(catalog)];
           width={940}
           widths={[600, 940, 1400]}
           sizes="(min-width: 1000px) 940px, 100vw"
+          {/* Eager, because it sits just past the fold and a lazy load
+              would visibly pop in on scroll -- but NOT fetchpriority="high".
+              Measured at 930px (mobile) and 962px (desktop) from the top, it
+              is below the fold at both, and telling the browser to rush an
+              image nobody can see costs the lockup its head start. */}
           loading="eager"
-          fetchpriority="high"
         />
       </div>
     </div>
