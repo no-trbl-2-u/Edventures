@@ -104,7 +104,10 @@ const year = new Date().getFullYear();
     color: rgb(246 237 229 / 0.9);
     text-decoration: none;
     padding: 8px 0;
-    min-height: 40px;
+    /* 44px, not 40 -- the Roadmap 2.3 floor for a touch target. min-width
+       matters too: "Home" is short enough that its text box came to 42px. */
+    min-height: 44px;
+    min-width: 44px;
   }
   .footer-links a:hover {
     color: #fff;

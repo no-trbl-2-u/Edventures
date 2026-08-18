@@ -557,6 +557,9 @@ textarea.field {
   left: 8px;
   top: -60px;
   z-index: 100;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
   background: var(--color-brand-green);
   color: var(--color-brand-cream);
   padding: 12px 18px;

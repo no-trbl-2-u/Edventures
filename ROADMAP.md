@@ -330,21 +330,27 @@ Claude transcribes from the image assets into Markdown, marking anything uncerta
 - [x] `/book` — full booking form, arrived early via the design (Phase 3 below)
 - [x] 404 page
 
-### 2.3 — Responsive pass
+### 2.3 — Responsive pass ✅
 
-- [ ] 375px (iPhone SE — the real floor)
-- [ ] 390px / 430px (modern iPhone)
-- [ ] 768px (tablet)
-- [ ] 1280px+ (desktop)
-- [ ] Verify no horizontal scroll at any width
-- [ ] Verify tap targets are at least 44×44px
+Every indexable page measured at every width below — 35 page-widths, 894 interactive elements.
+
+- [x] 375px (iPhone SE — the real floor)
+- [x] 390px / 430px (modern iPhone)
+- [x] 768px (tablet)
+- [x] 1280px+ (desktop)
+- [x] Verify no horizontal scroll at any width — zero overflow anywhere, on the first pass
+- [x] Verify tap targets are at least 44×44px — five real failures, now fixed: footer nav links (40px tall, and "Home" only 42px wide), both home-page CTA links (33px and 20px), the skip link (43px — one pixel short, and it is the first thing a keyboard user meets), and the contact page social links (32px)
+
+> Measured in a same-origin iframe rather than by eye, which is what made it cheap enough to re-run after every fix.
+>
+> Two traps worth not rediscovering. The mobile menu is a closed `<details>`, so its links measure 14px wide and report six failures that vanish the moment you force it open — the check opens it first. And links inside running prose are exempt from the 44px floor (WCAG 2.5.5), so the check skips `display: inline` rather than padding out text mid-sentence.
 
 ### 2.4 — Accessibility pass
 
-- [ ] Alt text on every image, from `photo-captions.md`
+- [x] Alt text on every image, from `photo-captions.md` — audited: 33 described, 21 decorative with an explicit empty `alt`, 0 missing
 - [ ] Verify color contrast passes AA everywhere
 - [ ] Keyboard-navigate the entire site — every interactive element reachable, visible focus states
-- [ ] Correct heading hierarchy (one `h1` per page, no skipped levels)
+- [x] Correct heading hierarchy (one `h1` per page, no skipped levels) — verified across all 8 built pages, no skips
 - [ ] Test with a screen reader on at least the home and book pages
 - [ ] Respect `prefers-reduced-motion` if any animation is added
 

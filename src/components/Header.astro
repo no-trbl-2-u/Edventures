@@ -151,6 +151,12 @@ const isCurrent = (href: string) => path === href || path === `${href}/`;
     white-space: nowrap;
     text-decoration: none;
     border-radius: 6px;
+    /* The desktop bar is mouse-driven, so 44px is not strictly required here.
+       It costs nothing and keeps one tap-target rule for the whole site
+       rather than an exception that depends on the pointer type. */
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
   }
   .nav-link {
     color: var(--color-brand-ink);
