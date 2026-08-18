@@ -12,8 +12,10 @@ export default defineConfig({
   // Keep in sync with SITE.url in src/lib/site.ts.
   site: 'https://edventures.pet',
 
-  // Static output. Phase 3 adds the Cloudflare adapter for the
-  // booking form's serverless endpoint.
+  // Static output, and it stays that way. The booking endpoint (Phase 3.7)
+  // is a Cloudflare Pages Function in functions/, not an Astro route: the
+  // Cloudflare adapter has dropped Pages support and now targets Workers,
+  // so adopting it would migrate a live apex domain off Pages for one URL.
   output: 'static',
 
   // One URL shape, no redirects.

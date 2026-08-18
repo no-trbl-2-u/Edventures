@@ -534,45 +534,52 @@ Lives in [`src/lib/booking.ts`](src/lib/booking.ts).
 
 - [x] Validated client-side against the 11 served zips
 - [x] **Out-of-area never blocks.** Shows *"Edward may still be able to help — travel fees may apply"* and lets them submit.
-- [ ] Flag out-of-area requests visibly in Edward's email — waits on 3.9
+- [x] Flag out-of-area requests visibly in Edward's email — first line of the notification, and a gentler note on the customer's copy
 
 > Turning away a nearby customer is worse than a slightly awkward email.
 
-> ## ⚠️ The form cannot send yet.
+> ## ⚠️ The form is wired, but cannot send until Resend is configured.
 >
-> 3.1–3.6 and 3.8 are built; **3.7 is not**, so there is no endpoint to POST to. Until `PUBLIC_BOOKING_ENDPOINT` is set, submitting lands on the failure screen, which puts Edward's phone number in front of the customer. That is deliberate — a visible hand-off beats a silent drop — but **`/book` should not be promoted as a working booking form until 3.7, 3.10 and 3.11 are done.**
+> 3.1–3.10 are built and deployed. `/book` posts to a live Pages Function at `/api/booking`, which validates server-side, prices from the catalog, rate-limits by IP and durably logs every submission to KV. **The one missing piece is `RESEND_API_KEY`** — until it is set, the endpoint answers 502 and the customer lands on the failure screen with Edward's phone number. That is deliberate: it refuses rather than accepting a booking nobody will read. See [NEEDS_HUMAN_ATTENTION.md](NEEDS_HUMAN_ATTENTION.md). **`/book` should not be promoted as a working booking form until the key is in and 3.11 is done.**
 
-### 3.7 — Backend
+### 3.7 — Backend ✅
 
-- [ ] Serverless function at `/api/booking`
-- [ ] **Validate server-side.** Never trust the client.
-- [ ] Rate-limit by IP
-- [ ] Send Edward's notification email via Resend
-- [ ] Send the customer a confirmation email restating their request
-- [ ] Return clear success/failure to the form
-- [ ] Handle the failure path in the UI — show the phone number as a fallback if submission fails
+- [x] Serverless function at `/api/booking` — a Cloudflare **Pages Function**, `functions/api/booking.ts`
+- [x] **Validate server-side.** Never trust the client. `src/lib/booking-validate.ts` rebuilds the request field by field rather than trusting the payload, so a crafted 5-minute walk or 15-minute overnight cannot price itself and no invented key reaches an email
+- [x] Rate-limit by IP — fixed window, KV-backed, 3/min · 8/hr · 20/day
+- [x] Send Edward's notification email via Resend — code live; **needs the API key**
+- [x] Send the customer a confirmation email restating their request
+- [x] Return clear success/failure to the form
+- [x] Handle the failure path in the UI — already built in 3.4; the endpoint's 502 drives it
+
+> **Why a Pages Function and not Astro's Cloudflare adapter,** which the config comment above anticipated: the adapter has dropped Cloudflare Pages support and now targets Workers only. Adopting it would mean migrating a live, DNS-verified apex domain off Pages for the sake of one endpoint. `functions/` rides along beside `dist/` instead — the site stays static and the deploy command is unchanged.
+>
+> The logic lives in `src/lib/booking-handler.ts` as a plain `Request -> Response` function with its dependencies injected, so the route file is thin and the whole endpoint is testable with no server, no network and no credentials. 40 tests, `npm test`.
 
 ### 3.8 — Spam protection
 
 - [x] Honeypot field — positioned off-screen rather than `display:none`, which some bots skip
-- [ ] Cloudflare Turnstile — waits on 3.7
-- [x] Minimum time-to-submit check (5s; bots submit instantly)
+- [x] **Both client-side checks re-run on the server**, where they cannot be edited out with devtools. A caught bot gets a 200 and silence rather than an error it could learn from
+- [ ] Cloudflare Turnstile — unblocked now, but needs a widget created under the Cloudflare account for a site key (NEEDS_HUMAN_ATTENTION.md)
+- [x] Minimum time-to-submit check (5s; bots submit instantly). A *future* `startedAt` is ignored rather than punished — that is a skewed clock, not evidence
 - [x] **No image CAPTCHA.** Don't punish real customers.
 
-### 3.9 — Edward's notification email
+### 3.9 — Edward's notification email ✅
 
-- [ ] Scannable on a phone — service, date, time window, customer name, and phone in the **first three lines**. He'll read it while walking a dog.
-- [ ] Full details below the fold
-- [ ] `Reply-To` set to the customer's email so replying just works
-- [ ] Prominent out-of-area flag when applicable
-- [ ] Prominent first-time-client flag (may need a meet-and-greet)
-- [ ] Subject line format: `New booking: [Service] — [Date] — [Customer]`
+- [x] Scannable on a phone — service, date, time window, customer name, and phone in the **first three lines**. He'll read it while walking a dog.
+- [x] Full details below the fold
+- [x] `Reply-To` set to the customer's email so replying just works
+- [x] Prominent out-of-area flag when applicable
+- [ ] Prominent first-time-client flag — **cannot be built yet: the form does not collect one.** Blocked on B4 (does he require a meet-and-greet?), which decides whether it is a flag or a whole separate path
+- [x] Subject line format: `New booking: [Service] — [Date] — [Customer]`
+
+> Sent as plain text *and* HTML. The text part is not a fallback nobody reads: a message with no text alternative scores worse with spam filters, and this project cannot afford to land in spam.
 
 ### 3.10 — Durable logging
 
-- [ ] Write every submission to durable storage (Cloudflare KV, or a Google Sheet via webhook)
-- [ ] Log before attempting the email, so a mail failure still leaves a record
-- [ ] Alert TJ if the email send fails
+- [x] Write every submission to durable storage — Cloudflare KV, namespace `BOOKINGS`, bound in `wrangler.jsonc`
+- [x] Log before attempting the email, so a mail failure still leaves a record. Verified: a booking that 502s on send is still readable from KV afterwards
+- [ ] Alert TJ if the email send fails — currently `console.error`, visible via `wrangler pages deployment tail`. Real alerting needs a channel to alert *to* (NEEDS_HUMAN_ATTENTION.md)
 
 > If an email silently fails, a lost booking is a lost customer. This is cheap insurance.
 
