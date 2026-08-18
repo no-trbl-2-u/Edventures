@@ -7,13 +7,19 @@ import { SERVED_ZIPS, SITE } from "../lib/site";
 const catalog = await getCatalog();
 
 /**
- * The submit endpoint (Roadmap 3.7) does not exist yet -- it needs a serverless
- * function, Resend, and the deliverability work in 3.11. Until PUBLIC_BOOKING_ENDPOINT
- * is set, the form is fully usable but a submit lands on the failure screen,
- * which puts Edward's phone number in front of the customer. That is the honest
- * behaviour: better a visible hand-off than a silent drop.
+ * The submit endpoint, live since Roadmap 3.7: a Pages Function at
+ * /api/booking, same origin, so no CORS and no absolute URL to keep in sync.
+ *
+ * The env var remains an override for pointing a preview build at a different
+ * deployment. It is no longer the on-switch.
+ *
+ * Note that a configured endpoint is not the same as a working one. Until
+ * RESEND_API_KEY is set in Cloudflare (NEEDS_HUMAN_ATTENTION.md), the function
+ * answers 502 and the form lands on the failure screen with Edward's phone
+ * number -- the same honest hand-off as before, except the attempt is now
+ * durably logged to KV instead of vanishing.
  */
-const endpoint = import.meta.env.PUBLIC_BOOKING_ENDPOINT ?? "";
+const endpoint = import.meta.env.PUBLIC_BOOKING_ENDPOINT ?? "/api/booking";
 ---
 
 <Base
@@ -30,15 +36,6 @@ const endpoint = import.meta.env.PUBLIC_BOOKING_ENDPOINT ?? "";
         usually within a few hours.
       </p>
     </header>
-
-    {
-      !endpoint && (
-        <p class="note endpoint-warning">
-          Build note: no booking endpoint is configured, so submissions fall through to the
-          "text Edward" screen. Set PUBLIC_BOOKING_ENDPOINT once Roadmap 3.7 is done.
-        </p>
-      )
-    }
 
     {/* client:load rather than client:visible - the form is the whole page, and
         a visible-triggered hydration flash on the primary conversion path is
@@ -74,14 +71,6 @@ const endpoint = import.meta.env.PUBLIC_BOOKING_ENDPOINT ?? "";
   .booking-lede {
     margin: 12px 0 0;
     font-size: 16.5px;
-  }
-  .endpoint-warning {
-    max-width: 620px;
-    margin: 20px auto 0;
-    text-align: center;
-    border: 1px dashed rgb(78 50 22 / 0.4);
-    border-radius: 10px;
-    padding: 12px;
   }
 
   /* ---- progress ---- */

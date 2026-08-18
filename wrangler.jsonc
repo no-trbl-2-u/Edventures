@@ -1,0 +1,24 @@
+{
+  // Cloudflare Pages configuration.
+  //
+  // The site is static Astro; the only server-side code is the booking
+  // endpoint in functions/api/booking.ts (Roadmap 3.7), which Pages compiles
+  // and serves alongside the built assets.
+  //
+  // Secrets are NOT here. RESEND_API_KEY is set with
+  //   wrangler pages secret put RESEND_API_KEY --project-name edventures
+  // and lives only in Cloudflare. See NEEDS_HUMAN_ATTENTION.md.
+  "name": "edventures",
+  "compatibility_date": "2026-08-17",
+  "pages_build_output_dir": "dist",
+
+  // Durable log of every booking submission (3.10) and the backing store for
+  // per-IP rate limiting. Without it, bookings still send but leave no record
+  // and the rate limiter degrades to per-isolate memory.
+  "kv_namespaces": [
+    {
+      "binding": "BOOKINGS",
+      "id": "69106e068b034688b47badd5d8f1f880"
+    }
+  ]
+}
