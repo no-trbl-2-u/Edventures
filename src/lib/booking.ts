@@ -294,7 +294,10 @@ export function estimate(request: BookingRequest, catalog: Catalog): Estimate {
     const addon = catalog.addons.find((a) => a.id === id);
     if (!addon) continue;
     // A nail trim add-on on top of a stand-alone nail trim is double-charging.
-    if (addon.id === "nail-trim" && service.id === "nail-trim") continue;
+    // The ids differ by design -- the service is `nail-trim`, the add-on is
+    // `nail-trim-addon` -- so this compared the add-on against a service id it
+    // could never equal, and quietly charged $28 for a $20 trim.
+    if (addon.id === "nail-trim-addon" && service.id === "nail-trim") continue;
 
     const free = addon.freeWithOvernight && isOvernight;
     lines.push({
