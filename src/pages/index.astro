@@ -15,6 +15,10 @@ import { SERVED_ZIPS, SITE } from "../lib/site";
 import { localBusiness, serviceOffers } from "../lib/structured-data";
 
 const catalog = await getCatalog();
+const testimonials = (await getCollection("testimonials"))
+  .map((t) => t.data)
+  .sort((a, b) => a.order - b.order);
+
 const photos = (await getCollection("photos")).map((p) => p.data as PhotoData);
 const byId = (id: string) => resolvePhoto(photos.find((p) => p.id === id)!);
 
@@ -131,21 +135,35 @@ const structuredData = [localBusiness(), ...serviceOffers(catalog)];
     <Ribbon class="section-ribbon">Kind Words</Ribbon>
     <div class="auto-grid" style="--min:250px">
       {
-        [
-          "Testimonial 1 — two or three sentences, in the client's own words.",
-          "Testimonial 2 — ideally one that mentions medication, an anxious pet, or a key handover.",
-          "Testimonial 3 — a repeat client is the most persuasive one to place last.",
-        ].map((text) => (
-          <figure class="testimonial">
+        testimonials.map((t) => (
+          <figure class="testimonial is-real">
             <PawDivider size={16} class="testimonial-paw" />
-            <blockquote>{text}</blockquote>
-            <figcaption>First name · Neighborhood</figcaption>
+            <blockquote>{t.quote}</blockquote>
+            <figcaption>
+              <span class="testimonial-name">{t.name}</span>
+              <span class="testimonial-pet">
+                {t.petName}
+                {t.neighborhood ? ` · ${t.neighborhood}` : ""} · {t.petType}
+              </span>
+            </figcaption>
           </figure>
         ))
       }
+
+      {/* One slot left open. Two real quotes read better than two real ones
+          padded out with lorem, but a third is worth asking for -- ideally
+          covering medication or a key handover, which the current two don't. */}
+      <figure class="testimonial">
+        <PawDivider size={16} class="testimonial-paw" />
+        <blockquote>
+          Testimonial 3 — ideally one that mentions medication, an anxious pet, or a key
+          handover. A repeat client is the most persuasive one to place last.
+        </blockquote>
+        <figcaption>First name · Neighborhood</figcaption>
+      </figure>
     </div>
     <p class="note testimonial-note">
-      Placeholder slots — swap in real quotes with permission (go-back-to-ed.md, D1).
+      Two real quotes, published with permission. One slot open (go-back-to-ed.md, D1).
     </p>
   </section>
 
@@ -358,6 +376,13 @@ const structuredData = [localBusiness(), ...serviceOffers(catalog)];
   .testimonial-paw::after {
     display: none;
   }
+  /* Real quotes get a solid border and full-strength ink; the remaining
+     placeholder keeps the dashed outline and greyed text, so an unfilled slot
+     can never be mistaken for a shy customer. */
+  .testimonial.is-real {
+    border-style: solid;
+    border-color: var(--color-brand-rule);
+  }
   .testimonial blockquote {
     margin: 0;
     font-family: var(--font-display);
@@ -366,12 +391,26 @@ const structuredData = [localBusiness(), ...serviceOffers(catalog)];
     color: rgb(26 26 24 / 0.42);
     line-height: 1.45;
   }
+  .testimonial.is-real blockquote {
+    color: var(--color-brand-ink);
+  }
   .testimonial figcaption {
     margin-top: auto;
     font: 500 11.5px ui-monospace, Menlo, monospace;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: rgb(78 50 22 / 0.65);
+  }
+  .testimonial-name {
+    display: block;
+    font-weight: 600;
+    color: var(--color-brand-green);
+  }
+  .testimonial-pet {
+    display: block;
+    margin-top: 3px;
+    text-transform: none;
+    letter-spacing: 0.04em;
   }
   .testimonial-note {
     margin: 16px 0 0;

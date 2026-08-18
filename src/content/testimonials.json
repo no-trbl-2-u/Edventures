@@ -1,0 +1,18 @@
+[
+  {
+    "id": "anthony-allen",
+    "quote": "Edward is just incredible! I live a very busy life, but I also have a big 'ol boxer that I love dearly. Edward is always there for me whenever I need him and Auggie absolutely loves him.",
+    "name": "Anthony Allen",
+    "petName": "Auggie",
+    "petType": "Boxer",
+    "order": 1
+  },
+  {
+    "id": "dana-ditullio",
+    "quote": "Edward is above and beyond with my guy! I've got a highly active corso and there's nobody I trust more to watch over him when I am away. Xenon is always so excited to see him and the communication during his stays is consistent.",
+    "name": "Dana DiTullio",
+    "petName": "Xenon",
+    "petType": "Cane Corso",
+    "order": 2
+  }
+]
