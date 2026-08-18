@@ -30,18 +30,32 @@ const teaser = [byId("proud-cat-dad"), byId("my-son-harry-and-i"), byId("playing
 
 const medication = catalog.addons.find((a) => a.id === "medication")!;
 
+/**
+ * The brand supplies "Pet Sitting" through the title suffix Base appends, so
+ * the prefix spends its characters on the other half of the offer and on the
+ * city. "Edventures Pet Sitting" alone told a searcher nothing they had not
+ * already typed. Lands at 52 characters, inside the ~60 that survive in a
+ * result page (Roadmap 2.6.1).
+ */
+const title = `Dog Walking in ${SITE.city}`;
+
 const structuredData = [localBusiness(), ...serviceOffers(catalog)];
 ---
 
 <Base
-  title={SITE.name}
+  title={title}
   description={`Independent dog walking, cat visits and overnight pet sitting in ${SITE.city}. ${SITE.yearsExperience} years' experience, CPR and First-Aid certified. Book directly with Edward.`}
   structuredData={structuredData}
 >
   {/* ---------------- Hero: letterhead ---------------- */}
   <section class="hero">
     <div class="hero-inner">
-      <h1 class="sr-only">{SITE.name} — {SITE.tagline}</h1>
+      {/* The visible masthead is the lockup image, which carries the brand in its
+          alt text. The h1 therefore states what the business actually does --
+          Roadmap 2.6.1 wants the page subject here, not the logo -- which also
+          means a screen reader opens on the service and the city rather than on
+          a name that means nothing yet. */}
+      <h1 class="sr-only">Dog walking, cat visits and overnight pet sitting in {SITE.city}</h1>
       <Image src={lockup} alt={SITE.name} width={600} densities={[1, 2]} loading="eager" class="hero-lockup" />
       <p class="hero-tagline">{SITE.tagline}</p>
       <PawDivider class="hero-divider" />

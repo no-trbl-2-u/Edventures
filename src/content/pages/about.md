@@ -1,6 +1,6 @@
 ---
 title: About Edward
-description: Fifteen years caring for pets in Philadelphia. CPR and First-Aid certified, background-checked through Rover.
+description: Fifteen years looking after Philadelphia dogs and cats. Edward is CPR and First-Aid certified, background-checked, and books with you directly, no app involved.
 ---
 
 Hi! I'm Edward, the owner and founder of **Edventures Pet Sitting**.
