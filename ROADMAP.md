@@ -348,11 +348,11 @@ Every indexable page measured at every width below — 35 page-widths, 894 inter
 ### 2.4 — Accessibility pass
 
 - [x] Alt text on every image, from `photo-captions.md` — audited: 33 described, 21 decorative with an explicit empty `alt`, 0 missing
-- [ ] Verify color contrast passes AA everywhere
-- [ ] Keyboard-navigate the entire site — every interactive element reachable, visible focus states
+- [x] Verify color contrast passes AA everywhere — every text node on all 7 pages, computed against its real composited background. Three failures, all in the testimonial block: the attribution line sat at 3.87:1 and the open-slot placeholder at 2.59:1. Both raised past 4.5:1 while staying visually secondary — muted is not the same as illegible, and the dashed border already marks the slot
+- [x] Keyboard-navigate the entire site — every interactive element reachable, visible focus states. 166 interactive elements; the global `:focus-visible` rule gives a 2px green outline at 12.05:1 on white and 10.42:1 on cream, well past the 3:1 that non-text contrast needs
 - [x] Correct heading hierarchy (one `h1` per page, no skipped levels) — verified across all 8 built pages, no skips
-- [ ] Test with a screen reader on at least the home and book pages
-- [ ] Respect `prefers-reduced-motion` if any animation is added
+- [ ] Test with a screen reader on at least the home and book pages — the one item here a script cannot stand in for. Semantics are verified (one h1 per page, no skipped levels, landmarks present, decorative images correctly empty-alt), but that is not the same as listening to it
+- [x] Respect `prefers-reduced-motion` if any animation is added — the blanket CSS rule covers every transition, and the booking form's step-change scroll now reads the preference in JS. That one needed fixing separately: `scroll-behavior: auto !important` only governs CSS-initiated scrolling, so a JS `behavior: "smooth"` was overriding it and animating anyway
 
 ### 2.5 — Performance pass
 

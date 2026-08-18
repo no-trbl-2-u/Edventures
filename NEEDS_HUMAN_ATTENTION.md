@@ -166,3 +166,28 @@ have been open a while. Full context in [go-back-to-ed.md](go-back-to-ed.md).
   Related: the form does not currently collect a first-time-client flag at all,
   so Roadmap 3.9's "prominent first-time-client flag" in Edward's email cannot
   be built until it does.
+
+---
+
+## 🟢 6. The third testimonial slot is a visible placeholder on the live site
+
+The home page currently shows a dashed third card reading *"Testimonial 3 —
+ideally one that mentions medication, an anxious pet, or a key handover. A
+repeat client is the most persuasive one to place last."*, with a note beneath
+saying one slot is open.
+
+That is a deliberate choice, and there is a real argument for it — an obviously
+empty slot is more honest than padding. But it is **internal editorial
+direction addressed to Edward, rendered to customers**, and a prospective
+client reading it learns that the business has two reviews and wants a third.
+
+I did not remove it, because which way that goes is an editorial call rather
+than a bug. I did raise its contrast to pass AA (it was at 2.59:1, and WCAG
+does not exempt text for being a placeholder), which has made it slightly more
+prominent than before — an argument for deciding this sooner rather than later.
+
+Three options, cheapest first: drop the third card and let two quotes sit as
+two; keep the slot but replace the copy with something customer-facing
+(*"Your pet could be next"*); or get the third quote and close it (D1 in
+[go-back-to-ed.md](go-back-to-ed.md)). Tell me which and it is a two-minute
+change.

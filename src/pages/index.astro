@@ -404,7 +404,10 @@ const structuredData = [localBusiness(), ...serviceOffers(catalog)];
     font-family: var(--font-display);
     font-size: 19px;
     font-style: italic;
-    color: rgb(26 26 24 / 0.42);
+    /* 0.62, not 0.42: the placeholder still has to clear AA (4.5:1 on cream)
+       even though it is deliberately secondary. Muted is not the same as
+       illegible, and the dashed border already does the signalling. */
+    color: rgb(26 26 24 / 0.62);
     line-height: 1.45;
   }
   .testimonial.is-real blockquote {
@@ -415,7 +418,10 @@ const structuredData = [localBusiness(), ...serviceOffers(catalog)];
     font: 500 11.5px ui-monospace, Menlo, monospace;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: rgb(78 50 22 / 0.65);
+    /* 0.71 is where brown-on-cream reaches 4.5:1; 0.65 sat at 3.87. At
+       11.5px this is the smallest text on the page, so it is the least
+       forgiving place to be under. */
+    color: rgb(78 50 22 / 0.72);
   }
   .testimonial-name {
     display: block;

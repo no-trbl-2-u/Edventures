@@ -194,7 +194,12 @@ export default function BookingForm({
 
   const goToStep = (n: number) => {
     setStep(n);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    // The global `prefers-reduced-motion` rule in global.css cannot reach this
+    // one: `scroll-behavior: auto !important` governs CSS-initiated scrolling,
+    // while a JS `behavior: "smooth"` sets it per call and wins regardless. So
+    // the preference has to be read here as well.
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
   };
 
   /* ---------------- submit ---------------- */
