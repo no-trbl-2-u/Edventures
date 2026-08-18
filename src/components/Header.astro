@@ -85,8 +85,21 @@ const isCurrent = (href: string) => path === href || path === `${href}/`;
   }
 
   /* Brand lockup: the mark supplies the "E", the text supplies the rest.
-     Baseline alignment is what makes the join read as one word. */
+     Baseline alignment is what makes the join read as one word.
+
+     Two things have to hold for that, and both are easy to break:
+
+     1. The mark is sized to the text's CAP HEIGHT, not to its font-size. A
+        capital letter fills about 64% of its em in Cormorant Garamond, so a
+        34px-tall E next to 34px text is half again too big and hangs below
+        the line. `--brand-cap` is that ratio, measured from the font.
+     2. Nothing may set `align-self` on the mark. It previously said `center`,
+        which silently opted the image out of the baseline alignment above and
+        centred it against the whole two-line block instead -- dropping the E
+        15px below the baseline of the word it is supposed to begin. */
   .brand {
+    --brand-size: clamp(27px, 3.4vw, 34px);
+    --brand-cap: 0.641;
     display: flex;
     align-items: baseline;
     gap: 0;
@@ -96,11 +109,10 @@ const isCurrent = (href: string) => path === href || path === `${href}/`;
     text-decoration: none;
   }
   .brand-mark {
-    height: clamp(27px, 3.4vw, 34px);
+    height: calc(var(--brand-size) * var(--brand-cap));
     width: auto;
     display: block;
     margin-right: 1px;
-    align-self: center;
   }
   .brand-text {
     display: flex;
@@ -109,7 +121,7 @@ const isCurrent = (href: string) => path === href || path === `${href}/`;
   }
   .brand-name {
     font-family: var(--font-display);
-    font-size: clamp(27px, 3.4vw, 34px);
+    font-size: var(--brand-size);
     font-weight: 600;
     letter-spacing: 0.1em;
     color: var(--color-brand-green);
