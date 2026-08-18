@@ -14,7 +14,8 @@
     "astro": "astro",
     "brand": "node scripts/brand-assets.mjs",
     "photos": "node scripts/photos.mjs",
-    "assets": "npm run brand && npm run photos",
+    "og": "node scripts/og-images.mjs",
+    "assets": "npm run brand && npm run photos && npm run og",
     "deploy": "astro build && wrangler pages deploy dist --project-name edventures --branch main"
   },
   "dependencies": {

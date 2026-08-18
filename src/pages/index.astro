@@ -46,6 +46,7 @@ const structuredData = [localBusiness(), ...serviceOffers(catalog)];
   title={title}
   description={`Independent dog walking, cat visits and overnight pet sitting in ${SITE.city}. ${SITE.yearsExperience} years' experience, CPR and First-Aid certified. Book directly with Edward.`}
   structuredData={structuredData}
+  ogImage="/og-home.jpg"
 >
   {/* ---------------- Hero: letterhead ---------------- */}
   <section class="hero">
@@ -83,17 +84,17 @@ const structuredData = [localBusiness(), ...serviceOffers(catalog)];
   <section class="hero-photo-wrap">
     <div class="hero-photo">
       <div class="hero-photo-inner">
+        {/* Eager, because it sits just past the fold and a lazy load would
+            visibly pop in on scroll -- but NOT fetchpriority="high". Measured
+            at 930px (mobile) and 962px (desktop) from the top, it is below
+            the fold at both, and telling the browser to rush an image nobody
+            can see costs the lockup its head start. */}
         <Image
           src={hero.image}
           alt={hero.alt}
           width={940}
           widths={[600, 940, 1400]}
           sizes="(min-width: 1000px) 940px, 100vw"
-          {/* Eager, because it sits just past the fold and a lazy load
-              would visibly pop in on scroll -- but NOT fetchpriority="high".
-              Measured at 930px (mobile) and 962px (desktop) from the top, it
-              is below the fold at both, and telling the browser to rush an
-              image nobody can see costs the lockup its head start. */}
           loading="eager"
         />
       </div>
