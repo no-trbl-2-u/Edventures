@@ -87,7 +87,7 @@ npx astro add react
 - [x] Verify `npm run build` passes and brand tokens compile to utilities
 - [x] Verify `npm run dev` serves 200 at localhost
 - [x] Cloudflare Pages project created (`edventures`)
-- [x] First deploy succeeded — **https://edventures-4ak.pages.dev**
+- [x] Deployed — **https://edventures.pet** (also on `edventures-4ak.pages.dev`)
 - [ ] **Connect the repo for auto-deploy on push to main.** Needs the GitHub OAuth handshake in the Pages dashboard; it can't be done from the CLI. Until then, deploys are manual: `npm run build && npm run deploy`.
 - [ ] Attach `edventures.pet` — see 0.2, blocked on a DNS token scope
 
@@ -102,8 +102,23 @@ npx astro add react
 - [x] `edventures.pet` and `www.edventures.pet` attached to the Pages project
 - [ ] **Point DNS at the host — BLOCKED.** Both hostnames sit at `pending` because the DNS records don't exist. The API token in `.env` has Account→Pages (edit) and Zone→Read, but **not Zone→DNS→Edit**, so the records can't be created from here.
   - Fix either way: add **Zone → DNS → Edit** for `edventures.pet` to the token, *or* click *Custom domains → Set up a domain* in the Pages dashboard, which writes the records for you.
-- [x] `www` → apex 301 shipped as `public/_redirects` — version-controlled and travels with the repo, rather than a zone rule that can drift from a dashboard setting nobody remembers changing
-- [ ] Verify HTTPS resolves on the apex
+- [x] DNS: `CNAME @` and `CNAME www` → `edventures-4ak.pages.dev`, both proxied
+- [x] **HTTPS live on the apex.** Valid cert, `http://` 301s to `https://`, all 7 routes 200, `/nope` 404s
+- [x] Every canonical is self-referential and resolves 200; all 7 sitemap URLs resolve 200
+- [x] `robots.txt` served byte-identical to what we ship — **no Content Signals edge injection**, so the zone isn't contradicting our decision to allow AI crawlers
+- [ ] **`www` → apex 301 — still outstanding.** See below.
+
+> **`public/_redirects` did not work, and has been removed.**
+>
+> I wrote `https://www.edventures.pet/* → https://edventures.pet/:splat 301!` and asserted it handled the redirect. It doesn't. Cloudflare Pages matches `_redirects` rules on the **path only** — a full URL as the *source* never matches, so the rule silently did nothing and `www` served a 200. The destination may be absolute; the source may not.
+>
+> Leaving dead config in the repo is worse than having none, because the next person reads the file and believes it.
+>
+> **The fix needs a zone Redirect Rule**, which the API token can't create (`rulesets` is readable but not writable). Dashboard: `edventures.pet` → **Rules** → **Redirect Rules** → *Create rule*:
+> - **If** `Hostname` `equals` `www.edventures.pet`
+> - **Then** Dynamic redirect → `concat("https://edventures.pet", http.request.uri.path)`, status **301**, preserve query string
+>
+> **Severity: low, not blocking.** `www` currently serves the site with a canonical pointing at the apex, so search engines will consolidate on the apex anyway. The 301 is the correct fix, not an urgent one.
 
 > **URL shape is settled and should not change now.** The site serves `/about`, not `/about/` — no trailing slash, no redirect, canonical and sitemap in agreement. This was fixed *before* DNS went live deliberately: once the domain is public, changing URL shape means carrying redirects forever.
 
