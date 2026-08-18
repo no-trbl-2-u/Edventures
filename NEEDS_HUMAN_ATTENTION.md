@@ -191,3 +191,20 @@ two; keep the slot but replace the copy with something customer-facing
 (*"Your pet could be next"*); or get the third quote and close it (D1 in
 [go-back-to-ed.md](go-back-to-ed.md)). Tell me which and it is a two-minute
 change.
+
+---
+
+## 🟢 7. Two SEO checks that only work against the live site
+
+Left over from the PR that added per-page OG images and `/llms-full.txt`
+(Roadmap 2.6.3/2.6.4). Both are quick, need no decision, and just need
+someone to actually do them once the change is deployed:
+
+- **Paste the live URL into Facebook Messenger and iMessage** and confirm the
+  new `/og-home.jpg` and `/og-gallery.jpg` previews render correctly (Roadmap
+  2.6.4). Can't be checked from a local build — these previews are fetched by
+  Facebook's and Apple's own crawlers against the public URL.
+- **Run every page through Google's Rich Results Test** (Roadmap 2.6.3) to
+  confirm the `LocalBusiness`, `Service`, `FAQPage` and `BreadcrumbList`
+  JSON-LD all validate. Same reason — it's a hosted tool that fetches the live
+  page, not something a local build can substitute for.

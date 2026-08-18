@@ -391,23 +391,23 @@ Every indexable page measured at every width below — 35 page-widths, 894 inter
 
 **2.6.3 — Structured data**
 
-- [ ] `LocalBusiness` JSON-LD on the homepage — ideally the `ProfessionalService` subtype
-  - [ ] `name`, `telephone`, `email`, `url`, `image`, `logo`
-  - [ ] `areaServed` as the 11 postal codes
-  - [ ] `sameAs` → Instagram and Facebook URLs
+- [x] `LocalBusiness` JSON-LD on the homepage — `ProfessionalService`, built by `localBusiness()` in `src/lib/structured-data.ts`
+  - [x] `name`, `telephone`, `email`, `url`, `image`, `logo`
+  - [x] `areaServed` as the 11 postal codes
+  - [x] `sameAs` → Instagram and Facebook URLs
   - [ ] `openingHoursSpecification` — **blocked on C1** (Edward's real hours)
-  - [ ] `priceRange` (e.g. `$$`)
-- [ ] `Service` schema per offering, with `offers` carrying the real prices from `services.json`
-- [ ] `FAQPage` schema on `/contact` once the FAQ is written
-- [ ] `BreadcrumbList` on interior pages
-- [ ] Generate all JSON-LD **from the content collections**, never hand-written — otherwise the markup and the visible prices drift apart, which is both an SEO penalty and a customer-facing lie
-- [ ] Validate every page in Google's Rich Results Test
+  - [x] `priceRange` (e.g. `$$`)
+- [x] `Service` schema per offering, with `offers` carrying the real prices from `services.json` — `serviceOffers()`, wired on `/` and `/services`
+- [x] `FAQPage` schema on `/contact` — `faqPage()` excludes placeholder answers so nothing invented reaches structured data
+- [x] `BreadcrumbList` on interior pages — `/about`, `/contact`, `/gallery`, `/service-area`, `/services`, `/book`. Deliberately absent on `/` (it's the root) and `/404` (unlinked, not indexable)
+- [x] Generate all JSON-LD **from the content collections**, never hand-written — every builder in `structured-data.ts` reads from `getCatalog()` / `SITE` / `SERVICE_AREA`
+- [ ] Validate every page in Google's Rich Results Test — needs a live URL, can't be run against a local build
 
 **2.6.4 — Social / sharing**
 
-- [ ] Open Graph tags: `og:title`, `og:description`, `og:image` (1200×630), `og:url`, `og:type`
-- [ ] `twitter:card` = `summary_large_image`
-- [ ] Per-page OG images where it's cheap — the hero photo for `/`, a pet photo for `/gallery`
+- [x] Open Graph tags: `og:title`, `og:description`, `og:image` (1200×630), `og:url`, `og:type` — set once in `Base.astro`
+- [x] `twitter:card` = `summary_large_image`
+- [x] Per-page OG images where it's cheap — `/` gets a cropped hero photo, `/gallery` gets a cropped gallery photo. `scripts/og-images.mjs` derives both from `src/assets/photos/`, so they can't drift from the actual gallery curation. Everything else still gets `og-default.png` (the lockup on cream)
 - [ ] Test a real paste into Facebook Messenger and iMessage. Links to this site will overwhelmingly be *texted*, and a broken preview costs more here than a ranking position.
 
 **2.6.5 — Off-site (highest leverage, lowest effort)**
@@ -439,18 +439,18 @@ Every indexable page measured at every width below — 35 page-widths, 894 inter
 - [x] Short and factual — a briefing document, not marketing copy
 - [x] Includes a "Not yet published" section naming the policies that don't exist yet, with an explicit *do not infer them*. An assistant inventing a cancellation policy is a customer conversation Edward has to walk back.
 - [x] States the negatives too: no insulin, not insured. Constraints are what get invented otherwise.
-- [ ] Optionally publish `/llms-full.txt` with the full page text concatenated
+- [x] Publish `/llms-full.txt` with the full page text concatenated — bio, answered FAQ, testimonials and gallery captions, all pulled from the same content collections rather than retyped
 - [x] Served as `text/plain; charset=utf-8`
 
 > `llms.txt` is a community convention, not a standard, and support is uneven. It costs ~20 lines of build script and can't hurt — but don't treat it as the main mechanism. Clean semantic HTML is what actually gets read today.
 
 **2.7.2 — Make the real pages machine-legible**
 
-- [ ] Prices, hours, and service area must exist as **text in the HTML** — never in an image, never assembled by JavaScript. (Phase 0.5 already fixed this; the rule is: don't regress it.)
-- [ ] Semantic landmarks: `<main>`, `<nav>`, `<article>`, `<address>` for contact details
-- [ ] Question-shaped headings on `/contact` — *"Do you administer medication?"*, *"What areas do you serve?"* — models extract answers far more reliably from an explicit Q&A structure
-- [ ] Keep the structured data from 2.6.3 accurate; it's the highest-confidence source a model has
-- [ ] State constraints explicitly rather than implying them — the insulin exclusion, the 24-hour last-minute threshold, the `+$15` holiday surcharge. An assistant that confidently invents a policy creates a real customer conversation Edward has to walk back.
+- [x] Prices, hours, and service area must exist as **text in the HTML** — never in an image, never assembled by JavaScript. (Phase 0.5 already fixed this; the rule is: don't regress it.) Verified: no price or zip renders from an image or client JS anywhere in `src/pages`
+- [x] Semantic landmarks: `<main>`, `<nav>`, `<article>`, `<address>` for contact details — `<main>` in `Base.astro`, `<nav>` in `Header`/`Footer`/404, `<article>` on the service cards, `<address>` wrapping the contact page's own details
+- [ ] Question-shaped headings on `/contact` — the questions exist and are worded as questions, but they're `<summary>` text inside `<details>`, not `<h3>` elements. Worth revisiting if extraction turns out to want a real heading rather than a disclosure widget
+- [x] Keep the structured data from 2.6.3 accurate; it's the highest-confidence source a model has — see 2.6.3, all generated from the same collections
+- [x] State constraints explicitly rather than implying them — the insulin exclusion, the 24-hour last-minute threshold, the `+$15` holiday surcharge. Stated in the contact FAQ, `llms.txt`, and now `llms-full.txt`
 
 **2.7.3 — Crawler policy (a decision, not a default)**
 
