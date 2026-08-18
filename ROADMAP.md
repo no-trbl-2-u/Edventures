@@ -89,20 +89,34 @@ npx astro add react
 - [x] Cloudflare Pages project created (`edventures`)
 - [x] Deployed — **https://edventures.pet** (also on `edventures-4ak.pages.dev`)
 - [ ] **Connect the repo for auto-deploy on push to main.** Needs the GitHub OAuth handshake in the Pages dashboard; it can't be done from the CLI. Until then, deploys are manual: `npm run build && npm run deploy`.
-- [ ] Attach `edventures.pet` — see 0.2, blocked on a DNS token scope
+- [x] Attached `edventures.pet` and `www` — live, see 0.2
 
 > **Local gotcha — nested worktrees.** The git worktrees live at `.claude/worktrees/…`, *inside* the main repo. Once `tsconfig.json` exists on `main`, a build inside a worktree walks up, finds the parent's `tsconfig.json`, and fails with `Tsconfig not found astro/tsconfigs/strict` if the parent has no `node_modules`. Fix: run `npm install` at the repo root too. A clean CI/Cloudflare checkout is unaffected.
 
-> **Deploy subtasks deferred.** They depend on 0.2 (the domain isn't purchased yet) and creating a Pages project publishes a public URL — worth a deliberate go-ahead rather than a side effect. Credentials are in `.env` in the primary worktree and confirmed git-ignored.
+> **Credentials — what the `.env` token actually does.** `.env` in the primary worktree (git-ignored, confirmed) holds `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, and separate S3-compatible R2 keys.
+>
+> Measured by calling the API, rather than inferred from the token's shape:
+>
+> | Capability | Result |
+> |---|---|
+> | Account → Pages, read + **write** | yes — created the project, ran 5 deploys, attached 3 domains |
+> | Zone → list / read | yes |
+> | Zone → Rulesets **read** | yes |
+> | Zone → **DNS**, read or write | no — 403 |
+> | Zone → Rulesets **write** | no — not authorized |
+>
+> An earlier revision of this note claimed the token was "an R2 object-storage credential, so it carries no Pages or DNS scope regardless." **That was wrong** — the entire deploy was driven with it. Two things misled: it is 53 characters rather than the familiar 40, and `GET /user/tokens/verify` returns `1000 Invalid API Token`. Neither is evidence of scope — `/user/tokens/verify` is a *user-level* endpoint, so a token with no user scope fails it while working perfectly on the account and zone endpoints it does hold.
+>
+> **Probe the endpoints you actually need. Never infer permissions from a token's length, or from one unrelated 403.**
+>
+> Still missing for full CLI control: `Zone · DNS · Edit` and `Zone · Dynamic Redirect · Edit` on `edventures.pet`. DNS was done by hand in the dashboard instead; the www redirect still needs one.
 
 ### 0.2 — Domain
 
-- [x] **Registered: `edventures.pet`** — shorter and more memorable than the `.com` we'd planned, and the TLD does some of the explaining for you.
+- [x] **Registered: `edventures.pet`** — bought through Cloudflare Registrar on 2026-08-17. Shorter and more memorable than the `.com` we'd planned, and the TLD does some of the explaining for you. (`.pet` is on Cloudflare's supported list, registry operator Afilias, so it sells at cost and the zone lands in the account with DNS ready.)
 - [x] Canonical form is the **apex**, `https://edventures.pet`. Set in `astro.config.mjs` and `SITE.url`; those two must stay in step.
 - [x] `edventures.pet` and `www.edventures.pet` attached to the Pages project
-- [ ] **Point DNS at the host — BLOCKED.** Both hostnames sit at `pending` because the DNS records don't exist. The API token in `.env` has Account→Pages (edit) and Zone→Read, but **not Zone→DNS→Edit**, so the records can't be created from here.
-  - Fix either way: add **Zone → DNS → Edit** for `edventures.pet` to the token, *or* click *Custom domains → Set up a domain* in the Pages dashboard, which writes the records for you.
-- [x] DNS: `CNAME @` and `CNAME www` → `edventures-4ak.pages.dev`, both proxied
+- [x] DNS: `CNAME @` and `CNAME www` → `edventures-4ak.pages.dev`, both proxied. Added by hand in the dashboard — the token has no DNS scope, so this step could not be automated.
 - [x] **HTTPS live on the apex.** Valid cert, `http://` 301s to `https://`, all 7 routes 200, `/nope` 404s
 - [x] Every canonical is self-referential and resolves 200; all 7 sitemap URLs resolve 200
 - [x] `robots.txt` served byte-identical to what we ship — **no Content Signals edge injection**, so the zone isn't contradicting our decision to allow AI crawlers
@@ -122,9 +136,15 @@ npx astro add react
 
 > **URL shape is settled and should not change now.** The site serves `/about`, not `/about/` — no trailing slash, no redirect, canonical and sitemap in agreement. This was fixed *before* DNS went live deliberately: once the domain is public, changing URL shape means carrying redirects forever.
 
+> **Propagation, for the record.** `edventures.pet` returned `NXDOMAIN` for a while after purchase, which is normal for a fresh registration and briefly looked like a misconfiguration. Once the CNAMEs were added it resolved in seconds, because Cloudflare is the nameserver — the "up to 24 hours" warning in the Pages UI is boilerplate aimed at external DNS providers.
+
 > **The handle no longer matches the domain.** Social is `@edventurespetsitting`; the site is `edventures.pet`. Not a problem, but it makes the NAP work in 2.6.2 matter more, not less — the business *name* is the thing that has to be byte-identical across the site, Google Business Profile, Instagram and Facebook. The domain isn't part of that match.
 >
 > Worth grabbing `edventurespetsitting.com` later as a redirect if it's cheap and free — it's what people will guess from the Instagram handle.
+
+> **Consequence to handle in 2.6.** The domain no longer contains "petsitting" and no longer matches the IG/FB handle `@edventurespetsitting`. Not a ranking problem — exact-match domains stopped mattering years ago — but it does mean the Google Business Profile, the site title, and the `<h1>` have to carry the "pet sitting Philadelphia" keywords the domain used to. Also make sure the handle and the domain appear together everywhere, so the two identities are visibly one business.
+
+*Original recommendation, kept for the record:* `edventurespetsitting.com` (matches the handle); fallbacks `edventurespetsitting.net`, `edventurespets.com`, `edventuresphilly.com`.
 
 ### 0.3 — Brand tokens
 
