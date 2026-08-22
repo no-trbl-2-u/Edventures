@@ -47,11 +47,20 @@ How does he receive, store, and return keys or door codes? **This is one of the 
 ### 🟡 B3. Vet emergency policy
 If something goes wrong: what does he do, who pays, what authorization does he need in advance? The other top anxiety. The booking form should collect the client's vet info and emergency contact, which implies a policy behind it.
 
-### 🟡 B4. Meet-and-greet before first booking?
-Most sitters require one. If he does, the booking form needs a different path for first-time clients — it's a structural change, not a copy change. Worth answering before Phase 3 starts.
+### ✅ B4. Meet-and-greet before first booking? — ANSWERED 2026-08-22
+**Offered, not required.** Built accordingly: the booking form's final step has a
+first-time-client checkbox, Edward's email leads with a `FIRST-TIME CLIENT -
+offer a meet-and-greet` flag, the customer's confirmation sets the expectation,
+and the contact-page FAQ now answers this for real (it was a placeholder).
+Still open for Edward: how long a meet-and-greet takes and whether it's free —
+the site deliberately doesn't claim either yet.
 
-### 🟡 B5. Which holidays carry the +$15 surcharge?
-The form can auto-apply it, but only against a concrete date list. "Major holidays" isn't implementable. Need actual dates: Thanksgiving, Christmas Day, Christmas Eve, New Year's Day, July 4th, etc. — and whether it's the day only or a window around it.
+### ✅ B5. Which holidays carry the +$15 surcharge? — ANSWERED 2026-08-22
+**The standard list plus Easter.** Applied in `src/lib/booking.ts` through
+early 2028 (requests can be made 550 days out): New Year's Day, Easter,
+Memorial Day, July 4th, Labor Day, Thanksgiving, Christmas Eve, Christmas Day,
+New Year's Eve. Surcharge applies when any listed date falls inside the booked
+range, day-only (no window around it).
 
 ### 🟡 B6. What is the travel fee for out-of-area clients?
 `Locations served.jpg` says "travel fees may apply" without a number. Options: publish a figure, or keep it quoted case-by-case. Either is fine — but the site should say which, rather than leaving customers guessing.
@@ -161,8 +170,8 @@ Same question, from the overnight card: *"I stay at your place, keep the routine
 ### 🟢 G3. Should the site say "Insured"?
 Currently it does **not** — the trust strip and footer list *15 years · CPR & First-Aid Certified · Background checked* only. The design comp included an "Insured" badge, and the flyer claims it, but this stays off until A3 is resolved. **A published insurance claim that turns out to be wrong is a much bigger problem than a missing badge.** One line to add back once there's a policy number.
 
-### 🟢 G4. Which dates count as holidays?
-Beyond B5 (which holidays carry the fee), the booking form now applies the +$15 automatically, so it needs **actual dates**. There's a standard list in `src/lib/booking.ts` (New Year's, Memorial Day, July 4th, Labor Day, Thanksgiving, Christmas Eve/Day, New Year's Eve) — he just needs to strike out any he doesn't charge for and add any he does.
+### ✅ G4. Which dates count as holidays? — ANSWERED 2026-08-22 with B5
+The standard list plus Easter, applied through early 2028 in `src/lib/booking.ts`. See B5 above.
 
 ### 🟢 G5. Is he happy for AI assistants to read the site?
 `robots.txt` currently **allows** GPTBot, ClaudeBot, PerplexityBot and friends, and the site publishes an `llms.txt` summary. Reasoning: he wants to be findable, and there's no proprietary content to protect — being the answer when someone asks an assistant *"who walks dogs in Rittenhouse?"* is worth more than withholding six pages of public copy. It's his call and a one-line reversal.

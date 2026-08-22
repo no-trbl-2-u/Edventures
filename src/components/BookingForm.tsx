@@ -29,6 +29,7 @@ import {
   type Catalog,
   type Species,
 } from "../lib/booking";
+import { validateBooking, type FieldError } from "../lib/booking-validate";
 
 interface Props {
   catalog: Catalog;
@@ -59,6 +60,8 @@ export default function BookingForm({
   const [status, setStatus] = useState<Status>("form");
   const [restored, setRestored] = useState(false);
   const [honeypot, setHoneypot] = useState("");
+  /** Field-level problems, from the shared validator or the server's 422. */
+  const [errors, setErrors] = useState<FieldError[]>([]);
   const startedAt = useRef(Date.now());
   /** True when the medication add-on was pre-selected by choosing Overnight,
    *  rather than ticked by the customer. */
@@ -130,14 +133,61 @@ export default function BookingForm({
     setBooking((b) => ({ ...b, ...patch }));
   }, []);
 
-  const setSelection = (patch: Partial<BookingRequest["selection"]>) =>
+  /** Editing a field settles its complaint; it comes back only if it's still
+   *  wrong on the next submit. */
+  const clearErrorsFor = (group: string, patch: object) =>
+    setErrors((errs) =>
+      errs.length
+        ? errs.filter((e) => !Object.keys(patch).some((k) => e.field === `${group}.${k}`))
+        : errs,
+    );
+
+  const setSelection = (patch: Partial<BookingRequest["selection"]>) => {
+    clearErrorsFor("selection", patch);
     setBooking((b) => ({ ...b, selection: { ...b.selection, ...patch } }));
-  const setSchedule = (patch: Partial<BookingRequest["schedule"]>) =>
+  };
+  const setSchedule = (patch: Partial<BookingRequest["schedule"]>) => {
+    clearErrorsFor("schedule", patch);
     setBooking((b) => ({ ...b, schedule: { ...b.schedule, ...patch } }));
-  const setPet = (patch: Partial<BookingRequest["pet"]>) =>
+  };
+  const setPet = (patch: Partial<BookingRequest["pet"]>) => {
+    clearErrorsFor("pet", patch);
     setBooking((b) => ({ ...b, pet: { ...b.pet, ...patch } }));
-  const setCustomer = (patch: Partial<BookingRequest["customer"]>) =>
+  };
+  const setCustomer = (patch: Partial<BookingRequest["customer"]>) => {
+    clearErrorsFor("customer", patch);
     setBooking((b) => ({ ...b, customer: { ...b.customer, ...patch } }));
+  };
+
+  /** Which step a dotted field path lives on, for routing the customer back. */
+  const stepForField = (field: string): number => {
+    if (field.startsWith("selection.")) return 1;
+    if (field.startsWith("schedule.")) return 2;
+    if (field.startsWith("pet.")) return 3;
+    return 4;
+  };
+
+  const errorFor = (field: string) => errors.find((e) => e.field === field)?.message;
+
+  const showFieldErrors = (errs: FieldError[]) => {
+    setErrors(errs);
+    goToStep(errs.reduce((min, e) => Math.min(min, stepForField(e.field)), 4));
+  };
+
+  /**
+   * "Next" checks the step it is leaving. Problems surface right there, while
+   * the customer is still looking at the fields in question -- not four steps
+   * later at submit. Only this step's complaints are raised: being told on
+   * step 1 that an email is missing would just be nagging about the future.
+   * The progress bar above deliberately stays free navigation.
+   */
+  const tryAdvance = (from: number, to: number) => {
+    const check = validateBooking({ ...booking, startedAt: startedAt.current }, { catalog, servedZips });
+    const own = check.ok ? [] : check.errors.filter((e) => stepForField(e.field) === from);
+    setErrors((prev) => [...prev.filter((p) => stepForField(p.field) !== from), ...own]);
+    if (own.length) return;
+    goToStep(to);
+  };
 
   const pickService = (id: string) => {
     const next = catalog.services.find((s) => s.id === id)!;
@@ -209,12 +259,23 @@ export default function BookingForm({
     if (honeypot) return; // silently drop
     if ((Date.now() - startedAt.current) / 1000 < MIN_SUBMIT_SECONDS) return;
 
-    setStatus("sending");
-
     const payload: BookingRequest = {
       ...booking,
       startedAt: startedAt.current,
     };
+
+    // The exact validator the server runs, run here first. A missed date or a
+    // mistyped email sends the customer back to the field that needs fixing --
+    // the failure screen with Edward's phone number is for genuine failures,
+    // not for a form that was one zip code short of complete.
+    const check = validateBooking(payload, { catalog, servedZips });
+    if (!check.ok) {
+      showFieldErrors(check.errors);
+      return;
+    }
+
+    setErrors([]);
+    setStatus("sending");
 
     // Without a configured endpoint there is nowhere to send this. Falling
     // through to the error screen is deliberate: it puts Edward's phone number
@@ -230,6 +291,28 @@ export default function BookingForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
+      // A 422 means the server found something this client's copy of the
+      // validator did not (a stale bundle, an edited request). Its errors
+      // carry the same dotted field paths, so route them the same way.
+      if (res.status === 422) {
+        const body: unknown = await res.json().catch(() => null);
+        const serverErrors =
+          body && typeof body === "object" && Array.isArray((body as { errors?: unknown }).errors)
+            ? ((body as { errors: unknown[] }).errors.filter(
+                (err): err is FieldError =>
+                  typeof err === "object" && err !== null &&
+                  typeof (err as FieldError).field === "string" &&
+                  typeof (err as FieldError).message === "string",
+              ))
+            : [];
+        if (serverErrors.length) {
+          setStatus("form");
+          showFieldErrors(serverErrors);
+          return;
+        }
+      }
+
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setStatus("success");
       clearDraft();
@@ -297,6 +380,7 @@ export default function BookingForm({
   /* ---------------- the form ---------------- */
 
   const steps = ["Service", "Schedule", "Pets", "You"];
+  const stepErrors = (n: number) => errors.filter((e) => stepForField(e.field) === n);
 
   return (
     <form onSubmit={handleSubmit} noValidate>
@@ -340,6 +424,7 @@ export default function BookingForm({
             <section className="step">
               <h2 className="heading-brand step-title">What do you need?</h2>
               <p className="step-sub">Pick one service — you can mention extras in the notes at the end.</p>
+              <StepErrors errors={stepErrors(1)} />
 
               <fieldset className="fieldset">
                 <legend className="sr-only">Service</legend>
@@ -457,7 +542,7 @@ export default function BookingForm({
                 </div>
               </div>
 
-              <StepNav onNext={() => goToStep(2)} nextLabel="Next · Schedule" />
+              <StepNav onNext={() => tryAdvance(1, 2)} nextLabel="Next · Schedule" />
             </section>
           )}
 
@@ -469,11 +554,16 @@ export default function BookingForm({
                 Pick a date — or a range for a trip — then the window that suits your pet. Edward
                 doesn't promise an exact minute, and won't pretend to.
               </p>
+              <StepErrors errors={stepErrors(2)} />
 
               <Calendar
                 dateStart={booking.schedule.dateStart}
                 dateEnd={booking.schedule.dateEnd}
                 onChange={(dateStart, dateEnd) => setSchedule({ dateStart, dateEnd })}
+              />
+              <FieldNote
+                id="dateStart-error"
+                message={errorFor("schedule.dateStart") ?? errorFor("schedule.dateEnd")}
               />
 
               {lastMinute && (
@@ -506,6 +596,7 @@ export default function BookingForm({
                     </button>
                   ))}
                 </div>
+                <FieldNote id="window-error" message={errorFor("schedule.window")} />
               </fieldset>
 
               <div className="fieldset">
@@ -522,7 +613,7 @@ export default function BookingForm({
                 />
               </div>
 
-              <StepNav onBack={() => goToStep(1)} onNext={() => goToStep(3)} nextLabel="Next · Your pet" />
+              <StepNav onBack={() => goToStep(1)} onNext={() => tryAdvance(2, 3)} nextLabel="Next · Your pet" />
             </section>
           )}
 
@@ -531,6 +622,7 @@ export default function BookingForm({
             <section className="step">
               <h2 className="heading-brand step-title">Your pet</h2>
               <p className="step-sub">The more you tell Edward, the less your pet has to explain.</p>
+              <StepErrors errors={stepErrors(3)} />
 
               <div className="two-up">
                 <div>
@@ -540,8 +632,11 @@ export default function BookingForm({
                     className="field"
                     value={booking.pet.name}
                     placeholder="Jackie"
+                    aria-invalid={errorFor("pet.name") ? true : undefined}
+                    aria-describedby={errorFor("pet.name") ? "petName-error" : undefined}
                     onChange={(e) => setPet({ name: e.target.value })}
                   />
+                  <FieldNote id="petName-error" message={errorFor("pet.name")} />
                 </div>
                 <div>
                   <label className="field-label" htmlFor="species">Species</label>
@@ -634,7 +729,7 @@ export default function BookingForm({
                 />
               </div>
 
-              <StepNav onBack={() => goToStep(2)} onNext={() => goToStep(4)} nextLabel="Next · Your details" />
+              <StepNav onBack={() => goToStep(2)} onNext={() => tryAdvance(3, 4)} nextLabel="Next · Your details" />
             </section>
           )}
 
@@ -647,6 +742,7 @@ export default function BookingForm({
                 has no account and no database. A draft is kept in this browser so you don't lose
                 your place.
               </p>
+              <StepErrors errors={stepErrors(4)} />
 
               <div className="two-up">
                 <div>
@@ -657,8 +753,11 @@ export default function BookingForm({
                     autoComplete="name"
                     required
                     value={booking.customer.name}
+                    aria-invalid={errorFor("customer.name") ? true : undefined}
+                    aria-describedby={errorFor("customer.name") ? "yourName-error" : undefined}
                     onChange={(e) => setCustomer({ name: e.target.value })}
                   />
+                  <FieldNote id="yourName-error" message={errorFor("customer.name")} />
                 </div>
                 <div>
                   <label className="field-label" htmlFor="phone">Mobile</label>
@@ -670,8 +769,11 @@ export default function BookingForm({
                     required
                     placeholder="215-555-0134"
                     value={booking.customer.phone}
+                    aria-invalid={errorFor("customer.phone") ? true : undefined}
+                    aria-describedby={errorFor("customer.phone") ? "phone-error" : undefined}
                     onChange={(e) => setCustomer({ phone: e.target.value })}
                   />
+                  <FieldNote id="phone-error" message={errorFor("customer.phone")} />
                 </div>
                 <div>
                   <label className="field-label" htmlFor="email">Email</label>
@@ -682,8 +784,11 @@ export default function BookingForm({
                     autoComplete="email"
                     required
                     value={booking.customer.email}
+                    aria-invalid={errorFor("customer.email") ? true : undefined}
+                    aria-describedby={errorFor("customer.email") ? "email-error" : undefined}
                     onChange={(e) => setCustomer({ email: e.target.value })}
                   />
+                  <FieldNote id="email-error" message={errorFor("customer.email")} />
                 </div>
                 <div>
                   <label className="field-label" htmlFor="zip">Zip code</label>
@@ -695,10 +800,13 @@ export default function BookingForm({
                     autoComplete="postal-code"
                     placeholder="19146"
                     value={booking.customer.zip}
+                    aria-invalid={errorFor("customer.zip") ? true : undefined}
+                    aria-describedby={errorFor("customer.zip") ? "zip-error" : undefined}
                     onChange={(e) =>
                       setCustomer({ zip: e.target.value.replace(/\D/g, "").slice(0, 5) })
                     }
                   />
+                  <FieldNote id="zip-error" message={errorFor("customer.zip")} />
                 </div>
               </div>
 
@@ -727,8 +835,11 @@ export default function BookingForm({
                   className="field"
                   autoComplete="street-address"
                   value={booking.customer.address}
+                  aria-invalid={errorFor("customer.address") ? true : undefined}
+                  aria-describedby={errorFor("customer.address") ? "address-error" : undefined}
                   onChange={(e) => setCustomer({ address: e.target.value })}
                 />
+                <FieldNote id="address-error" message={errorFor("customer.address")} />
               </div>
 
               <fieldset className="fieldset">
@@ -775,6 +886,24 @@ export default function BookingForm({
                   />
                 </div>
               </div>
+
+              {/* First-timers get flagged prominently in Edward's email so he
+                  can lead with the meet-and-greet offer (Roadmap 3.9). */}
+              <label className="consent">
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={booking.customer.firstTime}
+                  onChange={(e) => setCustomer({ firstTime: e.target.checked })}
+                />
+                <span className="checkbox-box" aria-hidden="true">
+                  {booking.customer.firstTime && <CheckIcon size={16} />}
+                </span>
+                <span>
+                  This is my first booking with Edventures. Edward offers a meet-and-greet before
+                  a first visit — he'll suggest a time when he replies.
+                </span>
+              </label>
 
               <label className="consent">
                 <input
@@ -1023,6 +1152,35 @@ function Calendar({
 /* ------------------------------------------------------------------ *
  * Bits
  * ------------------------------------------------------------------ */
+
+/** The banner at the top of a step listing what stopped the submit. `role="alert"`
+ *  so a screen reader hears it the moment the step swaps in. */
+function StepErrors({ errors }: { errors: FieldError[] }) {
+  if (!errors.length) return null;
+  return (
+    <div className="notice notice-error" role="alert">
+      <AlertIcon size={18} />
+      <div>
+        <strong>{errors.length === 1 ? "One thing needs fixing:" : "A few things need fixing:"}</strong>
+        <ul className="error-list">
+          {errors.map((e) => (
+            <li key={e.field || e.message}>{e.message}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+/** Inline complaint under a single field. */
+function FieldNote({ id, message }: { id: string; message?: string }) {
+  if (!message) return null;
+  return (
+    <p className="field-error" id={id}>
+      {message}
+    </p>
+  );
+}
 
 function StepNav({
   onBack,

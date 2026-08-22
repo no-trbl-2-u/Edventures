@@ -1,0 +1,61 @@
+# Deploys the site to Cloudflare Pages when a release tag is pushed.
+#
+# Cut a release by tagging a commit on main:
+#
+#   git tag v1.0.0 && git push origin v1.0.0
+#
+# (Creating a release in the GitHub UI pushes the tag too, so that works the
+# same way.) Tests and typecheck run first; a failing check stops the deploy.
+#
+# ONE-TIME SETUP - the workflow needs a Cloudflare API token as a repo secret:
+#
+#   1. https://dash.cloudflare.com/profile/api-tokens -> Create Token ->
+#      "Edit Cloudflare Workers" template, or a custom token with
+#      Account -> Cloudflare Pages -> Edit on this account.
+#   2. GitHub repo -> Settings -> Secrets and variables -> Actions ->
+#      New repository secret, name CLOUDFLARE_API_TOKEN.
+#
+# The account id is not a secret (it is in the dashboard URL), so it is set
+# plainly below. Note the read-only token in the local .env will NOT work
+# here - deploying needs Pages edit permission.
+
+name: Deploy
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node 22, matching local dev: the test runner relies on Node's own
+      # type stripping, and Astro 7 wants >= 20 anyway.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Typecheck
+        run: npx astro check
+
+      - name: Build
+        run: npx astro build
+
+      # Same command as `npm run deploy` locally. `--branch main` marks this
+      # as the production deployment for the Pages project.
+      - name: Deploy to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: 3d3243067c7831c5e8acf512352c6f05
+        run: npx wrangler pages deploy dist --project-name edventures --branch main

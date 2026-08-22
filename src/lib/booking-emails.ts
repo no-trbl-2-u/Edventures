@@ -157,6 +157,7 @@ export function edwardEmail(request: BookingRequest, ctx: EmailContext): EmailMe
 
   // The flags that change what Edward does next, before anything else.
   const flags: string[] = [];
+  if (request.customer.firstTime) flags.push("FIRST-TIME CLIENT - offer a meet-and-greet");
   if (outOfArea) flags.push(`OUT OF AREA - ${request.customer.zip} is outside the served zips`);
   if (lastMinute) flags.push("LAST MINUTE - under 24 hours' notice");
 
@@ -168,6 +169,7 @@ export function edwardEmail(request: BookingRequest, ctx: EmailContext): EmailMe
   ];
 
   const detailRows: Row[] = [
+    ["First-time client", request.customer.firstTime ? "Yes" : ""],
     ["Pet", petsText(request)],
     ["Temperament", request.pet.temperament],
     ["Medical / medication", request.pet.medical],
@@ -268,6 +270,10 @@ export function customerEmail(request: BookingRequest, ctx: EmailContext): Email
     ? `Your zip code is just outside ${owner}'s usual area, so he may need to add a travel fee - he'll confirm when he replies.`
     : "";
 
+  const firstTimeNote = request.customer.firstTime
+    ? `Since this is your first booking, ${owner} will offer a meet-and-greet before the visit - a chance for your pet to meet him first. He'll suggest a time when he replies.`
+    : "";
+
   const text = [
     `Thanks - ${owner} has your request.`,
     "",
@@ -278,6 +284,7 @@ export function customerEmail(request: BookingRequest, ctx: EmailContext): Email
     rowsToText(detailRows),
     "",
     `Estimated total: $${est.total} - an estimate, not a quote. ${owner} confirms the final price when he replies.`,
+    firstTimeNote ? `\n${firstTimeNote}` : "",
     outOfAreaNote ? `\n${outOfAreaNote}` : "",
     "",
     `Need to change something? Just reply to this email, or text ${phone}.`,
@@ -298,6 +305,7 @@ export function customerEmail(request: BookingRequest, ctx: EmailContext): Email
   ${rowsToHtml(detailRows)}
   <p style="margin:16px 0 0"><strong>Estimated total: $${est.total}</strong><br>
     <span style="color:#666;font-size:14px">An estimate, not a quote &mdash; ${escapeHtml(owner)} confirms the final price when he replies.</span></p>
+  ${firstTimeNote ? `<p style="margin:16px 0 0;padding:10px 12px;background:#eef3ec">${escapeHtml(firstTimeNote)}</p>` : ""}
   ${outOfAreaNote ? `<p style="margin:16px 0 0;padding:10px 12px;background:#fff4e5">${escapeHtml(outOfAreaNote)}</p>` : ""}
   <hr style="border:none;border-top:1px solid #e5e5e5;margin:20px 0">
   <p style="margin:0 0 4px;color:#666;font-size:14px">Need to change something? Reply to this email, or text ${escapeHtml(phone)}.</p>

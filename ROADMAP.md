@@ -577,7 +577,7 @@ Lives in [`src/lib/booking.ts`](src/lib/booking.ts).
 - [x] Full details below the fold
 - [x] `Reply-To` set to the customer's email so replying just works
 - [x] Prominent out-of-area flag when applicable
-- [ ] Prominent first-time-client flag — **cannot be built yet: the form does not collect one.** Blocked on B4 (does he require a meet-and-greet?), which decides whether it is a flag or a whole separate path
+- [x] Prominent first-time-client flag — B4 answered 2026-08-22 (meet-and-greet offered, not required), so it is a flag rather than a separate path. The form collects it as a checkbox on the final step; Edward's email leads with `FIRST-TIME CLIENT - offer a meet-and-greet` and the customer's copy sets the expectation
 - [x] Subject line format: `New booking: [Service] — [Date] — [Customer]`
 
 > Sent as plain text *and* HTML. The text part is not a fallback nobody reads: a message with no text alternative scores worse with spam filters, and this project cannot afford to land in spam.

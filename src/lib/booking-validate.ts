@@ -302,6 +302,7 @@ export function validateBooking(input: unknown, opts: ValidateOptions): Validati
       entryMethod,
       emergencyContact: clean(customerIn.emergencyContact, MAX.address),
       vet: clean(customerIn.vet, MAX.address),
+      firstTime: customerIn.firstTime === true,
     },
     consent: true,
     photoConsent: input.photoConsent === true,

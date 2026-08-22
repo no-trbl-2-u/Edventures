@@ -15,15 +15,14 @@ import { breadcrumbs, faqPage, type FaqItem } from "../lib/structured-data";
  * search result or an assistant is worse than no answer at all, because Edward
  * is the one who has to walk it back.
  *
- * The design comp stated the meet-and-greet answer as settled fact. It isn't
- * (go-back-to-ed.md, B4), so it is marked here like the rest.
+ * The meet-and-greet answer was settled 2026-08-22 (B4: offered, not
+ * required), so it is now a real answer and part of the structured data.
  */
 export const faqs: FaqItem[] = [
   {
     question: "Do we meet before the first booking?",
     answer:
-      "Placeholder — whether a meet-and-greet is required, how long it takes, and whether it's free (go-back-to-ed.md, B4).",
-    placeholder: true,
+      "Edward offers a meet-and-greet before every first booking — it's encouraged, not required. He'll suggest a time when he replies to your request, so you and your pet can size him up before he's ever alone with them. Keys, codes and routines get sorted there too.",
   },
   {
     question: "How do you handle keys and codes?",

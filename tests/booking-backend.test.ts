@@ -12,7 +12,7 @@
 import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
 
-import { estimate, type BookingRequest } from "../src/lib/booking.ts";
+import { coversHoliday, estimate, type BookingRequest } from "../src/lib/booking.ts";
 import { getCatalogFromJson } from "../src/lib/catalog-json.ts";
 import { validateBooking, looksAutomated } from "../src/lib/booking-validate.ts";
 import { handleBookingRequest, type BookingDeps } from "../src/lib/booking-handler.ts";
@@ -49,6 +49,7 @@ function validBooking(overrides: Partial<BookingRequest> = {}): BookingRequest {
       entryMethod: "Lockbox",
       emergencyContact: "Sam 215-555-0199",
       vet: "Fairmount Vet 215-555-0111",
+      firstTime: false,
     },
     consent: true,
     photoConsent: true,
@@ -230,6 +231,24 @@ describe("validation", () => {
     assert.ok(!("total" in result.value));
   });
 
+  it("treats the first-time flag as false unless it is literally true", () => {
+    const yes = validateBooking(
+      validBooking({ customer: { ...validBooking().customer, firstTime: true } }),
+      opts,
+    );
+    assert.equal(yes.ok, true);
+    if (!yes.ok) return;
+    assert.equal(yes.value.customer.firstTime, true);
+
+    // A crafted request cannot smuggle a truthy non-boolean through.
+    const legacy = { ...validBooking() } as Record<string, unknown>;
+    (legacy.customer as Record<string, unknown>).firstTime = "yes";
+    const coerced = validateBooking(legacy, opts);
+    assert.equal(coerced.ok, true);
+    if (!coerced.ok) return;
+    assert.equal(coerced.value.customer.firstTime, false);
+  });
+
   it("rejects malformed phone numbers and email addresses", () => {
     const result = validateBooking(
       validBooking({ customer: { ...validBooking().customer, phone: "12", email: "not-an-email" } }),
@@ -264,6 +283,13 @@ describe("pricing", () => {
       selection: { serviceId: "nail-trim", durationMinutes: 0, addonIds: ["nail-trim-addon"], extraDogs: 0, extraCats: 0 },
     });
     assert.equal(estimate(request, catalog).total, 20);
+  });
+
+  it("surcharges Easter (B5, confirmed) and holidays inside a range, both years", () => {
+    assert.equal(coversHoliday("2026-04-05", ""), true, "Easter 2026");
+    assert.equal(coversHoliday("2027-03-27", "2027-03-30"), true, "range over Easter 2027");
+    assert.equal(coversHoliday("2027-12-20", "2027-12-26"), true, "range over Christmas 2027");
+    assert.equal(coversHoliday("2026-04-06", ""), false, "the Monday after is a normal day");
   });
 
   it("charges nights for an overnight range and visits for a walk range", () => {
@@ -354,6 +380,18 @@ describe("emails", () => {
     const flagged = { ...ctx, outOfArea: true };
     assert.match(edwardEmail(validBooking(), flagged).text.split("\n")[0]!, /OUT OF AREA/);
     assert.match(customerEmail(validBooking(), flagged).text, /travel fee/);
+  });
+
+  it("flags a first-time client at the top of Edward's email and tells the customer about the meet-and-greet", () => {
+    const firstTimer = validBooking({
+      customer: { ...validBooking().customer, firstTime: true },
+    });
+    assert.match(edwardEmail(firstTimer, ctx).text.split("\n")[0]!, /FIRST-TIME CLIENT/);
+    assert.match(customerEmail(firstTimer, ctx).text, /meet-and-greet/);
+
+    // And a repeat client's emails say nothing about it.
+    assert.ok(!edwardEmail(validBooking(), ctx).text.includes("FIRST-TIME"));
+    assert.ok(!customerEmail(validBooking(), ctx).text.includes("meet-and-greet"));
   });
 
   it("escapes HTML so a pasted angle bracket cannot inject markup", () => {

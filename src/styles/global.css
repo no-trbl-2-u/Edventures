@@ -28,6 +28,8 @@
   /* Hairlines. Brown at low alpha reads warmer than a neutral grey. */
   --color-brand-rule: rgb(78 50 22 / 0.16);
   --color-brand-rule-strong: rgb(78 50 22 / 0.28);
+  /* Validation problems. A rust that sits with the palette; 7.4:1 on cream. */
+  --color-brand-alert: #8a2a12;
 
   /* Typography. The letterspaced small-caps display serif is a brand
      signature, not decoration - preserve it. */
@@ -533,6 +535,28 @@ textarea.field {
   background: rgb(22 62 31 / 0.06);
   border: 1px solid rgb(22 62 31 / 0.25);
   color: var(--color-brand-green);
+}
+.notice-error {
+  background: rgb(138 42 18 / 0.06);
+  border: 1px solid rgb(138 42 18 / 0.3);
+  color: var(--color-brand-alert);
+  margin-bottom: 22px;
+}
+.error-list {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+.error-list li + li {
+  margin-top: 4px;
+}
+
+.field-error {
+  margin: 7px 0 0;
+  font: 500 13.5px var(--font-body);
+  color: var(--color-brand-alert);
+}
+.field[aria-invalid="true"] {
+  border-color: var(--color-brand-alert);
 }
 
 /* ---------------------------------------------------------------
