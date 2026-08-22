@@ -25,5 +25,16 @@ export async function resolve(specifier, context, nextResolve) {
       }
     }
   }
+
+  // Source files import JSON without `with { type: "json" }`, because the
+  // esbuild inside Cloudflare's pinned wrangler 3 cannot parse the attribute
+  // syntax (import attributes postdate it). Bundlers import JSON fine bare;
+  // Node's own ESM loader is the one consumer that insists on the attribute,
+  // so it is supplied here for the test run instead of in the source.
+  if (specifier.endsWith(".json")) {
+    const resolved = await nextResolve(specifier, context);
+    return { ...resolved, importAttributes: { type: "json" } };
+  }
+
   return nextResolve(specifier, context);
 }

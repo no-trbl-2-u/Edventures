@@ -10,13 +10,20 @@
  * These imports skip the Zod schemas in `content.config.ts`, which is
  * acceptable only because the build already validates the very same files: a
  * malformed price fails `astro build` before this code could ever see it.
+ *
+ * No `with { type: "json" }` attribute, deliberately. Cloudflare's Pages git
+ * builder compiles `functions/` with its own pinned wrangler 3, whose esbuild
+ * predates import attributes and dies on the syntax -- while esbuild and Vite
+ * import JSON fine without it. The one place that genuinely needs the
+ * attribute is Node's ESM loader in `npm test`, and the test runner's resolve
+ * hook (tests/resolve-hooks.mjs) supplies it there instead.
  */
 import { shapeCatalog, type AddonRecord, type FeeRecord, type ServiceRecord } from "./catalog-shape";
 import type { Catalog } from "./booking";
 
-import serviceRecords from "../content/services.json" with { type: "json" };
-import addonRecords from "../content/addons.json" with { type: "json" };
-import feeRecords from "../content/fees.json" with { type: "json" };
+import serviceRecords from "../content/services.json";
+import addonRecords from "../content/addons.json";
+import feeRecords from "../content/fees.json";
 
 let cached: Catalog | null = null;
 

@@ -1,0 +1,45 @@
+# Tests, typecheck and a production build on every push and pull request.
+#
+# Deployment is NOT done here. The Cloudflare Pages Git integration builds
+# and deploys `main` on push (build command `npm run build`, output `dist`
+# per wrangler.jsonc, Node pinned by .node-version). This workflow is the
+# gate in front of that: make these checks required on `main` (Settings ->
+# Branches -> branch protection) and a red build can't be merged in the
+# first place. Cloudflare itself does not wait for GitHub checks.
+#
+# This replaced a tag-triggered wrangler deploy (2026-08-22): with the Git
+# integration deploying every push to main, a second deploy path from tags
+# would only fight it. No secrets are needed here.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node 22, matching .node-version: the test runner relies on Node's
+      # own type stripping, and Astro 7 requires >= 22.12.
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Typecheck
+        run: npx astro check
+
+      - name: Build
+        run: npx astro build
