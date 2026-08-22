@@ -290,6 +290,8 @@ export function validateBooking(input: unknown, opts: ValidateOptions): Validati
       age: clean(petIn.age, MAX.shortText),
       temperament: clean(petIn.temperament, MAX.shortText),
       medical: cleanMultiline(petIn.medical, MAX.notes),
+      upToDateOnPreventatives:
+        petIn.upToDateOnPreventatives === true ? true : petIn.upToDateOnPreventatives === false ? false : null,
     },
     customer: {
       name: customerName,
@@ -302,6 +304,7 @@ export function validateBooking(input: unknown, opts: ValidateOptions): Validati
       vet: clean(customerIn.vet, MAX.address),
     },
     consent: true,
+    photoConsent: input.photoConsent === true,
   };
 
   return { ok: true, value, warnings };

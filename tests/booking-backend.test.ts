@@ -31,7 +31,15 @@ function validBooking(overrides: Partial<BookingRequest> = {}): BookingRequest {
   return {
     selection: { serviceId: "dog-walk", durationMinutes: 30, addonIds: [], extraDogs: 0, extraCats: 0 },
     schedule: { dateStart: SOON, dateEnd: "", window: "morning", flexibilityNotes: "" },
-    pet: { name: "Stellaluna", species: "Dog", breed: "Mutt", age: "4", temperament: "Easy-going", medical: "" },
+    pet: {
+      name: "Stellaluna",
+      species: "Dog",
+      breed: "Mutt",
+      age: "4",
+      temperament: "Easy-going",
+      medical: "",
+      upToDateOnPreventatives: true,
+    },
     customer: {
       name: "Dana Reyes",
       phone: "215-555-0134",
@@ -43,6 +51,7 @@ function validBooking(overrides: Partial<BookingRequest> = {}): BookingRequest {
       vet: "Fairmount Vet 215-555-0111",
     },
     consent: true,
+    photoConsent: true,
     ...overrides,
   };
 }

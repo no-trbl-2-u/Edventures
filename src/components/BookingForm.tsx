@@ -596,6 +596,30 @@ export default function BookingForm({
                 </div>
               </fieldset>
 
+              <fieldset className="fieldset">
+                <legend className="group-label">
+                  Up to date on vaccinations and flea/tick medication?
+                </legend>
+                <div className="pill-row">
+                  <button
+                    type="button"
+                    className="choice choice-pill"
+                    aria-pressed={booking.pet.upToDateOnPreventatives === true}
+                    onClick={() => setPet({ upToDateOnPreventatives: true })}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    type="button"
+                    className="choice choice-pill"
+                    aria-pressed={booking.pet.upToDateOnPreventatives === false}
+                    onClick={() => setPet({ upToDateOnPreventatives: false })}
+                  >
+                    No
+                  </button>
+                </div>
+              </fieldset>
+
               <div className="fieldset">
                 <label className="field-label" htmlFor="medical">
                   Medical needs, medication, anything Edward should watch for
@@ -765,6 +789,21 @@ export default function BookingForm({
                 <span>
                   I've read the <a href="/contact#cancellation">cancellation policy</a> and
                   understand this is a request, not a confirmed booking.
+                </span>
+              </label>
+
+              <label className="consent">
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={booking.photoConsent}
+                  onChange={(e) => update({ photoConsent: e.target.checked })}
+                />
+                <span className="checkbox-box" aria-hidden="true">
+                  {booking.photoConsent && <CheckIcon size={16} />}
+                </span>
+                <span>
+                  Edward may post photos from the visit to Edventures' social media.
                 </span>
               </label>
 

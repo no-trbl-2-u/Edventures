@@ -8,7 +8,7 @@
     "tiers": [
       { "minutes": 15, "price": 15 },
       { "minutes": 30, "price": 25 },
-      { "minutes": 60, "price": 40 }
+      { "minutes": 60, "price": 45 }
     ],
     "order": 1
   },
@@ -27,11 +27,11 @@
   },
   {
     "id": "nail-trim",
-    "name": "Nail Trims",
-    "blurb": "Available as its own visit, or added to any other visit.",
-    "icon": "scissors",
+    "name": "Drop-in Visit",
+    "blurb": "A quick check-in - feeding, a potty break, medication, or company.",
+    "icon": "door-open",
     "flatRate": true,
-    "baseLabel": "Stand-alone nail trim",
+    "baseLabel": "Drop-in visit",
     "tiers": [{ "minutes": 15, "price": 20 }],
     "order": 3
   },

@@ -116,6 +116,8 @@ export interface PetDetails {
   temperament: string;
   /** Free text: medical needs, medication, anything to watch for. */
   medical: string;
+  /** Whether vaccinations and flea/tick prevention are current. `null` until answered. */
+  upToDateOnPreventatives: boolean | null;
 }
 
 export interface CustomerDetails {
@@ -155,6 +157,8 @@ export interface BookingRequest {
   customer: CustomerDetails;
   /** Acknowledgement that this is a request, not a confirmed booking. */
   consent: boolean;
+  /** Whether Edward may post photos of the visit to social media. */
+  photoConsent: boolean;
   /** Filled by bots, never by people. Server rejects any non-empty value. */
   honeypot?: string;
   /** Client timestamp of form render, for the minimum-time-to-submit check. */
@@ -164,12 +168,16 @@ export interface BookingRequest {
 export const EMPTY_BOOKING: BookingRequest = {
   selection: { serviceId: "dog-walk", durationMinutes: 30, addonIds: [], extraDogs: 0, extraCats: 0 },
   schedule: { dateStart: "", dateEnd: "", window: "", flexibilityNotes: "" },
-  pet: { name: "", species: "Dog", breed: "", age: "", temperament: "", medical: "" },
+  pet: {
+    name: "", species: "Dog", breed: "", age: "", temperament: "", medical: "",
+    upToDateOnPreventatives: null,
+  },
   customer: {
     name: "", phone: "", email: "", address: "", zip: "",
     entryMethod: "", emergencyContact: "", vet: "",
   },
   consent: false,
+  photoConsent: false,
 };
 
 /* ------------------------------------------------------------------ *
