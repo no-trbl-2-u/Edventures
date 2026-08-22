@@ -169,6 +169,24 @@ quote when it lands (D1 in [go-back-to-ed.md](go-back-to-ed.md)).
 
 ---
 
+## 🔴 7a. The new deploy workflow needs a `CLOUDFLARE_API_TOKEN` repo secret
+
+`.github/workflows/deploy.yml` (added 2026-08-22) deploys to Cloudflare Pages
+whenever a `v*` tag is pushed — tests and typecheck run first. It cannot work
+until you add the token:
+
+1. <https://dash.cloudflare.com/profile/api-tokens> → Create Token → custom
+   token with **Account → Cloudflare Pages → Edit** (the read-only token in
+   `.env` will not deploy).
+2. GitHub repo → Settings → Secrets and variables → Actions → New repository
+   secret → name `CLOUDFLARE_API_TOKEN`.
+3. Then cut a release: `git tag v1.0.0 && git push origin v1.0.0` (or create a
+   release in the GitHub UI — same thing).
+
+Until the secret exists, `npm run deploy` locally remains the deploy path.
+
+---
+
 ## 🟢 7. Two SEO checks that only work against the live site
 
 Left over from the PR that added per-page OG images and `/llms-full.txt`

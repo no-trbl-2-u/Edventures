@@ -174,6 +174,21 @@ export default function BookingForm({
     goToStep(errs.reduce((min, e) => Math.min(min, stepForField(e.field)), 4));
   };
 
+  /**
+   * "Next" checks the step it is leaving. Problems surface right there, while
+   * the customer is still looking at the fields in question -- not four steps
+   * later at submit. Only this step's complaints are raised: being told on
+   * step 1 that an email is missing would just be nagging about the future.
+   * The progress bar above deliberately stays free navigation.
+   */
+  const tryAdvance = (from: number, to: number) => {
+    const check = validateBooking({ ...booking, startedAt: startedAt.current }, { catalog, servedZips });
+    const own = check.ok ? [] : check.errors.filter((e) => stepForField(e.field) === from);
+    setErrors((prev) => [...prev.filter((p) => stepForField(p.field) !== from), ...own]);
+    if (own.length) return;
+    goToStep(to);
+  };
+
   const pickService = (id: string) => {
     const next = catalog.services.find((s) => s.id === id)!;
 
@@ -527,7 +542,7 @@ export default function BookingForm({
                 </div>
               </div>
 
-              <StepNav onNext={() => goToStep(2)} nextLabel="Next · Schedule" />
+              <StepNav onNext={() => tryAdvance(1, 2)} nextLabel="Next · Schedule" />
             </section>
           )}
 
@@ -545,6 +560,10 @@ export default function BookingForm({
                 dateStart={booking.schedule.dateStart}
                 dateEnd={booking.schedule.dateEnd}
                 onChange={(dateStart, dateEnd) => setSchedule({ dateStart, dateEnd })}
+              />
+              <FieldNote
+                id="dateStart-error"
+                message={errorFor("schedule.dateStart") ?? errorFor("schedule.dateEnd")}
               />
 
               {lastMinute && (
@@ -577,6 +596,7 @@ export default function BookingForm({
                     </button>
                   ))}
                 </div>
+                <FieldNote id="window-error" message={errorFor("schedule.window")} />
               </fieldset>
 
               <div className="fieldset">
@@ -593,7 +613,7 @@ export default function BookingForm({
                 />
               </div>
 
-              <StepNav onBack={() => goToStep(1)} onNext={() => goToStep(3)} nextLabel="Next · Your pet" />
+              <StepNav onBack={() => goToStep(1)} onNext={() => tryAdvance(2, 3)} nextLabel="Next · Your pet" />
             </section>
           )}
 
@@ -709,7 +729,7 @@ export default function BookingForm({
                 />
               </div>
 
-              <StepNav onBack={() => goToStep(2)} onNext={() => goToStep(4)} nextLabel="Next · Your details" />
+              <StepNav onBack={() => goToStep(2)} onNext={() => tryAdvance(3, 4)} nextLabel="Next · Your details" />
             </section>
           )}
 
