@@ -169,21 +169,29 @@ quote when it lands (D1 in [go-back-to-ed.md](go-back-to-ed.md)).
 
 ---
 
-## 🔴 7a. The new deploy workflow needs a `CLOUDFLARE_API_TOKEN` repo secret
+## 🟡 7a. Deploys now ride the Cloudflare Pages Git integration
 
-`.github/workflows/deploy.yml` (added 2026-08-22) deploys to Cloudflare Pages
-whenever a `v*` tag is pushed — tests and typecheck run first. It cannot work
-until you add the token:
+Superseded twice on 2026-08-22: a tag-triggered wrangler deploy was added,
+then TJ connected the repo to Cloudflare Pages directly, which builds and
+deploys `main` on every push. The tag workflow was removed (two deploy paths
+would fight); `.github/workflows/ci.yml` now runs tests, typecheck and a
+build on every push and PR instead. **No GitHub secret is needed.**
 
-1. <https://dash.cloudflare.com/profile/api-tokens> → Create Token → custom
-   token with **Account → Cloudflare Pages → Edit** (the read-only token in
-   `.env` will not deploy).
-2. GitHub repo → Settings → Secrets and variables → Actions → New repository
-   secret → name `CLOUDFLARE_API_TOKEN`.
-3. Then cut a release: `git tag v1.0.0 && git push origin v1.0.0` (or create a
-   release in the GitHub UI — same thing).
+The first Git-integration builds failed because nothing pinned Node — Astro 7
+needs ≥ 22.12 and Cloudflare's builder defaults older. Fixed with
+`.node-version` (22) plus an `engines` field. Worth verifying in the Pages
+project settings (Settings → Builds & deployments) that:
 
-Until the secret exists, `npm run deploy` locally remains the deploy path.
+- **Build command** is `npm run build` (or `npx astro build`) — NOT
+  `npm run deploy`, which runs wrangler inside the build and fails.
+- **Build output directory** is `dist` (also declared in `wrangler.jsonc`).
+- If the Git integration created a **new** Pages project rather than
+  attaching to the existing `edventures` one, the custom domains, the
+  `BOOKINGS` KV binding and (once created) the `RESEND_API_KEY` /
+  `BOOKING_FROM` secrets live on the old project and must be moved.
+- Cloudflare deploys on push regardless of GitHub checks. To keep red code
+  off `main`, make the `checks` job required: Settings → Branches →
+  protection rule for `main`.
 
 ---
 
