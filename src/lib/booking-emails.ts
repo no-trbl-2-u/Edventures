@@ -171,6 +171,14 @@ export function edwardEmail(request: BookingRequest, ctx: EmailContext): EmailMe
     ["Pet", petsText(request)],
     ["Temperament", request.pet.temperament],
     ["Medical / medication", request.pet.medical],
+    [
+      "Vaccines & flea/tick up to date",
+      request.pet.upToDateOnPreventatives === null
+        ? "Not answered"
+        : request.pet.upToDateOnPreventatives
+          ? "Yes"
+          : "No",
+    ],
     ["Add-ons", addonsText(request, catalog)],
     ["Flexibility", request.schedule.flexibilityNotes],
     ["Address", `${request.customer.address}, ${request.customer.zip}`],
@@ -178,6 +186,7 @@ export function edwardEmail(request: BookingRequest, ctx: EmailContext): EmailMe
     ["Emergency contact", request.customer.emergencyContact],
     ["Vet", request.customer.vet],
     ["Email", request.customer.email],
+    ["OK to post photos on social media", request.photoConsent ? "Yes" : "No"],
   ];
 
   const estimateRows: Row[] = est.lines.map((l) => [l.label, l.amount] as Row);

@@ -99,6 +99,7 @@ const structuredData = [localBusiness(), ...serviceOffers(catalog)];
         />
       </div>
     </div>
+    <p class="hero-photo-caption">Dog walks or Drop ins</p>
   </section>
 
   {/* ---------------- Services ---------------- */}
@@ -293,6 +294,14 @@ const structuredData = [localBusiness(), ...serviceOffers(catalog)];
     object-position: 50% 30%;
     display: block;
     filter: saturate(0.9) contrast(1.02);
+  }
+  .hero-photo-caption {
+    margin: 14px 0 0;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: clamp(16px, 2.6vw, 20px);
+    font-style: italic;
+    color: var(--color-brand-brown);
   }
 
   /* ---- Services ---- */

@@ -85,8 +85,8 @@ const structuredData = [
 
     <article class="card">
       <div class="card-head">
-        <span class="roundel"><Icon name="scissors" size={26} /></span>
-        <h2 class="heading-brand card-title">Nail Trims</h2>
+        <span class="roundel"><Icon name={nailTrim.icon} size={26} /></span>
+        <h2 class="heading-brand card-title">{nailTrim.name}</h2>
       </div>
       <div class="rule"></div>
       <dl class="price-list">
@@ -95,7 +95,7 @@ const structuredData = [
           <dd>${nailTrim.base}</dd>
         </div>
         <div class="price-row">
-          <dt>Add-on to any visit</dt>
+          <dt>Nail trim add-on to any visit</dt>
           <dd>${nailAddon.price}</dd>
         </div>
       </dl>

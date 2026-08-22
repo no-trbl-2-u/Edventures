@@ -4,7 +4,7 @@
     "src": "smooches.jpg",
     "caption": "Smooches",
     "alt": "Edward in a grey hoodie, eyes closed, kissing the head of a tan-and-white speckled hound curled against his chest",
-    "placement": "hero",
+    "placement": "gallery",
     "needsExifRotation": false
   },
   {
@@ -44,7 +44,7 @@
     "src": "harry-and-i.jpg",
     "caption": "Harry and I",
     "alt": "Edward in a maroon cap on a sofa beside Harry, a grey tabby cat stretched out on the cushion next to him",
-    "placement": "about",
+    "placement": "hero",
     "needsExifRotation": false
   },
   {
@@ -124,7 +124,7 @@
     "src": "stellaluna-and-i.jpg",
     "caption": "Stellaluna and I",
     "alt": "Edward lying on a blue blanket beside Stellaluna, a grey tabby cat, both looking up at the camera",
-    "placement": "gallery",
+    "placement": "about",
     "needsExifRotation": true
   },
   {

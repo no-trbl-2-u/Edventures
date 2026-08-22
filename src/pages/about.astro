@@ -13,6 +13,7 @@ import { getCollection, getEntry, render } from "astro:content";
 import Base from "../layouts/Base.astro";
 import Icon from "../components/Icon.astro";
 import Photo from "../components/Photo.astro";
+import PhotoSlideshow from "../components/PhotoSlideshow.astro";
 import PawDivider from "../components/PawDivider.astro";
 import FinalCta from "../components/FinalCta.astro";
 import { resolvePhoto, type PhotoData } from "../lib/photos";
@@ -25,7 +26,12 @@ const { Content } = await render(about!);
 const photos = (await getCollection("photos")).map((p) => p.data as PhotoData);
 const byId = (id: string) => resolvePhoto(photos.find((p) => p.id === id)!);
 
-const portrait = byId("selfie-with-tecate");
+const portraitSlides = [
+  byId("selfie-with-tecate"),
+  byId("proud-cat-dad"),
+  byId("me-and-regina"),
+  byId("me-and-taco"),
+];
 // The comp's strip included `me-and-goy-pouting`, which is marked `excluded`
 // for lighting. Swapped for a sharp one rather than shipping a photo our own
 // curation pass rejected.
@@ -35,7 +41,7 @@ const strip = [
   byId("stellaluna-at-the-park"),
   byId("a-fun-day-with-cows"),
 ];
-const crew = [byId("my-son-harry-and-i"), byId("hubert")];
+const crew = [byId("my-son-harry-and-i"), byId("stellaluna-and-i")];
 const angel = byId("angel-and-i");
 
 const structuredData = [
@@ -55,7 +61,7 @@ const structuredData = [
         Owner and founder of {SITE.name}, in {SITE.city}.
       </p>
     </div>
-    <Photo photo={portrait} ratio="5/4" width={560} objectPosition="50% 30%" />
+    <PhotoSlideshow photos={portraitSlides} ratio="5/4" width={560} />
   </section>
 
   <section class="shell-prose bio">
@@ -81,7 +87,7 @@ const structuredData = [
     <div class="shell crew">
       <div>
         <span class="eyebrow">My own crew</span>
-        <h2 class="display crew-title">Harry and Hubert keep me honest.</h2>
+        <h2 class="display crew-title">Harry and Stellaluna keep me honest.</h2>
         <p class="crew-body">
           I'm a pet owner before I'm a pet sitter. Everything I ask of your routine is something
           I run at home first — the slow introductions, the medication reminders, the patience
