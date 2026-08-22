@@ -867,6 +867,24 @@ export default function BookingForm({
                 </div>
               </div>
 
+              {/* First-timers get flagged prominently in Edward's email so he
+                  can lead with the meet-and-greet offer (Roadmap 3.9). */}
+              <label className="consent">
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={booking.customer.firstTime}
+                  onChange={(e) => setCustomer({ firstTime: e.target.checked })}
+                />
+                <span className="checkbox-box" aria-hidden="true">
+                  {booking.customer.firstTime && <CheckIcon size={16} />}
+                </span>
+                <span>
+                  This is my first booking with Edventures. Edward offers a meet-and-greet before
+                  a first visit — he'll suggest a time when he replies.
+                </span>
+              </label>
+
               <label className="consent">
                 <input
                   type="checkbox"

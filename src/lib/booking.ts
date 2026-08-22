@@ -129,6 +129,9 @@ export interface CustomerDetails {
   entryMethod: string;
   emergencyContact: string;
   vet: string;
+  /** First booking with Edventures. Flags the request prominently for Edward,
+   *  who offers (but does not require) a meet-and-greet before a first visit. */
+  firstTime: boolean;
 }
 
 export interface BookingSchedule {
@@ -174,7 +177,7 @@ export const EMPTY_BOOKING: BookingRequest = {
   },
   customer: {
     name: "", phone: "", email: "", address: "", zip: "",
-    entryMethod: "", emergencyContact: "", vet: "",
+    entryMethod: "", emergencyContact: "", vet: "", firstTime: false,
   },
   consent: false,
   photoConsent: false,
@@ -239,13 +242,14 @@ export function isLastMinute(dateStart: string, now = new Date()): boolean {
 /**
  * Dates carrying the holiday surcharge.
  *
- * OPEN QUESTION (go-back-to-ed.md, B5): Edward has not confirmed which days he
- * treats as holidays. This is the common pet-sitting set. The surcharge is
- * published on the price list at a flat +$15, so applying it here matches what
- * a customer already sees -- but the *list* needs his sign-off before launch.
+ * Confirmed 2026-08-22 (was go-back-to-ed.md, B5): the common pet-sitting set
+ * plus Easter. Listed through the booking horizon -- requests can be made up
+ * to 550 days out, so stopping at Dec 2026 would quietly miss a Christmas 2027
+ * booking made in autumn. Extend this list before it runs out, not after.
  */
-export const HOLIDAYS_2026: string[] = [
+export const HOLIDAYS: string[] = [
   "2026-01-01", // New Year's Day
+  "2026-04-05", // Easter
   "2026-05-25", // Memorial Day
   "2026-07-04", // Independence Day
   "2026-09-07", // Labor Day
@@ -253,12 +257,22 @@ export const HOLIDAYS_2026: string[] = [
   "2026-12-24", // Christmas Eve
   "2026-12-25", // Christmas Day
   "2026-12-31", // New Year's Eve
+  "2027-01-01", // New Year's Day
+  "2027-03-28", // Easter
+  "2027-05-31", // Memorial Day
+  "2027-07-04", // Independence Day
+  "2027-09-06", // Labor Day
+  "2027-11-25", // Thanksgiving
+  "2027-12-24", // Christmas Eve
+  "2027-12-25", // Christmas Day
+  "2027-12-31", // New Year's Eve
+  "2028-01-01", // New Year's Day
 ];
 
 export function coversHoliday(
   dateStart: string,
   dateEnd: string,
-  holidays: string[] = HOLIDAYS_2026,
+  holidays: string[] = HOLIDAYS,
 ): boolean {
   if (!dateStart) return false;
   const end = dateEnd || dateStart;

@@ -123,12 +123,10 @@ failed booking is recoverable:
 npx wrangler kv key list --namespace-id 69106e068b034688b47badd5d8f1f880 --remote
 ```
 
-Real alerting needs a channel to alert *to*. Cheapest options, in order: a
-second Resend send to your own address on failure (no new dependency, but it
-fails for exactly the reason the first one did), a Cloudflare Workers Analytics
-alert, or a webhook to wherever you actually get notified. **Tell me which and
-I will wire it** — I did not pick one for you because they all involve a service
-choice that is yours.
+**Decided 2026-08-22: skip for now.** The KV log is the safety net until real
+traffic arrives. Revisit once bookings are flowing — the cheapest options
+remain a second Resend send to your own address on failure, a Cloudflare
+Workers Analytics alert, or a webhook to wherever you actually get notified.
 
 ---
 
@@ -151,46 +149,23 @@ sides. The server-side verification hook is a small addition to
 
 ---
 
-## 🟢 5. Two open questions that shape real behaviour
+## ✅ 5. Two open questions that shaped real behaviour — ANSWERED 2026-08-22
 
-Both are Edward's to answer, repeated here because they are load-bearing and
-have been open a while. Full context in [go-back-to-ed.md](go-back-to-ed.md).
-
-- **B5 / G4 — which dates carry the +$15 holiday surcharge.** The estimator
-  applies it automatically from a hardcoded list in `src/lib/booking.ts`. If
-  that list is wrong, customers see a surcharge Edward does not charge, or miss
-  one he does.
-- **B4 — does he require a meet-and-greet before a first booking?** If yes, the
-  form needs a different path for first-time clients. That is a structural
-  change, not a copy change, and it gets more expensive the longer it waits.
-  Related: the form does not currently collect a first-time-client flag at all,
-  so Roadmap 3.9's "prominent first-time-client flag" in Edward's email cannot
-  be built until it does.
+- **B5 / G4 — holiday surcharge dates:** the standard list **plus Easter**,
+  now applied through early 2028 in `src/lib/booking.ts`.
+- **B4 — meet-and-greet:** **offered, not required.** The form's final step
+  collects a first-time-client checkbox, Edward's email leads with a
+  `FIRST-TIME CLIENT` flag, and the contact FAQ answers it for real.
+  Still Edward's to confirm: how long it takes and whether it's free — the
+  site deliberately claims neither yet.
 
 ---
 
-## 🟢 6. The third testimonial slot is a visible placeholder on the live site
+## ✅ 6. The third testimonial slot — DECIDED 2026-08-22
 
-The home page currently shows a dashed third card reading *"Testimonial 3 —
-ideally one that mentions medication, an anxious pet, or a key handover. A
-repeat client is the most persuasive one to place last."*, with a note beneath
-saying one slot is open.
-
-That is a deliberate choice, and there is a real argument for it — an obviously
-empty slot is more honest than padding. But it is **internal editorial
-direction addressed to Edward, rendered to customers**, and a prospective
-client reading it learns that the business has two reviews and wants a third.
-
-I did not remove it, because which way that goes is an editorial call rather
-than a bug. I did raise its contrast to pass AA (it was at 2.59:1, and WCAG
-does not exempt text for being a placeholder), which has made it slightly more
-prominent than before — an argument for deciding this sooner rather than later.
-
-Three options, cheapest first: drop the third card and let two quotes sit as
-two; keep the slot but replace the copy with something customer-facing
-(*"Your pet could be next"*); or get the third quote and close it (D1 in
-[go-back-to-ed.md](go-back-to-ed.md)). Tell me which and it is a two-minute
-change.
+The internal-note placeholder is gone; the third card now carries
+customer-facing copy (*"Your pet could be next…"*). Swap in the real third
+quote when it lands (D1 in [go-back-to-ed.md](go-back-to-ed.md)).
 
 ---
 
