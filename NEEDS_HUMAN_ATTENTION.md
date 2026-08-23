@@ -10,44 +10,46 @@ this file is the TJ list.
 
 ---
 
-## 🔴 1. Resend API key — the booking form cannot send without it
+## 🔴 1. Resend key — created and proven; production still needs it
 
-**Status:** everything around it is built, deployed and verified. `/book` posts
-to `/api/booking`, the request is validated, priced and durably logged to KV.
-Then the send fails, because there is no key, and the customer lands on the
-failure screen with Edward's phone number.
+**Status, 2026-08-23:** the Resend account exists, the API key works, and the
+whole pipeline was verified end to end — a real booking posted to the real
+endpoint returned 200 and **both emails sent** (Edward's notification and the
+customer copy), with the key supplied locally via `.dev.vars`.
 
-That is deliberate — the endpoint refuses rather than pretending — but it means
-**`/book` is not yet a working booking form.** It is currently no worse than
-before: same failure screen, except the attempt is now recorded in KV instead of
-vanishing.
+**But the live site still cannot send.** The deployed Function reads its
+environment from Cloudflare, and the key is not there yet. Until it is, `/book`
+answers 502 and the customer lands on the failure screen with Edward's phone
+number — deliberate, but it means **`/book` is not yet a working booking form
+in production.**
+
+The key is in the git-ignored `.env` / `.dev.vars` at the repo root.
 
 ### What to do
 
-1. Create a Resend account and add `edventures.pet` as a sending domain:
-   <https://resend.com/domains>
-2. Resend will give you three DNS records to add to the `edventures.pet` zone in
-   Cloudflare — an MX and two TXT (SPF and DKIM). **Set them to DNS-only (grey
-   cloud), not proxied.** This is Roadmap 3.11, and skipping it is the single
-   most likely way this project quietly fails: mail from an unverified domain
-   goes to spam.
-3. Create an API key at <https://resend.com/api-keys> (sending permission is
-   enough).
-4. Set it as a Cloudflare Pages secret:
+1. Cloudflare dashboard → Workers & Pages → **edventures** → Settings →
+   **Variables and Secrets** → Production → add `RESEND_API_KEY`, type
+   **Secret**, value from `.env`. (Or `npx wrangler pages secret put
+   RESEND_API_KEY --project-name edventures` if you are logged in.)
+2. **Do not set `BOOKING_FROM`.** `edventures.pet` is not a verified Resend
+   domain yet, so `bookings@edventures.pet` returns 403 and *every* booking
+   would 502. Leaving it unset falls back to Resend's shared sender, which
+   reaches the Resend account owner — `edventurespetsitting@gmail.com` — so
+   Edward's notification arrives.
+3. Redeploy: Deployments → latest → **Retry deployment**. Environment variables
+   only apply to new builds, so the running deployment will not pick it up.
+4. Submit a real request through `/book` and check the inbox, **including the
+   spam folder**.
+5. **Rotate the key** at <https://resend.com/api-keys> once this works — it was
+   pasted into a chat transcript. Create a new one, update the Cloudflare
+   secret and `.env`, delete the old one.
 
-```bash
-npx wrangler pages secret put RESEND_API_KEY --project-name edventures
-```
-
-5. Set the verified sender:
-
-```bash
-npx wrangler pages secret put BOOKING_FROM --project-name edventures
-```
-
-   Value: `Edventures <bookings@edventures.pet>`
-
-6. Redeploy (`npm run deploy`) and submit a real request through `/book`.
+> **Known gap while the domain is unverified:** the shared sender delivers only
+> to the account owner, so the **customer's confirmation email is not
+> delivered**. That send fails and is swallowed by design — the booking still
+> succeeds and the customer still sees the success screen — but they get no
+> written receipt. Closing this is Roadmap 3.11 (dedicated sending domain),
+> which is wanted but deliberately deferred.
 
 ### Environment variables the endpoint reads
 
@@ -63,9 +65,10 @@ npx wrangler pages secret put BOOKING_FROM --project-name edventures
 
 ### Once the key is in
 
-Nothing in the code changes. Then finish Roadmap 3.11 by sending a test to a
-Gmail address and **checking the spam folder**, and 3.12 by submitting from a
-real phone.
+Nothing in the code changes. Confirm the Gmail delivery and **check the spam
+folder**, then Roadmap 3.12 by submitting from a real phone. The rest of 3.11
+(dedicated sending domain, SPF/DKIM/DMARC) is wanted but deferred by decision —
+Gmail delivery is accepted as good enough for now.
 
 ---
 
