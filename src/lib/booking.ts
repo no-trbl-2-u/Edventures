@@ -288,8 +288,20 @@ const feeAmount = (catalog: Catalog, id: string, fallback: number) =>
  * Deliberately shows the breakdown rather than a bare number: a customer who
  * can see *why* it is $48 does not need to ask, and Edward does not have to
  * defend a figure he never quoted.
+ *
+ * `now` is injectable because the last-minute surcharge is a function of the
+ * clock. Reading the real clock here regardless of the caller's meant a
+ * request priced by the endpoint could disagree with the same request priced
+ * in its own confirmation email, and made the tests silently date-dependent:
+ * a fixture booking a date that was comfortably ahead when written became a
+ * last-minute booking once the calendar caught up, and the suite began failing
+ * on a day nobody had changed anything.
  */
-export function estimate(request: BookingRequest, catalog: Catalog): Estimate {
+export function estimate(
+  request: BookingRequest,
+  catalog: Catalog,
+  now: Date = new Date(),
+): Estimate {
   const { selection, schedule } = request;
   const service = catalog.services.find((s) => s.id === selection.serviceId) ?? catalog.services[0];
   const lines: EstimateLine[] = [];
@@ -366,7 +378,7 @@ export function estimate(request: BookingRequest, catalog: Catalog): Estimate {
   }
 
   // Automatic surcharges, applied once per booking rather than per visit.
-  if (isLastMinute(schedule.dateStart)) {
+  if (isLastMinute(schedule.dateStart, now)) {
     const fee = feeAmount(catalog, "last-minute", 8);
     lines.push({ label: "Under 24 hrs notice", amount: `+${money(fee)}` });
     total += fee;

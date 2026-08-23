@@ -150,7 +150,7 @@ export async function handleBookingRequest(
 
   const booking = result.value;
   const outOfArea = result.warnings.includes("out-of-area");
-  const est = estimate(booking, deps.catalog);
+  const est = estimate(booking, deps.catalog, now);
   const summary = summarize(booking, deps.catalog);
 
   /* ---------------- log first (3.10) ---------------- */
@@ -179,6 +179,7 @@ export async function handleBookingRequest(
     email: deps.site.email,
     siteUrl: deps.site.url,
     owner: deps.site.owner,
+    now,
   };
 
   try {

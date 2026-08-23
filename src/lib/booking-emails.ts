@@ -45,6 +45,9 @@ export interface EmailContext {
   siteUrl: string;
   /** Owner's first name, as the customer sees it across the site. */
   owner: string;
+  /** The clock the request was priced against, so the email's figures and its
+   *  last-minute flag match the endpoint's to the second. Defaults to now. */
+  now?: Date;
 }
 
 /* ------------------------------------------------------------------ *
@@ -152,8 +155,8 @@ export function edwardSubject(request: BookingRequest, catalog: Catalog): string
 
 export function edwardEmail(request: BookingRequest, ctx: EmailContext): EmailMessage {
   const { catalog, outOfArea } = ctx;
-  const est = estimate(request, catalog);
-  const lastMinute = isLastMinute(request.schedule.dateStart);
+  const est = estimate(request, catalog, ctx.now);
+  const lastMinute = isLastMinute(request.schedule.dateStart, ctx.now);
 
   // The flags that change what Edward does next, before anything else.
   const flags: string[] = [];
@@ -255,7 +258,7 @@ ${flags
  */
 export function customerEmail(request: BookingRequest, ctx: EmailContext): EmailMessage {
   const { catalog, outOfArea, phone, email, siteUrl, owner } = ctx;
-  const est = estimate(request, catalog);
+  const est = estimate(request, catalog, ctx.now);
 
   const detailRows: Row[] = [
     ["Service", serviceText(request, catalog)],

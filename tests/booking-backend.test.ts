@@ -282,7 +282,7 @@ describe("pricing", () => {
     const request = validBooking({
       selection: { serviceId: "nail-trim", durationMinutes: 0, addonIds: ["nail-trim-addon"], extraDogs: 0, extraCats: 0 },
     });
-    assert.equal(estimate(request, catalog).total, 20);
+    assert.equal(estimate(request, catalog, NOW).total, 20);
   });
 
   it("surcharges Easter (B5, confirmed) and holidays inside a range, both years", () => {
@@ -290,6 +290,22 @@ describe("pricing", () => {
     assert.equal(coversHoliday("2027-03-27", "2027-03-30"), true, "range over Easter 2027");
     assert.equal(coversHoliday("2027-12-20", "2027-12-26"), true, "range over Christmas 2027");
     assert.equal(coversHoliday("2026-04-06", ""), false, "the Monday after is a normal day");
+  });
+
+  it("prices against the clock it is given, not the wall clock", () => {
+    // This suite books SOON, a week past NOW. Before the estimator took a
+    // clock, it read the real one -- so the fixture quietly became a
+    // last-minute booking once the calendar reached it, and the suite started
+    // failing on a day nobody had touched the code. Pin both sides.
+    const request = validBooking();
+    assert.equal(estimate(request, catalog, NOW).total, 25, "a week out: no surcharge");
+
+    const eveningBefore = new Date(2026, 7, 23, 20, 0, 0); // < 24h before 9am on the 24th
+    assert.equal(
+      estimate(request, catalog, eveningBefore).total,
+      33,
+      "inside 24 hours: +$8, and only because the clock says so",
+    );
   });
 
   it("charges nights for an overnight range and visits for a walk range", () => {
@@ -301,10 +317,11 @@ describe("pricing", () => {
         schedule: range,
       }),
       catalog,
+      NOW,
     );
     assert.equal(overnight.units, 3, "22nd to 25th is three nights");
 
-    const walks = estimate(validBooking({ schedule: range }), catalog);
+    const walks = estimate(validBooking({ schedule: range }), catalog, NOW);
     assert.equal(walks.units, 4, "22nd to 25th is four visits");
   });
 });
@@ -352,6 +369,7 @@ describe("emails", () => {
     email: "edventurespetsitting@gmail.com",
     siteUrl: "https://edventures.pet",
     owner: "Edward",
+    now: NOW,
   };
 
   it("puts service, date, window, name and phone in Edward's first lines", () => {
