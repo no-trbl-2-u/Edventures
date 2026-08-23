@@ -592,11 +592,30 @@ Lives in [`src/lib/booking.ts`](src/lib/booking.ts).
 
 ### 3.11 — Deliverability
 
+**Decided 2026-08-23: booking notifications go straight to the Gmail account
+for now.** Edward gets every request that way, which is enough to run the
+business, so a dedicated sending domain is *wanted but deferred* — not
+abandoned.
+
+- [ ] **Dedicated sending domain (wanted).** Verify `edventures.pet` — or a `mail.`/`send.` subdomain — at <https://resend.com/domains>, then set `BOOKING_FROM` to `Edventures <bookings@edventures.pet>`. Mail from the business's own domain is also what makes the rest of this section possible: SPF, DKIM and DMARC are all records on a domain you control, and none of them exist for a shared sender
 - [ ] Configure SPF on the sending domain
 - [ ] Configure DKIM
 - [ ] Configure DMARC
 - [ ] Verify with a mail tester tool
 - [ ] Send a test to Gmail specifically — **check the spam folder**
+
+> **What deferring costs, so the trade is made with open eyes.** Until a domain
+> is verified, the endpoint falls back to Resend's shared sender
+> (`onboarding@resend.dev`), which delivers *only to the Resend account owner*.
+> Edward's notification arrives. The **customer's confirmation copy does not** —
+> that send fails and is swallowed, which is deliberate (a failed receipt must
+> not fail a booking Edward already has), so the customer still sees the success
+> screen and simply never receives an email. Customers get no written record of
+> their request until this is done. That, more than spam scoring, is the reason
+> to finish it.
+>
+> `BOOKING_FROM` must stay **unset** until the domain shows Verified — sending
+> from an unverified domain returns 403, which would 502 every booking.
 
 > Skipping this is the single most likely way this project quietly fails.
 
