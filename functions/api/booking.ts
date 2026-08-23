@@ -15,6 +15,7 @@
 import { handleBookingRequest, type SubmissionRecord } from "../../src/lib/booking-handler";
 import { getCatalogFromJson } from "../../src/lib/catalog-json";
 import { resendMailer, type Mailer } from "../../src/lib/mailer";
+import { pointerKey } from "../../src/lib/confirm";
 import { kvStore, memoryStore } from "../../src/lib/rate-limit";
 import { SERVED_ZIPS, SITE } from "../../src/lib/site";
 
@@ -69,7 +70,12 @@ function unconfiguredMailer(): Mailer {
 function kvLogger(kv: KVNamespace) {
   return async (record: SubmissionRecord) => {
     const slug = record.request.customer.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40);
-    await kv.put(`booking:${record.receivedAt}:${slug}`, JSON.stringify(record));
+    const key = `booking:${record.receivedAt}:${slug}`;
+    await kv.put(key, JSON.stringify(record));
+    // A pointer rather than a second copy: the record stays the single source
+    // of truth, and the confirm flow stamps it in place. Written second so a
+    // failure here costs the button, never the booking itself.
+    await kv.put(pointerKey(record.token), key);
   };
 }
 
@@ -87,6 +93,10 @@ export const onRequest = async (context: PagesContext): Promise<Response> => {
     fromAddress: env.BOOKING_FROM || "Edventures <onboarding@resend.dev>",
     site: { phone: SITE.phone, email: SITE.email, url: SITE.url, owner: SITE.owner },
     logSubmission: env.BOOKINGS ? kvLogger(env.BOOKINGS) : undefined,
+    // No KV, no lookup, so no button - see BookingDeps.confirmLinkFor.
+    confirmLinkFor: env.BOOKINGS
+      ? (token: string) => `${SITE.url}/api/confirm?t=${encodeURIComponent(token)}`
+      : undefined,
     // Without KV the limiter is per-isolate and therefore leaky. It is a speed
     // bump either way; KV makes it a real one.
     rateLimitStore: env.BOOKINGS ? kvStore(env.BOOKINGS) : memoryStore(),
