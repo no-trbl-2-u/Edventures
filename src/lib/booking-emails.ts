@@ -48,6 +48,10 @@ export interface EmailContext {
   /** The clock the request was priced against, so the email's figures and its
    *  last-minute flag match the endpoint's to the second. Defaults to now. */
   now?: Date;
+  /** One-click confirm link for Edward's copy. Absent when there is nowhere to
+   *  look the booking up (no KV), in which case no button is rendered rather
+   *  than a button that leads to a 404. */
+  confirmUrl?: string;
 }
 
 /* ------------------------------------------------------------------ *
@@ -199,6 +203,7 @@ export function edwardEmail(request: BookingRequest, ctx: EmailContext): EmailMe
   const text = [
     flags.length ? `** ${flags.join(" **\n** ")} **\n` : "",
     headline.join("\n"),
+    ctx.confirmUrl ? `\nConfirm this booking: ${ctx.confirmUrl}` : "",
     "",
     "---",
     "",
@@ -227,6 +232,14 @@ ${flags
   <p style="margin:0 0 20px;font-size:17px">${escapeHtml(request.customer.name)} &middot;
     <a href="tel:${escapeHtml(request.customer.phone.replace(/[^\d+]/g, ""))}">${escapeHtml(request.customer.phone)}</a>
   </p>
+  ${
+    ctx.confirmUrl
+      ? `<p style="margin:0 0 22px">
+    <a href="${escapeHtml(ctx.confirmUrl)}" style="display:inline-block;background:#163e1f;color:#f6ede5;text-decoration:none;font-weight:700;font-size:16px;padding:14px 26px;border-radius:8px">Confirm this booking &rarr;</a>
+    <br><span style="color:#666;font-size:13px">Opens a page where you can add a note before sending.</span>
+  </p>`
+      : ""
+  }
   <hr style="border:none;border-top:1px solid #e5e5e5;margin:0 0 20px">
   ${rowsToHtml(detailRows)}
   <hr style="border:none;border-top:1px solid #e5e5e5;margin:20px 0">
@@ -317,6 +330,82 @@ export function customerEmail(request: BookingRequest, ctx: EmailContext): Email
 
   return {
     subject: `Your request is with ${owner} - ${summarize(request, catalog)}`,
+    text,
+    html,
+  };
+}
+
+/* ------------------------------------------------------------------ *
+ * The confirmation Edward sends
+ * ------------------------------------------------------------------ */
+
+/**
+ * Sent when Edward presses Confirm. This is the *only* email in the system
+ * that says a visit is actually happening, so it says so plainly and without
+ * the hedging the other two carry deliberately.
+ *
+ * `note` is whatever he typed on the confirm page - free text, already
+ * cleaned. Empty is the common case and renders nothing rather than an empty
+ * heading.
+ */
+export function confirmationEmail(
+  request: BookingRequest,
+  ctx: EmailContext,
+  note = "",
+): EmailMessage {
+  const { catalog, phone, email, siteUrl, owner } = ctx;
+  const est = estimate(request, catalog, ctx.now);
+
+  const detailRows: Row[] = [
+    ["Service", serviceText(request, catalog)],
+    ["When", dateRangeText(request)],
+    ["Time window", windowText(request)],
+    ["Pet", petsText(request)],
+    ["Add-ons", addonsText(request, catalog)],
+    ["Address", `${request.customer.address}, ${request.customer.zip}`],
+  ];
+
+  const text = [
+    `${owner} has confirmed your booking.`,
+    "",
+    `You are on the calendar for ${dateRangeText(request)}, ${windowText(request)}.`,
+    note ? `\nA note from ${owner}:\n${note}` : "",
+    "",
+    "--- Your visit ---",
+    "",
+    rowsToText(detailRows),
+    "",
+    `Total: $${est.total}. Payment is directly with ${owner} - nothing is charged through the website.`,
+    "",
+    `Need to change or cancel? Reply to this email, or text ${phone}.`,
+    "",
+    `${siteUrl} - ${email}`,
+  ]
+    .filter((block) => block !== "")
+    .join("\n");
+
+  const html = `
+<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:16px;line-height:1.6;color:#1a1a1a;max-width:600px">
+  <p style="margin:0 0 16px;font-size:20px;font-weight:700">${escapeHtml(owner)} has confirmed your booking.</p>
+  <p style="margin:0 0 20px">You are on the calendar for <strong>${escapeHtml(dateRangeText(request))}</strong>, ${escapeHtml(windowText(request))}.</p>
+  ${
+    note
+      ? `<p style="margin:0 0 20px;padding:12px 14px;background:#eef3ec;border-left:4px solid #163e1f">
+    <strong>A note from ${escapeHtml(owner)}:</strong><br>${escapeHtmlMultiline(note)}</p>`
+      : ""
+  }
+  <hr style="border:none;border-top:1px solid #e5e5e5;margin:0 0 20px">
+  <p style="margin:0 0 12px;font-weight:700">Your visit</p>
+  ${rowsToHtml(detailRows)}
+  <p style="margin:16px 0 0"><strong>Total: $${est.total}</strong><br>
+    <span style="color:#666;font-size:14px">Payment is directly with ${escapeHtml(owner)} &mdash; nothing is charged through the website.</span></p>
+  <hr style="border:none;border-top:1px solid #e5e5e5;margin:20px 0">
+  <p style="margin:0 0 4px;color:#666;font-size:14px">Need to change or cancel? Reply to this email, or text ${escapeHtml(phone)}.</p>
+  <p style="margin:0;color:#666;font-size:14px"><a href="${escapeHtml(siteUrl)}">${escapeHtml(siteUrl.replace(/^https?:\/\//, ""))}</a> &middot; ${escapeHtml(email)}</p>
+</div>`.trim();
+
+  return {
+    subject: `Confirmed: ${summarize(request, catalog)}`,
     text,
     html,
   };

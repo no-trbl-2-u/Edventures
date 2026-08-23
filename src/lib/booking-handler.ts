@@ -38,6 +38,9 @@ export interface SubmissionRecord {
   estimateTotal: number;
   summary: string;
   request: BookingRequest;
+  /** Unguessable handle for the confirm link in Edward's email. Stored with
+   *  the record so pressing the button can find this booking again. */
+  token: string;
 }
 
 export interface BookingDeps {
@@ -62,6 +65,15 @@ export interface BookingDeps {
   /** Reported to the caller when something fails, so a 502 is traceable. */
   onError?: (stage: string, error: unknown) => void;
   now?: () => Date;
+  /** Injectable so tests get a predictable token. Defaults to a v4 UUID,
+   *  which is 122 bits of randomness - not guessable at any useful rate. */
+  makeToken?: () => string;
+  /**
+   * Builds the confirm URL for Edward's email. Supplied only when there is
+   * somewhere to look the booking up again, so a deployment without KV renders
+   * no button rather than a button leading to a dead end.
+   */
+  confirmLinkFor?: (token: string) => string;
 }
 
 const json = (status: number, body: unknown, headers: Record<string, string> = {}) =>
@@ -155,6 +167,10 @@ export async function handleBookingRequest(
 
   /* ---------------- log first (3.10) ---------------- */
 
+  // Issued before the log so the record and the emailed link agree, and before
+  // the send so the button in Edward's copy is never a broken promise.
+  const token = deps.makeToken?.() ?? crypto.randomUUID();
+
   if (deps.logSubmission) {
     try {
       await deps.logSubmission({
@@ -164,6 +180,7 @@ export async function handleBookingRequest(
         estimateTotal: est.total,
         summary,
         request: booking,
+        token,
       });
     } catch (error) {
       deps.onError?.("log", error);
@@ -180,6 +197,7 @@ export async function handleBookingRequest(
     siteUrl: deps.site.url,
     owner: deps.site.owner,
     now,
+    confirmUrl: deps.confirmLinkFor?.(token),
   };
 
   try {

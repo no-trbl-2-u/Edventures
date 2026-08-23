@@ -18,7 +18,14 @@ import { validateBooking, looksAutomated } from "../src/lib/booking-validate.ts"
 import { handleBookingRequest, type BookingDeps } from "../src/lib/booking-handler.ts";
 import { dryRunMailer } from "../src/lib/mailer.ts";
 import { checkRateLimit, memoryStore } from "../src/lib/rate-limit.ts";
-import { edwardEmail, customerEmail } from "../src/lib/booking-emails.ts";
+import { edwardEmail, customerEmail, confirmationEmail } from "../src/lib/booking-emails.ts";
+import {
+  cleanNote,
+  handleConfirmRequest,
+  pointerKey,
+  type ConfirmDeps,
+  type ConfirmStore,
+} from "../src/lib/confirm.ts";
 import { SERVED_ZIPS } from "../src/lib/site.ts";
 
 const catalog = getCatalogFromJson();
@@ -553,5 +560,211 @@ describe("endpoint", () => {
       d,
     );
     assert.match(d.mailer.sent[0]!.text, /OUT OF AREA/);
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * Confirmation flow
+ * ------------------------------------------------------------------ */
+
+/** KV, as a Map. The real thing is get/put over strings and nothing else. */
+function fakeStore(): ConfirmStore & { data: Map<string, string> } {
+  const data = new Map<string, string>();
+  return {
+    data,
+    async get(key) {
+      return data.get(key) ?? null;
+    },
+    async put(key, value) {
+      data.set(key, value);
+    },
+  };
+}
+
+const TOKEN = "test-token-0001";
+
+/**
+ * Runs a real booking through the real endpoint, logging into `store` exactly
+ * the way functions/api/booking.ts does. Anything the confirm flow then reads
+ * was written by the booking flow, so the two cannot drift apart unnoticed.
+ */
+async function bookInto(store: ReturnType<typeof fakeStore>, overrides: Partial<BookingRequest> = {}) {
+  const d = deps({
+    makeToken: () => TOKEN,
+    confirmLinkFor: (t: string) => `https://edventures.pet/api/confirm?t=${t}`,
+    logSubmission: async (record) => {
+      const key = `booking:${record.receivedAt}:test`;
+      await store.put(key, JSON.stringify(record));
+      await store.put(pointerKey(record.token), key);
+    },
+  });
+  const res = await handleBookingRequest(post(validBooking(overrides)), d);
+  assert.equal(res.status, 200);
+  return d;
+}
+
+function confirmDeps(store: ConfirmStore, overrides: Partial<ConfirmDeps> = {}): ConfirmDeps & {
+  mailer: ReturnType<typeof dryRunMailer>;
+} {
+  const mailer = dryRunMailer();
+  return {
+    store,
+    catalog,
+    mailer,
+    fromAddress: "Edventures <bookings@edventures.pet>",
+    site: {
+      phone: "610-888-4541",
+      email: "edventurespetsitting@gmail.com",
+      url: "https://edventures.pet",
+      owner: "Edward",
+    },
+    now: () => NOW,
+    ...overrides,
+  } as ConfirmDeps & { mailer: ReturnType<typeof dryRunMailer> };
+}
+
+const confirmGet = (token: string) =>
+  new Request(`https://edventures.pet/api/confirm?t=${encodeURIComponent(token)}`);
+
+const confirmPost = (token: string, note = "") =>
+  new Request("https://edventures.pet/api/confirm", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ t: token, note }).toString(),
+  });
+
+describe("confirmation", () => {
+  it("issues a token with the booking and puts the link in Edward's email", async () => {
+    const store = fakeStore();
+    const d = await bookInto(store);
+
+    assert.match(d.mailer.sent[0]!.text, /\/api\/confirm\?t=test-token-0001/);
+    assert.match(d.mailer.sent[0]!.html, /Confirm this booking/);
+    assert.ok(store.data.get(pointerKey(TOKEN)), "pointer written for the token");
+  });
+
+  it("renders no button when there is nowhere to look the booking up", async () => {
+    const d = deps(); // no confirmLinkFor, as when KV is unbound
+    await handleBookingRequest(post(validBooking()), d);
+    assert.ok(!d.mailer.sent[0]!.text.includes("/api/confirm"));
+    assert.ok(!d.mailer.sent[0]!.html.includes("Confirm this booking"));
+  });
+
+  it("GET renders the page and sends absolutely nothing", async () => {
+    const store = fakeStore();
+    await bookInto(store);
+    const c = confirmDeps(store);
+
+    const res = await handleConfirmRequest(confirmGet(TOKEN), c);
+    const body = await res.text();
+
+    assert.equal(res.status, 200);
+    assert.match(body, /Confirm this booking\?/);
+    assert.match(body, /Dana Reyes/);
+    assert.match(body, /<form method="POST">/);
+    assert.equal(c.mailer.sent.length, 0, "a prefetching scanner must not send mail");
+  });
+
+  it("POST sends the confirmation, carries the note, and stamps the record", async () => {
+    const store = fakeStore();
+    await bookInto(store);
+    const c = confirmDeps(store);
+
+    const res = await handleConfirmRequest(confirmPost(TOKEN, "See you Tuesday."), c);
+    assert.equal(res.status, 200);
+
+    assert.equal(c.mailer.sent.length, 1);
+    const mail = c.mailer.sent[0]!;
+    assert.equal(mail.to, "dana@example.com");
+    assert.match(mail.subject, /^Confirmed: /);
+    assert.match(mail.text, /See you Tuesday\./);
+    assert.match(mail.html, /See you Tuesday\./);
+
+    const key = store.data.get(pointerKey(TOKEN))!;
+    const stored = JSON.parse(store.data.get(key)!);
+    assert.ok(stored.confirmedAt, "record stamped");
+    assert.equal(stored.confirmNote, "See you Tuesday.");
+  });
+
+  it("does not send twice, however many times the button is pressed", async () => {
+    const store = fakeStore();
+    await bookInto(store);
+    const c = confirmDeps(store);
+
+    await handleConfirmRequest(confirmPost(TOKEN), c);
+    const second = await handleConfirmRequest(confirmPost(TOKEN), c);
+    const body = await second.text();
+
+    assert.equal(c.mailer.sent.length, 1, "the customer hears once");
+    assert.match(body, /Already confirmed/);
+
+    // And the page a re-opened link shows says the same.
+    const get = await handleConfirmRequest(confirmGet(TOKEN), c);
+    assert.match(await get.text(), /Already confirmed/);
+  });
+
+  it("refuses an unknown token without sending", async () => {
+    const store = fakeStore();
+    await bookInto(store);
+    const c = confirmDeps(store);
+
+    const res = await handleConfirmRequest(confirmPost("not-a-real-token"), c);
+    assert.equal(res.status, 404);
+    assert.match(await res.text(), /isn.t recognised/);
+    assert.equal(c.mailer.sent.length, 0);
+  });
+
+  it("leaves the record unstamped when the send fails, so it can be retried", async () => {
+    const store = fakeStore();
+    await bookInto(store);
+    const c = confirmDeps(store, {
+      mailer: { send: async () => { throw new Error("provider down"); } },
+      onError: () => {},
+    });
+
+    const res = await handleConfirmRequest(confirmPost(TOKEN), c);
+    assert.equal(res.status, 502);
+    assert.match(await res.text(), /have <strong>not<\/strong> been told/);
+
+    const key = store.data.get(pointerKey(TOKEN))!;
+    assert.ok(!JSON.parse(store.data.get(key)!).confirmedAt, "not marked confirmed");
+  });
+
+  it("neutralises a note rather than rejecting it", () => {
+    assert.equal(cleanNote("Header: x\r\nBcc: someone@elsewhere.test").includes("\r"), false);
+    assert.equal(cleanNote(undefined), "");
+    assert.equal(cleanNote("x".repeat(5000)).length, 1000);
+  });
+
+  it("escapes a hostile note instead of rendering it", () => {
+    const ctx = {
+      catalog,
+      outOfArea: false,
+      phone: "610-888-4541",
+      email: "edventurespetsitting@gmail.com",
+      siteUrl: "https://edventures.pet",
+      owner: "Edward",
+      now: NOW,
+    };
+    const mail = confirmationEmail(validBooking(), ctx, "<script>alert(1)</script>");
+    assert.ok(!mail.html.includes("<script>"));
+    assert.ok(mail.html.includes("&lt;script&gt;"));
+  });
+
+  it("tells the customer it is actually booked, unlike the request receipt", () => {
+    const ctx = {
+      catalog,
+      outOfArea: false,
+      phone: "610-888-4541",
+      email: "edventurespetsitting@gmail.com",
+      siteUrl: "https://edventures.pet",
+      owner: "Edward",
+      now: NOW,
+    };
+    const confirmed = confirmationEmail(validBooking(), ctx);
+    assert.match(confirmed.text, /has confirmed your booking/);
+    assert.ok(!confirmed.text.includes("Nothing is booked yet"));
+    // No note given: no empty heading left behind.
+    assert.ok(!confirmed.html.includes("A note from"));
   });
 });

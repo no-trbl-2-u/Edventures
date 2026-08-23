@@ -638,6 +638,48 @@ abandoned.
 
 ---
 
+### 3.14 — One-click confirmation ✅
+
+Edward's notification email carries a **Confirm this booking** button. It opens
+a page showing the request, with a box for an optional note, and sending is a
+form POST from that page.
+
+- [x] Unguessable token issued with each booking and stored beside the record
+- [x] Confirm page renders the booking; **GET never sends**
+- [x] Optional note from Edward, included in the customer's email
+- [x] Customer confirmation email — the one message in the system that says a
+      visit is definitely happening, without the hedging the other two carry
+- [x] Idempotent: a second press says "already confirmed" instead of sending again
+- [x] Send fails → nothing is stamped, so the link still works and Edward is
+      told plainly that the customer has *not* been reached
+
+> **Why the button is a two-step and not a one-tap link.** Mail providers and
+> corporate security products prefetch every URL in a message to scan it. A
+> link that sent on GET would have scanners confirming bookings nobody looked
+> at, and customers told a visit was happening on the authority of a virus
+> checker. GET renders, POST sends.
+
+> **Blocked on 3.11 for real customers.** The confirmation goes to the
+> customer's own address, which the shared Resend sender cannot reach. The flow
+> is built, tested and deployed, but it only genuinely lands once
+> `edventures.pet` is a verified sending domain.
+
+**Wanted next, in the order they are worth doing:**
+
+- [ ] **Let Edward adjust the appointment before confirming.** Right now the
+      button confirms exactly what was requested, so a different time window or
+      a corrected price still means a text message. The confirm page becomes a
+      small form over the fields that actually move — window, date, final price
+      — and the confirmation email reports what was agreed rather than what was
+      asked for. This is the difference between a notification and a booking
+      tool, and it is the strongest argument for *not* needing Phase 4
+- [ ] **A "Can't make it" button** beside Confirm. Same lookup, same token, a
+      different template — cheap while the mechanism is fresh, and it closes
+      the loop for the customer instead of leaving them waiting on a text that
+      never comes
+
+---
+
 # Phase 4 — Third-party booking tool
 
 *Trigger: Edward is spending too much time on confirmation back-and-forth, or missing requests.*
