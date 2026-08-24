@@ -23,6 +23,7 @@
  */
 import { estimate, summarize, type BookingRequest, type Catalog } from "./booking";
 import { confirmationEmail, type EmailContext } from "./booking-emails";
+import { bookingIcs, icsFilename } from "./calendar";
 import type { Mailer } from "./mailer";
 
 /** The subset of KV this flow needs. Keeps the module platform-free. */
@@ -169,22 +170,40 @@ ${detailsCard(record, catalog, now)}
   );
 }
 
-export function confirmedPage(record: StoredBooking, note: string): string {
+/**
+ * The button, rather than a second email to Edward.
+ *
+ * He is already here -- he just pressed Confirm -- so a link he taps now beats
+ * a mail that has to be sent, delivered and found. It also keeps the confirm
+ * path to exactly one outbound send: adding a second would mean deciding what
+ * to do when the customer's email succeeds and Edward's fails, and there is no
+ * good answer to that question at the moment the booking is being agreed.
+ */
+function addToCalendarLink(token: string): string {
+  return token
+    ? `<p><a class="btn" href="?t=${encodeURIComponent(token)}&amp;format=ics">Add to calendar</a></p>
+<p class="muted">Downloads a calendar file. The customer's copy is attached to their confirmation email too.</p>`
+    : "";
+}
+
+export function confirmedPage(record: StoredBooking, note: string, token = ""): string {
   return page(
     "Confirmation sent",
     `<h1>Sent.</h1>
 <p class="ok">${escapeHtml(record.request.customer.name)} has been emailed a confirmation.</p>
 ${note ? `<div class="card"><p class="row"><strong>Your note:</strong></p><p class="row">${escapeHtml(note).replace(/\n/g, "<br>")}</p></div>` : ""}
+${addToCalendarLink(token)}
 <p class="muted">Nothing else to do. This page can be closed.</p>`,
   );
 }
 
-export function alreadyConfirmedPage(record: StoredBooking): string {
+export function alreadyConfirmedPage(record: StoredBooking, token = ""): string {
   const when = record.confirmedAt ? new Date(record.confirmedAt).toLocaleString("en-US") : "earlier";
   return page(
     "Already confirmed",
     `<h1>Already confirmed.</h1>
 <p>${escapeHtml(record.request.customer.name)} was sent a confirmation on <strong>${escapeHtml(when)}</strong>, so nothing was sent again.</p>
+${addToCalendarLink(token)}
 <p class="muted">To tell them something new, reply to their booking email instead.</p>`,
   );
 }
@@ -241,7 +260,31 @@ export async function handleConfirmRequest(
     const token = url.searchParams.get("t") ?? "";
     const found = await load(deps.store, token);
     if (!found) return html(404, notFoundPage());
-    if (found.record.confirmedAt) return html(200, alreadyConfirmedPage(found.record));
+
+    /**
+     * The calendar file. Still a GET that sends nothing, so it is safe from
+     * the mail-scanner prefetch this endpoint's GET/POST split exists to
+     * survive.
+     *
+     * Only once confirmed, deliberately: an `.ics` for a request Edward has
+     * not agreed to would put an unbooked visit in his diary, and a diary he
+     * cannot trust is worse than no export at all.
+     */
+    if (url.searchParams.get("format") === "ics" && found.record.confirmedAt) {
+      return new Response(bookingIcs(found.record, deps.catalog, now), {
+        headers: {
+          "Content-Type": "text/calendar; charset=utf-8; method=PUBLISH",
+          "Content-Disposition": `attachment; filename="${icsFilename(found.record)}"`,
+          // A token in a URL should never reach an analytics tool or a search
+          // index -- same reasoning as the page responses.
+          "Referrer-Policy": "no-referrer",
+          "X-Robots-Tag": "noindex, nofollow",
+          "Cache-Control": "private, no-store",
+        },
+      });
+    }
+
+    if (found.record.confirmedAt) return html(200, alreadyConfirmedPage(found.record, token));
     return html(200, confirmPage(found.record, deps.catalog, token, now));
   }
 
@@ -278,12 +321,29 @@ export async function handleConfirmRequest(
     now,
   };
 
+  // Built before the send and reused by the stamp below, so the attachment,
+  // the stored record and the served `.ics` are all the same object. The file
+  // says CONFIRMED and repeats Edward's note, so it has to describe what was
+  // agreed rather than what was requested.
+  const confirmed: StoredBooking = {
+    ...found.record,
+    confirmedAt: now.toISOString(),
+    confirmNote: note,
+  };
+
   try {
     await deps.mailer.send({
       ...confirmationEmail(found.record.request, ctx, note),
       to: found.record.request.customer.email,
       from: deps.fromAddress,
       replyTo: deps.site.email,
+      attachments: [
+        {
+          filename: icsFilename(confirmed),
+          content: bookingIcs(confirmed, deps.catalog, now),
+          contentType: "text/calendar; charset=utf-8; method=PUBLISH",
+        },
+      ],
     });
   } catch (error) {
     deps.onError?.("confirmation-email", error);
@@ -292,17 +352,12 @@ export async function handleConfirmRequest(
 
   // Only now. See the header note on send-then-stamp.
   try {
-    const updated: StoredBooking = {
-      ...found.record,
-      confirmedAt: now.toISOString(),
-      confirmNote: note,
-    };
-    await deps.store.put(found.key, JSON.stringify(updated));
+    await deps.store.put(found.key, JSON.stringify(confirmed));
   } catch (error) {
     // The customer has been told, which is the part that matters. A lost stamp
     // only risks a duplicate if he presses the button twice.
     deps.onError?.("stamp", error);
   }
 
-  return html(200, confirmedPage(found.record, note));
+  return html(200, confirmedPage(found.record, note, token));
 }

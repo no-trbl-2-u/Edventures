@@ -716,6 +716,117 @@ form POST from that page.
 
 ---
 
+## 3.14 — Edward's calendar
+
+*Goal: a confirmed booking reaches the diary Edward actually looks at.*
+
+Four steps, each shipping something useful on its own, each one only worth
+starting when the previous one is genuinely not enough. **Stop at whichever
+step stops hurting** — the last two are only justified by volume the business
+does not have yet.
+
+The direction matters more than the mechanism. This is all **outbound**:
+confirmed booking → calendar. The inbound direction — the form reading his
+availability and refusing slots — is deliberately excluded and gets its own
+note at the bottom.
+
+**3.14.1 — `.ics` at confirmation ✅ (2026-08-24)**
+
+- [x] `src/lib/calendar.ts` builds an RFC 5545 `VCALENDAR` from a confirmed
+      booking. No dependency: the format is text, and a package to emit twenty
+      lines would be the expensive way to save them
+- [x] Attached to the customer's confirmation email; Edward gets an **Add to
+      calendar** button on the page he is already looking at, having just
+      pressed Confirm. A button rather than a second email keeps the confirm
+      path at exactly one outbound send — a second would force a decision about
+      what to do when the customer's mail succeeds and Edward's fails, at the
+      worst possible moment to be deciding it
+- [x] Also served at `/api/confirm?t=<token>&format=ics`, and **only once
+      confirmed**. A calendar entry for a request he has not agreed to is worse
+      than no export, because a diary he cannot trust is one he stops reading
+- [x] One event per visit or per night, matching how `estimate()` bills them
+- [x] **Windows, not invented times.** A "morning" booking spans the published
+      7–11am. Overnight stays have no published hours (go-back-to-ed.md C1), so
+      they are all-day entries rather than a guessed 6pm–9am
+- [x] Stable UIDs, so re-importing updates the entry instead of duplicating it
+
+> **Where this stops.** It is one file, one time. Change the booking afterwards
+> and the calendar does not know. That is the entire argument for 3.14.2.
+
+**3.14.2 — A subscribed feed**
+
+- [ ] `/api/calendar/<secret>.ics` listing every confirmed booking, read from
+      the KV records that already exist — `booking:<timestamp>:<slug>` keys
+      carry `confirmedAt` once Edward has pressed the button
+- [ ] Secret in the path, stored as a Pages secret. This is exactly how
+      Google's own "secret address in iCal format" works; there is no session
+      to authenticate against and inventing one would be theatre
+- [ ] Edward subscribes once. Every future booking appears with no further
+      action, and a cancelled one disappears — which the attachment can never do
+- [ ] **Know the limitation before promising it.** Google Calendar polls
+      subscribed URLs on its own schedule, often hours and sometimes over a
+      day. Apple Calendar honours a refresh interval as low as 5 minutes. So
+      the feed is a *backstop that never misses*, not a live view — 3.14.1
+      stays for immediacy. The two are complements, not a replacement
+- [ ] Serve `Cache-Control: no-store` and a short `REFRESH-INTERVAL` hint
+
+**3.14.3 — Writing to Google Calendar directly**
+
+*Trigger: the poll delay in 3.14.2 has actually caused a double-booking, or
+Edward is editing bookings often enough that stale entries mislead him.*
+
+- [ ] OAuth to Edward's Google account, refresh token in KV, write the event on
+      confirm and patch or delete it on change
+- [ ] Gives what neither step above can: **instant**, and **it can delete**.
+      Pairs with the "Can't make it" button in 3.13 — a cancelled visit should
+      leave the diary, not linger
+- [ ] **Cost, honestly:** a Google Cloud project, an OAuth consent screen, and
+      refresh-token storage and rotation. An unverified app left in Testing has
+      refresh tokens that expire every 7 days, which is a support burden aimed
+      squarely at one person. Verification is the fix and it is not fast
+- [ ] Keep 3.14.1 working throughout. When the token expires — and it will —
+      the attachment is still a booking he can add by hand
+
+**3.14.4 — One calendar as the source of truth**
+
+*Trigger: Phase 4 or Phase 6. Not before.*
+
+- [ ] By this point the question is not "how do we sync" but "what is
+      authoritative". Two systems that both accept writes will disagree; the
+      only stable answers are *the site owns bookings and the calendar mirrors
+      them*, or *a booking tool owns both and the site is a form in front of it*
+- [ ] Phase 4 already recommends the second: keep the custom form for the
+      pet-specific intake no generic tool handles well, and let Time To Pet or
+      Square own the calendar. **That makes 3.14.3 a bridge, not a foundation**
+      — worth knowing before building it
+- [ ] If the site keeps ownership instead, this is Phase 6 territory: a real
+      database, an availability engine with travel time and buffers, and
+      two-way reconciliation with conflict rules. Read Phase 6's own honest
+      assessment before starting
+
+### The inbound direction, and why it is not here
+
+Letting the booking form read Edward's calendar and grey out unavailable slots
+is the obvious next thought, and it is a trap at this size.
+
+Roadmap 3 opens by saying *"there is no availability to compute, so there is no
+hard problem."* Reading his calendar re-introduces it, and makes the site's
+correctness depend on him maintaining a personal calendar rigorously enough for
+strangers to book against. The first time he forgets to block a dentist
+appointment, the site sells that slot with total confidence — the same failure
+shape as quoting a price from a stale copy.
+
+The version worth building, when it is worth building:
+
+- [ ] **Soft conflict detection, in the email he already reads.** On a new
+      request, check free/busy for that window and add a line to Edward's
+      notification: *"⚠️ You have something 9–10am that day."* He still decides;
+      the customer is never told no by a calendar. Free/busy is a far narrower
+      OAuth scope than calendar read/write, and it fits 3.13's plan to let him
+      adjust the appointment before confirming
+
+---
+
 # Phase 4 — Third-party booking tool
 
 *Trigger: Edward is spending too much time on confirmation back-and-forth, or missing requests.*

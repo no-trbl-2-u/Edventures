@@ -17,9 +17,18 @@ this file is the TJ list.
 > How the checks were made, so they can be repeated:
 >
 > ```sh
-> curl -s https://edventures.pet/api/health          # is the mailer configured?
-> curl -sI https://www.edventures.pet/ | head -1     # does www still 200?
+> curl -s https://edventures.pet/api/health   # is the mailer configured?
+>
+> # Does www still answer instead of redirecting? Prints e.g. `200` and an
+> # empty redirect while item 2 is open; `301 https://edventures.pet/` once
+> # it is fixed.
+> curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' https://www.edventures.pet/
 > ```
+>
+> Use that second form rather than `curl -sI ... | head -1`. Behind an HTTP
+> proxy the first header line is the tunnel's own `200 Connection
+> Established`, not the site's — which looks exactly like the failure this
+> item describes and would "confirm" it no matter what the origin said.
 
 ---
 
