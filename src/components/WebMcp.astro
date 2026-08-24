@@ -1,0 +1,77 @@
+---
+/**
+ * WebMCP -- the same four tools, offered to an agent driving the browser.
+ *
+ * The MCP server in `functions/api/mcp.ts` serves an agent that fetched the
+ * server card and connected. This serves the other kind: one already on the
+ * page, in the user's browser, with the user's session. Same tools, same
+ * `agent-tools.ts`, so the two can never answer the same question differently.
+ *
+ * Everything is read-only, and there is deliberately no tool that submits the
+ * booking form. An agent that can fill in an address, an entry arrangement and
+ * an emergency contact and press send is one misread sentence away from
+ * committing Edward's time to a booking nobody made.
+ *
+ * The tools are behind a dynamic `import()`, which is the whole reason this is
+ * affordable. Most of these pages ship no JavaScript at all, and the estimator
+ * plus the catalog is several kilobytes; loading them on every visit to buy a
+ * capability almost no visitor's browser has yet would be a poor trade. The
+ * feature check runs first, and the bytes arrive only if something is there to
+ * use them.
+ */
+---
+
+<script>
+  /**
+   * The shape of the API as specified today.
+   *
+   * WebMCP is a draft: `provideContext` is the current entry point and
+   * `registerTool` was an earlier one, and both are still in the wild. Feature
+   * detection covers both rather than picking one and silently doing nothing
+   * in the browsers that have the other.
+   */
+  interface WebMcpTool {
+    name: string;
+    description: string;
+    inputSchema: unknown;
+    execute(input: Record<string, unknown>): Promise<unknown>;
+  }
+
+  interface ModelContext {
+    provideContext?(context: { tools: WebMcpTool[] }): void;
+    registerTool?(tool: WebMcpTool): void;
+  }
+
+  const modelContext = (navigator as Navigator & { modelContext?: ModelContext }).modelContext;
+
+  if (modelContext && (modelContext.provideContext || modelContext.registerTool)) {
+    const [{ AGENT_TOOLS, runTool }, { getCatalogFromJson }] = await Promise.all([
+      import("../lib/agent-tools"),
+      import("../lib/catalog-json"),
+    ]);
+
+    const catalog = getCatalogFromJson();
+
+    const tools: WebMcpTool[] = AGENT_TOOLS.map((tool) => ({
+      name: tool.name,
+      description: tool.description,
+      inputSchema: tool.inputSchema,
+      async execute(input) {
+        const { ok, result } = runTool(tool.name, input ?? {}, catalog);
+        // MCP's content shape, because a WebMCP host is feeding this to the
+        // same kind of model as the HTTP server is.
+        return {
+          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          structuredContent: result,
+          isError: !ok,
+        };
+      },
+    }));
+
+    if (typeof modelContext.provideContext === "function") {
+      modelContext.provideContext({ tools });
+    } else {
+      for (const tool of tools) modelContext.registerTool?.(tool);
+    }
+  }
+</script>

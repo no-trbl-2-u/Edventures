@@ -1,0 +1,276 @@
+---
+/**
+ * /docs/api -- the `service-doc` target.
+ *
+ * The api-catalog and the `Link: rel="service-doc"` header both promise a
+ * human-readable API reference, and a promise that 404s is worse than one not
+ * made: an agent that follows a broken `service-doc` has no second guess. So
+ * this page exists, and it is generated from the same catalog and the same
+ * tool definitions as `/openapi.json` and the MCP server card rather than
+ * describing them from memory.
+ *
+ * It is unlinked from the site navigation on purpose. Nobody hiring a dog
+ * walker wants an API reference in the header; the things that need to find
+ * this page are reading headers, not menus.
+ */
+import Base from "../../layouts/Base.astro";
+import { AGENT_TOOLS } from "../../lib/agent-tools";
+import { ENDPOINTS, MCP_SERVER_VERSION } from "../../lib/agent-discovery";
+import { AGENT_SKILLS, skillUrl } from "../../lib/agent-skills";
+import { getCatalog } from "../../lib/catalog";
+import { SITE } from "../../lib/site";
+import { breadcrumbs } from "../../lib/structured-data";
+
+const catalog = await getCatalog();
+
+const structuredData = [
+  breadcrumbs([
+    { name: "Home", path: "/" },
+    { name: "API", path: "/docs/api" },
+  ]),
+];
+
+/** Everything an agent can fetch, in one table. */
+const discovery = [
+  [ENDPOINTS.apiCatalog, "application/linkset+json", "RFC 9727 API catalog — start here."],
+  [ENDPOINTS.openapi, "application/vnd.oai.openapi+json", "OpenAPI 3.1 description of every endpoint below."],
+  [ENDPOINTS.ardCatalog, "application/json", "ARD capability manifest."],
+  [ENDPOINTS.mcpServerCard, "application/json", "MCP server card (SEP-1649)."],
+  [ENDPOINTS.agentSkills, "application/json", "Agent Skills Discovery index."],
+  [ENDPOINTS.authMd, "text/markdown", "Authentication policy. Short version: there isn't any."],
+  [ENDPOINTS.llms, "text/plain", "Briefing: prices, area, constraints."],
+  [ENDPOINTS.llmsFull, "text/plain", "The same, plus the full text of every page."],
+];
+---
+
+<Base
+  title="API"
+  description={`The public API of ${SITE.name}: a booking endpoint, an MCP server with read-only tools over the published price list, and a health check. No authentication.`}
+  structuredData={structuredData}
+>
+  <section class="shell page-head">
+    <span class="eyebrow">For developers and agents</span>
+    <h1 class="heading-brand page-title">API</h1>
+    <p class="lede page-lede">
+      Everything here is public and unauthenticated. If you are looking to book a walk,
+      you want <a href="/book">the booking form</a> instead.
+    </p>
+  </section>
+
+  <section class="shell-prose api-doc">
+    <h2 class="heading-brand">Discovery</h2>
+    <p>
+      Every page carries <code>Link</code> headers pointing at these. Version {MCP_SERVER_VERSION}.
+    </p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Path</th><th>Type</th><th>What it is</th></tr>
+        </thead>
+        <tbody>
+          {
+            discovery.map(([path, type, what]) => (
+              <tr>
+                <td><a href={path}><code>{path}</code></a></td>
+                <td><code>{type}</code></td>
+                <td>{what}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="heading-brand">Markdown instead of HTML</h2>
+    <p>
+      Send <code>Accept: text/markdown</code> to any page and you get a markdown rendering of
+      it instead of HTML — the same content, without the layout. Every page also advertises
+      its own <code>.md</code> twin through a
+      <code>Link: rel="alternate"; type="text/markdown"</code> header, so
+      <a href="/services.md"><code>/services.md</code></a> works directly if you would rather
+      not negotiate.
+    </p>
+
+    <h2 class="heading-brand">Authentication</h2>
+    <p>
+      None. There is no account, no API key and no OAuth issuer, which is why this site
+      publishes no <code>oauth-authorization-server</code> or
+      <code>oauth-protected-resource</code> metadata — see
+      <a href={ENDPOINTS.authMd}><code>/auth.md</code></a>. Send a descriptive
+      <code>User-Agent</code> with a contact URL; nothing is refused for lacking one.
+    </p>
+
+    <h2 class="heading-brand">GET <code>{ENDPOINTS.health}</code></h2>
+    <p>
+      Liveness, and whether a booking would actually get through. When
+      <code>bookingsAcceptable</code> is <code>false</code> the mail transport is
+      unconfigured and a submission will answer <code>502</code> — offer
+      <a href={SITE.phoneHref}>{SITE.phone}</a> rather than posting one.
+    </p>
+
+    <h2 class="heading-brand">POST <code>{ENDPOINTS.mcp}</code></h2>
+    <p>
+      Model Context Protocol over Streamable HTTP, JSON-RPC 2.0. Stateless: no session id is
+      issued or required. <code>initialize</code>, <code>ping</code>, <code>tools/list</code>
+      and <code>tools/call</code> are implemented; <code>GET</code> answers <code>405</code>,
+      because nothing here needs a server-initiated stream.
+    </p>
+    <p>All {AGENT_TOOLS.length} tools are read-only:</p>
+    <dl class="tool-list">
+      {
+        AGENT_TOOLS.map((tool) => (
+          <>
+            <dt><code>{tool.name}</code></dt>
+            <dd>{tool.description}</dd>
+          </>
+        ))
+      }
+    </dl>
+    <p>
+      There is deliberately no <code>submit_booking</code> tool. A booking commits Edward's
+      time and puts a stranger's entry arrangement in his inbox; that should follow from a
+      person filling in the form, not from an agent deciding it has enough of the fields.
+    </p>
+
+    <h2 class="heading-brand">POST <code>{ENDPOINTS.booking}</code></h2>
+    <p>
+      Submits a booking request as JSON. The full request shape, with the accepted service and
+      add-on ids, is in <a href={ENDPOINTS.openapi}><code>/openapi.json</code></a>.
+    </p>
+    <p>
+      The server re-prices every request from the real catalog and ignores whatever total the
+      client sends, so the <code>total</code> in the response is the number Edward was emailed.
+      Two answers deserve care: <code>422</code> carries per-field <code>errors</code>, and
+      <code>502</code> means the mail did not send and <strong>the booking did not reach
+      him</strong> — never report that as success.
+    </p>
+    <p class="note">
+      A <code>200</code> is a received request, not a confirmed booking. Edward confirms every
+      one by hand.
+    </p>
+
+    <h2 class="heading-brand">Skills</h2>
+    <p>
+      Task-shaped instructions, indexed at
+      <a href={ENDPOINTS.agentSkills}><code>{ENDPOINTS.agentSkills}</code></a> with a SHA-256
+      digest for each:
+    </p>
+    <ul>
+      {
+        AGENT_SKILLS.map((skill) => (
+          <li>
+            <a href={skillUrl(skill.name)}><code>{skill.name}</code></a> — {skill.description}
+          </li>
+        ))
+      }
+    </ul>
+
+    <h2 class="heading-brand">Prices</h2>
+    <p>
+      Published, flat, and the same everywhere — {catalog.services.length} services and
+      {" "}{catalog.addons.length} add-ons, all generated from one set of content files, so the
+      tools, the OpenAPI examples, the skills and
+      {" "}<a href="/services">the pricing page</a> cannot disagree. Nothing is charged through
+      this site; payment is arranged directly with Edward.
+    </p>
+
+    <h2 class="heading-brand">Crawling</h2>
+    <p>
+      AI crawlers are welcome — see <a href="/robots.txt"><code>/robots.txt</code></a>, which
+      also carries the Content Signals declaration. Please keep request rates sane; this is one
+      person's small business, not a platform.
+    </p>
+  </section>
+</Base>
+
+<style>
+  /* Same head treatment as the other interior pages. Repeated rather than
+     lifted into global.css: five pages sharing three rules is not yet a
+     component, and hoisting them would change every page to add one. */
+  .page-head {
+    padding-top: clamp(32px, 5vw, 64px);
+    text-align: center;
+  }
+  .page-title {
+    margin: 12px 0 0;
+    font-size: clamp(32px, 6vw, 56px);
+    letter-spacing: 0.05em;
+    line-height: 1.05;
+  }
+  .page-lede {
+    margin: 14px auto 0;
+    max-width: 52ch;
+  }
+
+  .api-doc {
+    padding-top: clamp(20px, 3vw, 36px);
+    padding-bottom: 4rem;
+  }
+
+  .api-doc h2 {
+    font-size: 1.5rem;
+    margin-top: 2.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .api-doc p,
+  .api-doc li {
+    line-height: 1.7;
+  }
+
+  .api-doc p + p {
+    margin-top: 0.85rem;
+  }
+
+  .api-doc ul {
+    margin: 0.85rem 0 0;
+    padding-left: 1.25rem;
+  }
+
+  .api-doc li + li {
+    margin-top: 0.5rem;
+  }
+
+  .api-doc code {
+    font-size: 0.9em;
+    background: color-mix(in srgb, currentColor 7%, transparent);
+    border-radius: 4px;
+    padding: 0.1em 0.35em;
+  }
+
+  /* Wide tables scroll inside themselves rather than pushing the page sideways
+     on a phone. */
+  .table-scroll {
+    overflow-x: auto;
+    margin-top: 1rem;
+  }
+
+  .api-doc table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 34rem;
+    font-size: 0.95rem;
+  }
+
+  .api-doc th,
+  .api-doc td {
+    text-align: left;
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+    vertical-align: top;
+  }
+
+  .tool-list {
+    margin-top: 1rem;
+  }
+
+  .tool-list dt {
+    font-weight: 600;
+    margin-top: 0.9rem;
+  }
+
+  .tool-list dd {
+    margin: 0.25rem 0 0;
+    line-height: 1.7;
+  }
+</style>

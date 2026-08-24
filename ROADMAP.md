@@ -464,6 +464,42 @@ Every indexable page measured at every width below — 35 page-widths, 894 inter
 - [ ] Paste the live URL into an assistant and ask it to state the prices and service area — **wrong answers here are a content bug, not an AI quirk**
 - [ ] Re-check after any price change
 
+### 2.7.5 — Agent discovery standards ✅
+
+*2.7 made the site legible to a model that reads the page. This makes it legible to an agent that never renders one: a set of machine-readable documents saying what this business is, what it costs, and what it can be asked. Added 2026-08-24 against the isitagentready.com checklist.*
+
+Everything is generated from the same content collections the pages render from — `src/lib/agent-discovery.ts` declares each URL once in `ENDPOINTS`, and every document reads from it. The failure this is guarding against is not a broken build; it is a document that keeps confidently pointing at a URL that moved, or quoting a price that changed.
+
+**Published**
+
+- [x] **`Link` response headers** (RFC 8288) on every page: `api-catalog`, `service-desc`, `service-doc`, four `describedby` targets, and each page's own markdown `alternate`. Generated into `dist/_headers` by `scripts/agent-build-assets.ts`, from the page list the build produced
+- [x] **`/.well-known/api-catalog`** (RFC 9727) as `application/linkset+json` — one anchor per API, each with its OpenAPI description, documentation and health check
+- [x] **`/.well-known/ai-catalog.json`** — the ARD capability manifest, with `representativeQueries` written as the things people actually ask
+- [x] **`/.well-known/mcp/server-card.json`** (SEP-1649), with the tool list inlined so a client need not open a session to know what this server can answer
+- [x] **`/.well-known/agent-skills/index.json`** (Agent Skills Discovery v0.2.0) plus two SKILL.md files, `edventures-pricing` and `edventures-booking`. The SHA-256 digest is computed over the exact bytes the skill route serves, in the same build
+- [x] **`/openapi.json`** — OpenAPI 3.1 for the three HTTP endpoints, with the service and add-on ids enumerated from the live catalog
+- [x] **`/docs/api`** — the human-readable reference the `service-doc` relation promises. Unlinked from the nav; nobody hiring a dog walker wants it in the header
+- [x] **`/auth.md`** — the honest version: no account, no key, no issuer. See "Deliberately not published" below
+- [x] **Content Signals** in `robots.txt`: `search=yes, ai-input=yes, ai-train=yes`, following from the 2.7.3 decision rather than being a second one
+
+**Built**
+
+- [x] **An MCP server at `/api/mcp`** — Streamable HTTP, stateless, four read-only tools over the real catalog and the real estimator (`src/lib/mcp.ts`, `src/lib/agent-tools.ts`). There is deliberately **no** `submit_booking` tool: a booking commits Edward's time and puts a stranger's entry arrangement in his inbox, and that should follow from a person filling in the form
+- [x] **WebMCP** — the same four tools offered to an agent driving the browser, behind a dynamic `import()` so the bytes only load where `navigator.modelContext` exists. Verified against a real Chromium with the API stubbed
+- [x] **`/api/health`** — booleans only. Answers the question an agent has before posting a booking: *would this get through?* When `bookingsAcceptable` is false, the phone number is the right answer
+- [x] **Markdown for agents** — `Accept: text/markdown` on any page returns its markdown twin, with `Vary: Accept`, `Content-Location` and an `x-markdown-tokens` estimate. The twins are **converted from the rendered HTML** at build time, not reassembled from the collections, so they cannot say something the page does not
+
+**Deliberately not published**
+
+- [ ] ~~`/.well-known/oauth-authorization-server`, `/.well-known/openid-configuration`, `/.well-known/oauth-protected-resource`~~ — **not applicable.** There is no authorization server, no protected resource and nothing behind a login. RFC 8414 and RFC 9728 describe issuers and token endpoints; publishing either with an invented `issuer` would send agents hunting for something that will never answer. `/auth.md` states "no credentials required" instead, which is a real answer and saves the round trip. Revisit with Phase 6, if a database ever puts bookings behind an account
+- [ ] **DNS-AID records** — cannot be done from this repository; needs Cloudflare DNS access. Filed in `NEEDS_HUMAN_ATTENTION.md` with the exact records
+
+**2.7.6 — Verify against the live site**
+
+- [ ] Run `POST https://isitagentready.com/api/scan` against `https://edventures.pet` once deployed. Local `wrangler pages dev` proves the `_headers` rules parse and the middleware negotiates, but header behaviour at the real edge is the only thing that counts
+- [ ] Connect a real MCP client to `https://edventures.pet/api/mcp` and ask it to price three nights of overnight care
+- [ ] Re-check the skill digests after any price change — they are regenerated every build, so this is a check that the build ran, not that anyone remembered
+
 ### 2.8 — Launch
 
 - [ ] Final content review with Edward
