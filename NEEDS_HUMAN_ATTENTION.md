@@ -8,41 +8,58 @@ Ordered by what unblocks the most.
 Anything needing **Edward** rather than you is in [go-back-to-ed.md](go-back-to-ed.md);
 this file is the TJ list.
 
+> **Last verified against production: 2026-08-24.** Every claim below was
+> re-checked against the live site rather than carried forward. Two had gone
+> stale — item 1 was fixed without the file being updated, and most of 7a is
+> now answered by evidence. A file like this is only useful if its 🔴 means
+> something, so please re-check rather than append when you touch it.
+>
+> How the checks were made, so they can be repeated:
+>
+> ```sh
+> curl -s https://edventures.pet/api/health          # is the mailer configured?
+> curl -sI https://www.edventures.pet/ | head -1     # does www still 200?
+> ```
+
 ---
 
-## 🔴 1. Resend key — created and proven; production still needs it
+## 🟡 1. Resend key is in production — two follow-ups left
 
-**Status, 2026-08-23:** the Resend account exists, the API key works, and the
-whole pipeline was verified end to end — a real booking posted to the real
-endpoint returned 200 and **both emails sent** (Edward's notification and the
-customer copy), with the key supplied locally via `.dev.vars`.
+**Updated 2026-08-24. The original 🔴 is resolved.** Somebody set
+`RESEND_API_KEY` in Cloudflare and the file was never updated, so this entry
+spent a while claiming `/book` was broken when it was not.
 
-**But the live site still cannot send.** The deployed Function reads its
-environment from Cloudflare, and the key is not there yet. Until it is, `/book`
-answers 502 and the customer lands on the failure screen with Edward's phone
-number — deliberate, but it means **`/book` is not yet a working booking form
-in production.**
+Verified without side effects, via the health endpoint added in 2.7.5:
 
-The key is in the git-ignored `.env` / `.dev.vars` at the repo root.
+```sh
+$ curl -s https://edventures.pet/api/health
+{"ok":true,...,"bookingsAcceptable":true,"bookingLogging":true,...}
+```
 
-### What to do
+`bookingsAcceptable` is a straight boolean of `env.RESEND_API_KEY`, so a `true`
+means the deployed Function has the key. `bookingLogging: true` means the
+`BOOKINGS` KV namespace is bound too. **`/book` no longer answers 502.**
 
-1. Cloudflare dashboard → Workers & Pages → **edventures** → Settings →
-   **Variables and Secrets** → Production → add `RESEND_API_KEY`, type
-   **Secret**, value from `.env`. (Or `npx wrangler pages secret put
-   RESEND_API_KEY --project-name edventures` if you are logged in.)
-2. **Do not set `BOOKING_FROM`.** `edventures.pet` is not a verified Resend
-   domain yet, so `bookings@edventures.pet` returns 403 and *every* booking
-   would 502. Leaving it unset falls back to Resend's shared sender, which
-   reaches the Resend account owner — `edventurespetsitting@gmail.com` — so
-   Edward's notification arrives.
-3. Redeploy: Deployments → latest → **Retry deployment**. Environment variables
-   only apply to new builds, so the running deployment will not pick it up.
-4. Submit a real request through `/book` and check the inbox, **including the
-   spam folder**.
-5. **Rotate the key** at <https://resend.com/api-keys> once this works — it was
-   pasted into a chat transcript. Create a new one, update the Cloudflare
-   secret and `.env`, delete the old one.
+> **What this does *not* prove.** The key is *present*; nobody has confirmed
+> Resend *accepts* it in production or that mail lands in the inbox. That needs
+> a real submission, and a real submission emails Edward and writes a KV
+> record — so it is deliberately left to a human rather than done from here.
+
+The key is in the git-ignored `.env` / `.dev.vars` at the repo root — note that
+those files exist only on your machine, not in a fresh clone.
+
+### What is left
+
+1. ~~Set `RESEND_API_KEY` in Cloudflare.~~ **Done.**
+2. ~~Leave `BOOKING_FROM` unset.~~ **Still the right call** — see the table
+   below. `edventures.pet` is not a verified Resend domain, so
+   `bookings@edventures.pet` would 403 and *every* booking would 502.
+3. ~~Redeploy so the variable applies.~~ **Done** — the running deployment has it.
+4. **Submit a real request through `/book`** and check the inbox, **including
+   the spam folder**. This is the one that actually closes the item.
+5. **Rotate the key** at <https://resend.com/api-keys> — it was pasted into a
+   chat transcript. Create a new one, update the Cloudflare secret and `.env`,
+   delete the old one. Not Cloudflare-side work; needs the Resend dashboard.
 
 > **Known gap while the domain is unverified:** the shared sender delivers only
 > to the account owner, so the **customer's confirmation email is not
@@ -63,7 +80,7 @@ The key is in the git-ignored `.env` / `.dev.vars` at the repo root.
 `PUBLIC_BOOKING_ENDPOINT` is a build-time override only. It defaults to
 `/api/booking` and you should not need to set it.
 
-### Once the key is in
+### Closing it out
 
 Nothing in the code changes. Confirm the Gmail delivery and **check the spam
 folder**, then Roadmap 3.12 by submitting from a real phone. The rest of 3.11
@@ -72,14 +89,22 @@ Gmail delivery is accepted as good enough for now.
 
 ---
 
-## 🔴 2. `www.edventures.pet` serves a 200 instead of redirecting
+## 🟡 2. `www.edventures.pet` serves a 200 instead of redirecting
+
+**Re-checked 2026-08-24: still open.** `curl -sI https://www.edventures.pet/`
+returns `200`, no `Location`.
 
 Roadmap 2.6.1 says pick apex-or-www once and 301 the other, never serve both.
 Right now both serve the site.
 
-**Not urgent.** Every page carries a self-referential canonical pointing at the
-apex, so search engines consolidate there anyway. But it is the last unticked
-item in 2.6.1's technical foundation, and it is a two-minute fix in the UI.
+**Re-graded 🔴 → 🟡 on 2026-08-24.** Nothing changed about the problem; the
+severity was just wrong. This entry said "not urgent" and Roadmap 2.6.1 says
+"severity: low, not blocking", which is 🟡 by this file's own legend — a 🔴 that
+contradicts its own body teaches people to ignore the 🔴s.
+
+Every page carries a self-referential canonical pointing at the apex, so search
+engines consolidate there anyway. But it is the last unticked item in 2.6.1's
+technical foundation, and it is a two-minute fix in the UI.
 
 **Why I could not do it:** the `CLOUDFLARE_API_TOKEN` in `.env` can *read*
 rulesets but not write them. Creating the rule returns
@@ -150,6 +175,12 @@ Give me the **site key** (it is public, safe to paste) and I will wire both
 sides. The server-side verification hook is a small addition to
 `booking-handler.ts`; nothing needs restructuring.
 
+**The code half needs no credentials at all.** The verification hook and the
+widget can be built now behind a flag that stays inert while the keys are
+absent — the endpoint simply skips the check, exactly as it does today. Then
+creating the widget is a config change rather than a feature to write. Say the
+word and it can land before anyone opens the Cloudflare dashboard.
+
 ---
 
 ## ✅ 5. Two open questions that shaped real behaviour — ANSWERED 2026-08-22
@@ -172,7 +203,7 @@ quote when it lands (D1 in [go-back-to-ed.md](go-back-to-ed.md)).
 
 ---
 
-## 🟡 7a. Deploys now ride the Cloudflare Pages Git integration
+## 🟡 7a. `main` has no branch protection (the rest of this is now verified)
 
 Superseded twice on 2026-08-22: a tag-triggered wrangler deploy was added,
 then TJ connected the repo to Cloudflare Pages directly, which builds and
@@ -182,27 +213,31 @@ build on every push and PR instead. **No GitHub secret is needed.**
 
 The first Git-integration builds failed because nothing pinned Node — Astro 7
 needs ≥ 22.12 and Cloudflare's builder defaults older. Fixed with
-`.node-version` (22) plus an `engines` field. Worth verifying in the Pages
-project settings (Settings → Builds & deployments) that:
+`.node-version` (22) plus an `engines` field.
 
-- **Build command** is `npm run build` (or `npx astro build`) — NOT
-  `npm run deploy`, which runs wrangler inside the build and fails.
-- **Build output directory** is `dist` (also declared in `wrangler.jsonc`).
-- If the Git integration created a **new** Pages project rather than
-  attaching to the existing `edventures` one, the custom domains, the
-  `BOOKINGS` KV binding and (once created) the `RESEND_API_KEY` /
-  `BOOKING_FROM` secrets live on the old project and must be moved.
-- Cloudflare deploys on push regardless of GitHub checks. To keep red code
-  off `main`, make the `checks` job required: Settings → Branches →
-  protection rule for `main`.
+**Updated 2026-08-24: three of the four checks below are now answered by
+evidence**, from watching PR #14 build and deploy end to end:
+
+- ✅ **Build command and output directory are correct.** PR #14 built cleanly
+  on Cloudflare and the result reached `https://edventures.pet`. A wrong build
+  command or output directory could not have produced that.
+- ✅ **The Git integration attached to the existing project, not a new one.**
+  The custom domain serves, and `/api/health` reports `bookingLogging: true`,
+  which means the `BOOKINGS` KV namespace is bound on whichever project is
+  actually deploying. Both would be missing on a fresh project.
+- ❓ **Branch protection on `main` is still unverified.** It is a GitHub
+  setting, not a Cloudflare one, and cannot be checked from here. Cloudflare
+  deploys on push regardless of GitHub checks, so to keep red code off `main`,
+  make the `checks` job required: Settings → Branches → protection rule for
+  `main`. **This is the only part of 7a still open.**
 
 ---
 
-## 🟢 7. Two SEO checks that only work against the live site
+## 🟢 7. Three checks that only work against the live site
 
-Left over from the PR that added per-page OG images and `/llms-full.txt`
-(Roadmap 2.6.3/2.6.4). Both are quick, need no decision, and just need
-someone to actually do them once the change is deployed:
+Hosted tools that fetch the public URL themselves, so a local build cannot
+stand in for them. All three are quick and need no decision — just someone to
+actually run them now that the changes are deployed:
 
 - **Paste the live URL into Facebook Messenger and iMessage** and confirm the
   new `/og-home.jpg` and `/og-gallery.jpg` previews render correctly (Roadmap
@@ -212,6 +247,12 @@ someone to actually do them once the change is deployed:
   confirm the `LocalBusiness`, `Service`, `FAQPage` and `BreadcrumbList`
   JSON-LD all validate. Same reason — it's a hosted tool that fetches the live
   page, not something a local build can substitute for.
+- **Run the agent-readiness scan** (Roadmap 2.7.6), added 2026-08-24:
+  `POST https://isitagentready.com/api/scan` with `{"url":"https://edventures.pet"}`.
+  Every document 2.7.5 publishes was verified by hand against production — the
+  right status, the right content type, working markdown negotiation, live MCP
+  tools, and skill digests matching the bytes served — so this is confirmation
+  from the checker's own perspective rather than a hunt for something broken.
 
 ---
 
@@ -257,6 +298,13 @@ _mcp._agents.edventures.pet.   3600 IN SVCB 1 edventures.pet. (
   registered by RFC 9461; if the draft has since registered its own key, use
   that. The record is still worth publishing either way — the alpn and target
   are the parts a resolver acts on.
+
+> **Open question before you start: who is the registrar?** The DS step below
+> lands at the registrar, not at Cloudflare. If `edventures.pet` is on
+> Cloudflare Registrar both halves are one dashboard; if it is registered
+> elsewhere, that half is outside Cloudflare no matter how the API token is
+> scoped. This could not be determined from the build container — it has
+> neither `dig` nor `whois` — so it is worth two minutes before you begin.
 
 ### Then turn on DNSSEC
 
