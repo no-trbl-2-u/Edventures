@@ -12,10 +12,39 @@
  */
 import type { EmailMessage } from "./booking-emails";
 
+export interface EmailAttachment {
+  filename: string;
+  /** Text content. Base64 encoding happens at the transport, not here. */
+  content: string;
+  /** e.g. `text/calendar; charset=utf-8; method=PUBLISH`. */
+  contentType: string;
+}
+
 export interface OutboundEmail extends EmailMessage {
   to: string;
   /** `Name <address@domain>`. Must be a verified sending domain (3.11). */
   from: string;
+  /** Currently only the booking `.ics` (3.14). */
+  attachments?: EmailAttachment[];
+}
+
+/**
+ * UTF-8 safe base64.
+ *
+ * `btoa` is Latin-1 only and throws on anything above U+00FF, so encoding a
+ * `.ics` through it would work until the first customer named Zoë or a pet
+ * called Müsli -- and it would fail at confirmation time, the least
+ * recoverable moment in the flow. Encoding to bytes first removes the
+ * category. Chunked because spreading a large byte array into `String.fromCharCode`
+ * blows the argument limit.
+ */
+export function toBase64(value: string): string {
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  }
+  return btoa(binary);
 }
 
 export interface Mailer {
@@ -49,6 +78,15 @@ export function resendMailer(apiKey: string, fetchImpl: typeof fetch = fetch): M
           text: message.text,
           html: message.html,
           ...(message.replyTo ? { reply_to: [message.replyTo] } : {}),
+          ...(message.attachments?.length
+            ? {
+                attachments: message.attachments.map((file) => ({
+                  filename: file.filename,
+                  content: toBase64(file.content),
+                  content_type: file.contentType,
+                })),
+              }
+            : {}),
         }),
       });
 

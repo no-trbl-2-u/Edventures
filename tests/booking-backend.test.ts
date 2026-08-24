@@ -623,8 +623,11 @@ function confirmDeps(store: ConfirmStore, overrides: Partial<ConfirmDeps> = {}):
   } as ConfirmDeps & { mailer: ReturnType<typeof dryRunMailer> };
 }
 
-const confirmGet = (token: string) =>
-  new Request(`https://edventures.pet/api/confirm?t=${encodeURIComponent(token)}`);
+const confirmGet = (token: string, format = "") =>
+  new Request(
+    `https://edventures.pet/api/confirm?t=${encodeURIComponent(token)}` +
+      (format ? `&format=${format}` : ""),
+  );
 
 const confirmPost = (token: string, note = "") =>
   new Request("https://edventures.pet/api/confirm", {
@@ -749,6 +752,79 @@ describe("confirmation", () => {
     const mail = confirmationEmail(validBooking(), ctx, "<script>alert(1)</script>");
     assert.ok(!mail.html.includes("<script>"));
     assert.ok(mail.html.includes("&lt;script&gt;"));
+  });
+
+  it("attaches the calendar file to the customer's confirmation", async () => {
+    const store = fakeStore();
+    await bookInto(store);
+    const c = confirmDeps(store);
+
+    await handleConfirmRequest(confirmPost(TOKEN), c);
+    const [sent] = c.mailer.sent;
+
+    assert.equal(sent!.attachments?.length, 1);
+    assert.match(sent!.attachments![0].contentType, /^text\/calendar/);
+    assert.match(sent!.attachments![0].filename, /\.ics$/);
+    assert.match(sent!.attachments![0].content, /^BEGIN:VCALENDAR/);
+  });
+
+  it("builds the attachment from what was agreed, not what was requested", async () => {
+    // The note Edward types on the confirm page belongs in the calendar entry;
+    // generating the file from the pre-confirmation record would silently drop
+    // it and mark an unconfirmed booking CONFIRMED.
+    const store = fakeStore();
+    await bookInto(store);
+    const c = confirmDeps(store);
+
+    await handleConfirmRequest(confirmPost(TOKEN, "Bring the spare leash"), c);
+    const ics = c.mailer.sent[0]!.attachments![0].content;
+
+    assert.match(ics.replace(/\r\n /g, ""), /Bring the spare leash/);
+    assert.match(ics, /STATUS:CONFIRMED/);
+  });
+
+  it("serves the calendar file to Edward once, and only once, it is confirmed", async () => {
+    const store = fakeStore();
+    await bookInto(store);
+    const c = confirmDeps(store);
+
+    // Before confirming there is nothing to put in a diary -- the request has
+    // not been agreed to, and an unbooked visit in his calendar is worse than
+    // no export.
+    const early = await handleConfirmRequest(confirmGet(TOKEN, "ics"), c);
+    assert.match(early.headers.get("Content-Type") ?? "", /text\/html/);
+    assert.match(await early.text(), /Confirm this booking\?/);
+
+    await handleConfirmRequest(confirmPost(TOKEN), c);
+
+    const after = await handleConfirmRequest(confirmGet(TOKEN, "ics"), c);
+    assert.match(after.headers.get("Content-Type") ?? "", /^text\/calendar/);
+    assert.match(after.headers.get("Content-Disposition") ?? "", /attachment; filename=".*\.ics"/);
+    assert.match(await after.text(), /^BEGIN:VCALENDAR/);
+    // Serving a file is not sending mail. A second confirmation must not go out.
+    assert.equal(c.mailer.sent.length, 1);
+  });
+
+  it("keeps the token out of referrers and search indexes on the ics too", async () => {
+    const store = fakeStore();
+    await bookInto(store);
+    const c = confirmDeps(store);
+    await handleConfirmRequest(confirmPost(TOKEN), c);
+
+    const res = await handleConfirmRequest(confirmGet(TOKEN, "ics"), c);
+    assert.equal(res.headers.get("Referrer-Policy"), "no-referrer");
+    assert.match(res.headers.get("X-Robots-Tag") ?? "", /noindex/);
+  });
+
+  it("offers the add-to-calendar button on the confirmed page", async () => {
+    const store = fakeStore();
+    await bookInto(store);
+    const c = confirmDeps(store);
+
+    const res = await handleConfirmRequest(confirmPost(TOKEN), c);
+    const body = await res.text();
+    assert.match(body, /Add to calendar/);
+    assert.match(body, new RegExp(`t=${TOKEN}&amp;format=ics`));
   });
 
   it("tells the customer it is actually booked, unlike the request receipt", () => {

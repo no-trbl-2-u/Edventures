@@ -73,15 +73,24 @@ export type TimeWindowId = "morning" | "midday" | "afternoon" | "evening";
 export interface TimeWindow {
   id: TimeWindowId;
   name: string;
+  /** Display form. The only thing a customer ever sees. */
   hours: string;
+  /** The same span as numbers, 24-hour local clock, end exclusive.
+   *
+   *  Added for the calendar export (3.14): a `.ics` needs real hours, and
+   *  parsing them back out of "7 – 11 am" would be a regex standing between
+   *  Edward's diary and the truth. These two must stay in step with `hours` --
+   *  a test asserts they describe the same span. */
+  startHour: number;
+  endHour: number;
   icon: string;
 }
 
 export const TIME_WINDOWS: TimeWindow[] = [
-  { id: "morning", name: "Morning", hours: "7 – 11 am", icon: "sunrise" },
-  { id: "midday", name: "Midday", hours: "11 am – 2 pm", icon: "sun" },
-  { id: "afternoon", name: "Afternoon", hours: "2 – 6 pm", icon: "sunset" },
-  { id: "evening", name: "Evening", hours: "6 – 9 pm", icon: "moon" },
+  { id: "morning", name: "Morning", hours: "7 – 11 am", startHour: 7, endHour: 11, icon: "sunrise" },
+  { id: "midday", name: "Midday", hours: "11 am – 2 pm", startHour: 11, endHour: 14, icon: "sun" },
+  { id: "afternoon", name: "Afternoon", hours: "2 – 6 pm", startHour: 14, endHour: 18, icon: "sunset" },
+  { id: "evening", name: "Evening", hours: "6 – 9 pm", startHour: 18, endHour: 21, icon: "moon" },
 ];
 
 export const TEMPERAMENTS = [
