@@ -6,6 +6,8 @@ import react from '@astrojs/react';
 
 import sitemap from '@astrojs/sitemap';
 
+import agentBuildAssets from './scripts/agent-build-assets';
+
 // https://astro.build/config
 export default defineConfig({
   // Apex domain, registered Phase 0.2. Used for the sitemap and canonical URLs.
@@ -35,5 +37,8 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
 
-  integrations: [react(), sitemap()],
+  // `agentBuildAssets` runs after the build and writes the markdown twin of
+  // every page, plus `_headers` and `_routes.json`. It reads `site` above for
+  // the origin, so a preview build cannot advertise production's URLs.
+  integrations: [react(), sitemap(), agentBuildAssets()],
 });

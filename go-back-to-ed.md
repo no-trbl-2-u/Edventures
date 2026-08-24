@@ -176,6 +176,13 @@ The standard list plus Easter, applied through early 2028 in `src/lib/booking.ts
 ### 🟢 G5. Is he happy for AI assistants to read the site?
 `robots.txt` currently **allows** GPTBot, ClaudeBot, PerplexityBot and friends, and the site publishes an `llms.txt` summary. Reasoning: he wants to be findable, and there's no proprietary content to protect — being the answer when someone asks an assistant *"who walks dogs in Rittenhouse?"* is worth more than withholding six pages of public copy. It's his call and a one-line reversal.
 
+**Two things have been added on top of that decision** (2026-08-24, Roadmap 2.7.5), both following from it rather than being new questions — but worth naming when you ask him, because they say the same thing more loudly:
+
+- `robots.txt` now carries `Content-Signal: search=yes, ai-input=yes, ai-train=yes` — a machine-readable declaration that his prices and copy may be indexed, used to ground an AI answer, and trained on. Same stance, stated explicitly instead of left to be guessed.
+- The site publishes a small **read-only API for agents**: the price list, the served zip codes, a price estimate, and the contact details. There is deliberately **no** way for an agent to submit a booking on someone's behalf — a booking commits his time and puts a stranger's entry arrangement in his inbox, so that stays a person filling in the form.
+
+If he says no to any of it, it reverses together — the `Allow:` lines, the Content Signals and the agent API are one decision, not three.
+
 ### 🟢 G6. Zoe's eye
 Still open from the photo pass. In `Zoe and I.jpg` her left eye appears closed or absent. The alt text stays general until he confirms. If she's a special-needs dog and her owner is happy for it to be mentioned, **that's a genuine trust signal** — "he looks after a blind chihuahua" says more than any badge.
 

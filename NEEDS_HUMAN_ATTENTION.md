@@ -212,3 +212,71 @@ someone to actually do them once the change is deployed:
   confirm the `LocalBusiness`, `Service`, `FAQPage` and `BreadcrumbList`
   JSON-LD all validate. Same reason — it's a hosted tool that fetches the live
   page, not something a local build can substitute for.
+
+---
+
+## 🟡 8. DNS-AID records — needs Cloudflare DNS access
+
+Roadmap 2.7.5 published every agent-discovery document that can live in a
+repository. **DNS for AI Discovery** cannot: it is a zone change, and this
+repo has no DNS credentials and should not have any.
+
+It is the one discovery path that works before an agent has fetched anything.
+Everything else — the `Link` headers, `/.well-known/api-catalog`, the MCP
+server card — requires already knowing the domain and making a request.
+DNS-AID lets a resolver answer *"does edventures.pet expose agent
+endpoints?"* without one.
+
+Draft spec: <https://datatracker.ietf.org/doc/draft-mozleywilliams-dnsop-dnsaid/>
+(SVCB/HTTPS records, RFC 9460).
+
+### What to add
+
+Cloudflare dashboard → **edventures.pet** → DNS → Records → Add record, type
+**SVCB**, twice. Cloudflare's UI takes the priority, target and params as
+separate fields; in zone-file form the two records are:
+
+```
+_index._agents.edventures.pet. 3600 IN SVCB 1 edventures.pet. (
+    alpn="h2,http/1.1" port=443
+    dohpath="/.well-known/api-catalog" )
+
+_mcp._agents.edventures.pet.   3600 IN SVCB 1 edventures.pet. (
+    alpn="h2,http/1.1" port=443
+    dohpath="/api/mcp" )
+```
+
+- `_index` points at the RFC 9727 catalog, which is the entry point every
+  other document hangs off.
+- `_mcp` points at the MCP endpoint that `functions/api/mcp.ts` serves. The
+  server card describing it is at `/.well-known/mcp/server-card.json`.
+- **ServiceMode (priority ≥ 1), not AliasMode.** AliasMode carries no params,
+  which is the whole content of these records.
+- Check the parameter key the draft settles on for the endpoint path before
+  relying on it. `dohpath` above is the general-purpose path parameter
+  registered by RFC 9461; if the draft has since registered its own key, use
+  that. The record is still worth publishing either way — the alpn and target
+  are the parts a resolver acts on.
+
+### Then turn on DNSSEC
+
+DNS → Settings → **DNSSEC** → Enable, then add the DS record Cloudflare
+shows you **at the registrar** (Roadmap 0.2 — wherever `edventures.pet` was
+registered). Without it a validating resolver cannot tell these records from
+a forged answer, and unsigned agent-discovery records are worth close to
+nothing: the entire value is that a resolver can trust them.
+
+Enabling DNSSEC is safe here — the zone is Cloudflare-hosted and the records
+are few — but the DS record must land at the registrar within a day or two of
+enabling, or resolution can break. Do both in one sitting.
+
+### How to check it worked
+
+```sh
+dig +dnssec _index._agents.edventures.pet SVCB
+dig +dnssec _mcp._agents.edventures.pet   SVCB
+```
+
+Both should answer with an `SVCB` record and an `RRSIG` beside it, and the
+flags should include `ad` when queried through a validating resolver
+(`dig @1.1.1.1 ...`).
