@@ -41,21 +41,38 @@ export const onRequest = async (context: PagesContext): Promise<Response> => {
   const url = new URL(request.url);
   if (!isNegotiablePath(url.pathname)) return next();
 
+  const twinPath = markdownTwin(url.pathname);
   const twin = new URL(url);
-  twin.pathname = markdownTwin(url.pathname);
+  twin.pathname = twinPath;
 
   // A HEAD request must not become a GET: the client asked for headers.
   const markdown = await next(new Request(twin, request));
+
+  const headers = new Headers(markdown.headers);
+  headers.set("Vary", "Accept");
+  headers.set("Content-Location", twinPath);
+  headers.set("Access-Control-Allow-Origin", "*");
+
+  /**
+   * A conditional request that still matches.
+   *
+   * This has to come before the `!ok` check, because `Response.ok` is 200-299
+   * and a 304 is neither. Reading it as "no twin here" and falling through to
+   * `next()` would answer an `Accept: text/markdown` request with a 200 HTML
+   * page -- and it would happen *only* to clients that cache properly, since
+   * `new Request(twin, request)` forwards their `If-None-Match` and Pages
+   * emits an ETag on every static asset. Well-behaved agents would be the
+   * ones getting the wrong content type.
+   */
+  if (markdown.status === 304) {
+    return new Response(null, { status: 304, headers });
+  }
 
   // No twin -- an unknown path, or a page the build skipped. Fall back to
   // whatever the URL really serves, including its 404.
   if (!markdown.ok) return next();
 
-  const headers = new Headers(markdown.headers);
   headers.set("Content-Type", "text/markdown; charset=utf-8");
-  headers.set("Vary", "Accept");
-  headers.set("Content-Location", markdownTwin(url.pathname));
-  headers.set("Access-Control-Allow-Origin", "*");
 
   if (request.method === "HEAD") {
     return new Response(null, { status: markdown.status, headers });

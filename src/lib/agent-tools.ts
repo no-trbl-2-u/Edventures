@@ -16,8 +16,14 @@
  * tool. A booking commits Edward's time and puts a stranger's key arrangement
  * in his inbox; that should follow from a person filling in `/book`, not from
  * an agent deciding mid-conversation that it has enough of the twelve required
- * fields. `how_to_book` hands the agent the form URL and the API contract and
- * lets the customer take it from there.
+ * fields. `get_business_facts` hands the agent the form URL and how booking
+ * works, and lets the customer take it from there.
+ *
+ * The other rule these share: **bad input is refused, never rounded.** Every
+ * one of them answers with an `error` and the valid values rather than
+ * quietly substituting a default. A tool that silently returns the shortest
+ * tier's price for a duration nobody asked about is worse than one that
+ * fails, because the failure is visible and the wrong number is not.
  */
 import {
   estimate,
@@ -150,7 +156,9 @@ export const AGENT_TOOLS: AgentTool[] = [
         durationMinutes: {
           type: "number",
           description:
-            "Duration for services priced by duration. Ignored for flat-rate services.",
+            "Duration for services priced by duration; must be one of the tiers " +
+            "list_services reports. Omit it to get the shortest tier's price. " +
+            "Not accepted for flat-rate services.",
         },
         dateStart: { type: "string", description: "First date, as YYYY-MM-DD." },
         dateEnd: {
@@ -189,13 +197,53 @@ export const AGENT_TOOLS: AgentTool[] = [
         return { error: "dateEnd must be a calendar date formatted YYYY-MM-DD." };
       }
 
-      // Default to the service's cheapest tier rather than erroring: an agent
-      // asking "what does a walk cost on the 3rd?" has not chosen a length yet,
-      // and the estimator's own fallback is the first tier regardless.
-      const durationMinutes = service.tiers.length
-        ? Number(input.durationMinutes ?? service.tiers[0].minutes)
-        : 0;
+      /**
+       * Duration.
+       *
+       * Omitting it is fine -- an agent asking "what does a walk cost on the
+       * 3rd?" has not picked a length yet, and the shortest tier is the
+       * honest "from" price.
+       *
+       * Asking for a duration that is *not* a tier is not fine, and must not
+       * be quietly rounded. `estimate()` falls back to `tiers[0]` for an
+       * unmatched duration, so a request for 45 minutes came back
+       * `ok: true, total: 15` -- the 15-minute price, with no indication that
+       * the question had not been answered. A model reads `total` and quotes
+       * it. Refusing with the list of real durations is the only safe answer.
+       */
+      let durationMinutes = 0;
+      if (service.tiers.length) {
+        if (input.durationMinutes == null) {
+          durationMinutes = service.tiers[0].minutes;
+        } else {
+          const asked = Number(input.durationMinutes);
+          const tier = service.tiers.find((t) => t.minutes === asked);
+          if (!tier) {
+            return {
+              error: `${service.name} is not priced at ${JSON.stringify(input.durationMinutes)} minutes.`,
+              knownDurations: service.tiers.map((t) => t.minutes),
+              hint: "Omit durationMinutes to get the shortest tier's price.",
+            };
+          }
+          durationMinutes = tier.minutes;
+        }
+      } else if (input.durationMinutes != null) {
+        return {
+          error: `${service.name} is a flat rate; durationMinutes does not apply.`,
+          price: service.base,
+        };
+      }
 
+      // A bare string here used to be silently dropped, which under-quotes:
+      // `addonIds: "medication"` is not an array, so the add-on vanished and
+      // the total came back lower with no error. A wrong *shape* deserves the
+      // same refusal a wrong *value* already got.
+      if (input.addonIds != null && !Array.isArray(input.addonIds)) {
+        return {
+          error: "addonIds must be an array of add-on ids.",
+          knownAddonIds: catalog.addons.map((a) => a.id),
+        };
+      }
       const addonIds = Array.isArray(input.addonIds) ? input.addonIds.map(String) : [];
       const unknownAddons = addonIds.filter((id) => !catalog.addons.some((a) => a.id === id));
       if (unknownAddons.length) {
@@ -205,14 +253,30 @@ export const AGENT_TOOLS: AgentTool[] = [
         };
       }
 
+      // `estimate()` clamps these to 0-6 and turns anything unparseable into
+      // 0, so a typo would silently drop a pet from the quote.
+      const counts: Record<string, number> = {};
+      for (const field of ["extraDogs", "extraCats"] as const) {
+        const raw = input[field];
+        if (raw == null) {
+          counts[field] = 0;
+          continue;
+        }
+        const value = Number(raw);
+        if (!Number.isInteger(value) || value < 0 || value > 6) {
+          return { error: `${field} must be a whole number from 0 to 6.`, received: raw };
+        }
+        counts[field] = value;
+      }
+
       const request: BookingRequest = {
         ...EMPTY_BOOKING,
         selection: {
           serviceId,
           durationMinutes,
           addonIds,
-          extraDogs: Number(input.extraDogs ?? 0),
-          extraCats: Number(input.extraCats ?? 0),
+          extraDogs: counts.extraDogs,
+          extraCats: counts.extraCats,
         },
         schedule: { dateStart, dateEnd, window: "", flexibilityNotes: "" },
       };

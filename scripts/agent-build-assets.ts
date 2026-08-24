@@ -61,9 +61,15 @@ async function filesWithSuffix(dir: string, suffix: string, base = dir): Promise
  * The same transformation `Base.astro` applies to build the canonical URL. If
  * either of those config options changes, both have to change together.
  */
-function servedPath(file: string): string {
+export function servedPath(file: string): string {
+  // `index` is stripped at every depth, not just the root: Pages serves
+  // `docs/index.html` at `/docs`. Keying the `_headers` rule on `/docs/index`
+  // would match nothing, and the middleware -- which sees `/docs` -- would
+  // look for `/docs.md` while the twin sat at `/docs/index.md`. The page would
+  // quietly get neither its Link headers nor its markdown.
   const withoutExt = file.replace(/\.html$/, "");
-  return withoutExt === "index" ? "/" : `/${withoutExt}`;
+  const withoutIndex = withoutExt.replace(/(^|\/)index$/, "");
+  return withoutIndex === "" ? "/" : `/${withoutIndex}`;
 }
 
 function converter(): TurndownService {
@@ -306,7 +312,6 @@ export default function agentBuildAssets(): IntegrationHooks {
         for (const file of files) {
           const path = servedPath(file);
           if (SKIP.has(file.replace(/\.html$/, ""))) continue;
-          pagePaths.push(path);
 
           const html = await readFile(join(out, file), "utf8");
           const canonical = new URL(path, site).href;
@@ -322,6 +327,11 @@ export default function agentBuildAssets(): IntegrationHooks {
 
           await writeFile(join(out, markdownTwin(path).slice(1)), markdown, "utf8");
           written++;
+          // Recorded only now. Pushing before the guard above meant a page
+          // whose conversion failed still got `Link: </foo.md>; rel="alternate"`
+          // and `Vary: Accept` -- the build warned and then shipped a header
+          // advertising a 404, which is the exact thing the warning is for.
+          pagePaths.push(path);
         }
 
         // Walked after the twins are written, so the list covers them along

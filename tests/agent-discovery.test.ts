@@ -40,6 +40,7 @@ import {
   parseAccept,
   prefersMarkdown,
 } from "../src/lib/markdown-negotiation.ts";
+import { pageToMarkdown, servedPath } from "../scripts/agent-build-assets.ts";
 import { getCatalogFromJson } from "../src/lib/catalog-json.ts";
 import { SERVICE_AREA, SITE } from "../src/lib/site.ts";
 
@@ -138,6 +139,92 @@ describe("agent tools", () => {
     }
   });
 
+  it("refuse a duration that is not a tier, rather than quoting the cheapest", () => {
+    // The worst failure this module can have. `estimate()` falls back to
+    // `tiers[0]` for an unmatched duration, so asking for 45 minutes came back
+    // `ok: true, total: 15` -- the 15-minute price -- and a model reads
+    // `total` and quotes it.
+    const walk = catalog.services.find((s) => s.id === "dog-walk")!;
+    const notATier = 45;
+    assert.ok(!walk.tiers.some((t) => t.minutes === notATier), "fixture assumes 45 is not a tier");
+
+    const { ok, result } = runTool(
+      "estimate_price",
+      { serviceId: "dog-walk", durationMinutes: notATier, dateStart: SOON },
+      catalog,
+      NOW,
+    );
+    assert.equal(ok, false);
+    assert.deepEqual(
+      (result as { knownDurations: number[] }).knownDurations,
+      walk.tiers.map((t) => t.minutes),
+    );
+
+    // Unparseable durations take the same path, rather than becoming NaN and
+    // then matching nothing and then quoting $15.
+    for (const bad of ["sixty", null, {}]) {
+      assert.equal(
+        runTool("estimate_price", { serviceId: "dog-walk", durationMinutes: bad, dateStart: SOON }, catalog, NOW).ok,
+        bad === null,
+        `durationMinutes: ${JSON.stringify(bad)}`,
+      );
+    }
+  });
+
+  it("still quote the shortest tier when no duration was asked for", () => {
+    // Omitting it is a real question -- "what does a walk cost?" -- and the
+    // "from" price is the honest answer.
+    const walk = catalog.services.find((s) => s.id === "dog-walk")!;
+    const { ok, result } = runTool(
+      "estimate_price",
+      { serviceId: "dog-walk", dateStart: SOON },
+      catalog,
+      NOW,
+    );
+    assert.equal(ok, true);
+    assert.equal((result as { total: number }).total, walk.tiers[0].price);
+  });
+
+  it("refuse a duration on a flat-rate service instead of ignoring it", () => {
+    const { ok } = runTool(
+      "estimate_price",
+      { serviceId: "overnight", durationMinutes: 30, dateStart: SOON },
+      catalog,
+      NOW,
+    );
+    assert.equal(ok, false);
+  });
+
+  it("refuse a malformed addonIds rather than dropping it and under-quoting", () => {
+    // A bare string is not an array, so the add-on used to vanish and the
+    // total came back lower with no error at all.
+    const addon = catalog.addons[0].id;
+    const { ok, result } = runTool(
+      "estimate_price",
+      { serviceId: "dog-walk", dateStart: SOON, addonIds: addon },
+      catalog,
+      NOW,
+    );
+    assert.equal(ok, false);
+    assert.match((result as { error: string }).error, /must be an array/);
+  });
+
+  it("refuse a pet count that is not a whole number in range", () => {
+    // `estimate()` clamps to 0-6 and turns junk into 0, which silently drops
+    // a pet from the quote.
+    for (const bad of ["two", -1, 7, 1.5]) {
+      assert.equal(
+        runTool("estimate_price", { serviceId: "dog-walk", dateStart: SOON, extraDogs: bad }, catalog, NOW).ok,
+        false,
+        `extraDogs: ${JSON.stringify(bad)}`,
+      );
+    }
+    assert.equal(
+      runTool("estimate_price", { serviceId: "dog-walk", dateStart: SOON, extraCats: 2 }, catalog, NOW).ok,
+      true,
+    );
+  });
+
   it("know every served zip and refuse to guess at the ones they do not", () => {
     for (const area of SERVICE_AREA) {
       const { result } = runTool("check_service_area", { zip: area.zip }, catalog);
@@ -216,6 +303,45 @@ describe("MCP server", () => {
     const response = await mcp({ jsonrpc: "2.0", method: "notifications/initialized" });
     assert.equal(response.status, 202);
     assert.equal(await response.text(), "");
+  });
+
+  it("answers no notification, whatever its method", async () => {
+    // `isNotification` used to be consulted only in the malformed and
+    // `default` branches, so `{"jsonrpc":"2.0","method":"ping"}` came back
+    // `200 {"id":null,"result":{}}` -- a reply to a message that asked for
+    // none, which some clients treat as fatal.
+    for (const method of ["ping", "tools/list", "initialize", "notifications/initialized"]) {
+      const response = await mcp({ jsonrpc: "2.0", method });
+      assert.equal(response.status, 202, `${method} answered ${response.status}`);
+      assert.equal(await response.text(), "", `${method} sent a body`);
+    }
+
+    // An explicit null id means the same thing as an absent one.
+    const explicit = await mcp({ jsonrpc: "2.0", id: null, method: "tools/list" });
+    assert.equal(explicit.status, 202);
+  });
+
+  it("treats id 0 as a real id, not an absent one", async () => {
+    const response = await mcp({ jsonrpc: "2.0", id: 0, method: "tools/list" });
+    assert.equal(response.status, 200);
+    const body = (await response.json()) as { id: number };
+    assert.equal(body.id, 0);
+  });
+
+  it("answers a batch containing junk without crashing", async () => {
+    // `[null]` reached a property access on `null` and threw, which escaped
+    // the Worker as a Cloudflare HTML error page -- a malformed batch getting
+    // a non-JSON answer.
+    const response = await mcp([null, "nonsense", 42, { jsonrpc: "2.0", id: 1, method: "ping" }]);
+    assert.equal(response.status, 200);
+    const replies = (await response.json()) as { error?: { code: number }; id: unknown }[];
+    assert.equal(replies.length, 4);
+    assert.equal(replies.filter((r) => r.error?.code === -32600).length, 3);
+  });
+
+  it("rejects an empty batch rather than reading it as all-notifications", async () => {
+    const response = await mcp([]);
+    assert.equal(response.status, 400);
   });
 
   it("lists every tool, with a read-only annotation on each", async () => {
@@ -560,5 +686,74 @@ describe("_headers", () => {
       [],
       "a wildcard rule will overlap the specific ones",
     );
+  });
+});
+
+describe("markdown twins", () => {
+  const page = (main: string) =>
+    `<!doctype html><html><head><title>T</title>` +
+    `<meta name="description" content="D" /></head><body><main id="main">${main}</main></body></html>`;
+
+  it("map a built file to the URL Cloudflare Pages will serve it at", () => {
+    assert.equal(servedPath("index.html"), "/");
+    assert.equal(servedPath("about.html"), "/about");
+    assert.equal(servedPath("docs/api.html"), "/docs/api");
+    // Pages serves `docs/index.html` at `/docs`. Returning `/docs/index` keyed
+    // the `_headers` rule on a path that never matches, and left the middleware
+    // looking for `/docs.md` while the twin sat at `/docs/index.md` -- so the
+    // page silently got neither its Link headers nor its markdown.
+    assert.equal(servedPath("docs/index.html"), "/docs");
+    assert.equal(servedPath("a/b/index.html"), "/a/b");
+  });
+
+  it("report a page with no <main> rather than emitting an empty twin", () => {
+    // The build advertises a `rel="alternate"` for every page it converts, so
+    // a silent failure here would point agents at a 404.
+    assert.equal(pageToMarkdown("<html><body>no main</body></html>", "/x", "https://e.pet/x"), null);
+  });
+
+  it("carry the page's identity in front matter", () => {
+    const md = pageToMarkdown(page("<h1>Hello</h1>"), "/x", "https://edventures.pet/x")!;
+    assert.match(md, /^---\n/);
+    assert.match(md, /source: "https:\/\/edventures\.pet\/x"/);
+    assert.match(md, /# Hello/);
+  });
+
+  it("drop decoration but keep everything a reader would see", () => {
+    const md = pageToMarkdown(
+      page(
+        '<svg aria-hidden="true"><path d="M0 0"/></svg>' +
+          '<img src="/paw.png" alt="" />' +
+          '<img src="/dog.png" alt="A beagle" />' +
+          "<p>Real text.</p>",
+      ),
+      "/x",
+      "https://e.pet/x",
+    )!;
+    assert.ok(!md.includes("M0 0"), "SVG path data leaked into the markdown");
+    assert.ok(!md.includes("paw.png"), "a decorative image survived");
+    assert.match(md, /A beagle/);
+    assert.match(md, /Real text\./);
+  });
+
+  it("separate labels that CSS lays out as rows", () => {
+    // Concatenating them fuses "Walks" to "A walk" and hands a model a word
+    // that is not on the page.
+    const md = pageToMarkdown(
+      page('<a href="/services"><span>Dog Walks</span><span>From $15</span></a>'),
+      "/x",
+      "https://e.pet/x",
+    )!;
+    assert.ok(!md.includes("WalksFrom"), md);
+    assert.match(md, /Dog Walks · From \$15/);
+  });
+
+  it("pair a price with its term instead of orphaning both", () => {
+    const md = pageToMarkdown(
+      page("<dl><div><dt>30 minutes</dt><dd>$25</dd></div></dl>"),
+      "/x",
+      "https://e.pet/x",
+    )!;
+    assert.match(md, /- \*\*30 minutes\*\*: \$25/);
   });
 });

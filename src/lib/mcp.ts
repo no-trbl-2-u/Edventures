@@ -97,18 +97,48 @@ function negotiateVersion(requested: unknown): string {
  * Returns `null` for a notification, which must be answered with no body --
  * `notifications/initialized` is the one every client sends, and replying to
  * it with a result is a protocol error that some clients treat as fatal.
+ *
+ * The notification test is applied once, to whatever the dispatch produced,
+ * rather than inside each branch. Checking it per-case is how
+ * `{"jsonrpc":"2.0","method":"ping"}` -- no id, so a notification -- came back
+ * with `{"id":null,"result":{}}`: the `notifications/*` cases returned null
+ * and every other case forgot to.
  */
 function dispatch(
-  message: JsonRpcRequest,
+  message: unknown,
   catalog: Catalog,
   now: Date,
 ): { body: unknown; protocolVersion?: string } | null {
-  const id = message.id ?? null;
-  const method = message.method;
-  const isNotification = message.id === undefined || message.id === null;
+  // Guarded here rather than by the caller, because the batch branch maps this
+  // over array elements: a body of `[null]` reached the property access below
+  // and threw, which escaped the Worker as a Cloudflare HTML error page --
+  // a malformed batch getting a non-JSON answer.
+  if (typeof message !== "object" || message === null || Array.isArray(message)) {
+    return { body: rpcError(null, INVALID_REQUEST, "Expected a JSON-RPC 2.0 request object.") };
+  }
 
+  const request = message as JsonRpcRequest;
+  const id = request.id ?? null;
+  const method = request.method;
+  // Absent or null id means "no reply wanted". `0` is a real id, which is why
+  // this compares rather than testing truthiness.
+  const isNotification = request.id === undefined || request.id === null;
+
+  // Notifications are still dispatched, because some of them mean something --
+  // they just never get a reply.
+  const reply = answerRequest(request, id, method, catalog, now);
+  return isNotification ? null : reply;
+}
+
+/** The reply a request *would* get. Whether it is sent is `dispatch`'s call. */
+function answerRequest(
+  message: JsonRpcRequest,
+  id: string | number | null,
+  method: string | undefined,
+  catalog: Catalog,
+  now: Date,
+): { body: unknown; protocolVersion?: string } | null {
   if (message.jsonrpc !== "2.0" || typeof method !== "string") {
-    if (isNotification) return null;
     return { body: rpcError(id, INVALID_REQUEST, "Expected a JSON-RPC 2.0 request with a method.") };
   }
 
@@ -140,8 +170,10 @@ function dispatch(
       };
     }
 
-    // Every notification the spec defines for a server with no subscriptions.
-    // Answered with silence, which is what "no body" means over HTTP.
+    // Notifications are silenced by `dispatch` regardless, but naming the
+    // ones the spec defines keeps them out of the `Method not found` branch --
+    // a client that sends `notifications/cancelled` with an id by mistake gets
+    // silence rather than an error about a method this server does implement.
     case "notifications/initialized":
     case "notifications/cancelled":
       return null;
@@ -185,7 +217,6 @@ function dispatch(
     }
 
     default:
-      if (isNotification) return null;
       return { body: rpcError(id, METHOD_NOT_FOUND, `Method not found: ${method}`) };
   }
 }
@@ -232,8 +263,13 @@ export async function handleMcpRequest(
   // answering an array with an object breaks them in a way that is tedious to
   // diagnose from the other end.
   if (Array.isArray(payload)) {
+    // An empty batch is malformed per JSON-RPC 2.0, and answering it with 202
+    // would look like every element was a notification.
+    if (payload.length === 0) {
+      return json(400, rpcError(null, INVALID_REQUEST, "A JSON-RPC batch must not be empty."));
+    }
     const replies = payload
-      .map((m) => dispatch(m as JsonRpcRequest, catalog, now))
+      .map((m) => dispatch(m, catalog, now))
       .filter((r): r is { body: unknown } => r !== null)
       .map((r) => r.body);
     return replies.length ? json(200, replies) : new Response(null, { status: 202, headers: CORS_HEADERS });
@@ -243,7 +279,7 @@ export async function handleMcpRequest(
     return json(400, rpcError(null, INVALID_REQUEST, "Expected a JSON-RPC object or array."));
   }
 
-  const reply = dispatch(payload as JsonRpcRequest, catalog, now);
+  const reply = dispatch(payload, catalog, now);
   if (!reply) return new Response(null, { status: 202, headers: CORS_HEADERS });
 
   return json(
