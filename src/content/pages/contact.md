@@ -5,7 +5,7 @@ description: Text or email Edventures Pet Sitting to book a walk, visit, or over
 
 ## Get in touch
 
-**Text:** [610-888-4541](tel:+16108884541)
+**Text:** [856-433-4010](tel:+18564334010)
 
 **Email:** [edventurespetsitting@gmail.com](mailto:edventurespetsitting@gmail.com)
 

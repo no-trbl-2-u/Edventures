@@ -26,8 +26,8 @@ Worth raising with him for his own sake rather than the website's:
 
 *Not legal or insurance advice — just a gap worth checking with whoever wrote his policy.*
 
-### 🟢 A5. Is 610-888-4541 the right public number, and does it take texts from unknown numbers?
-The 610 area code is suburban PA rather than Philly's 215/267 — that's common and fine, just confirming it's the business line and not a personal one he'd rather not publish.
+### ✅ A5. Public number — resolved
+Updated to the new business line: **856-433-4010**. (Still worth confirming it takes texts from unknown numbers.)
 
 ### 🟢 A6. Does he take phone calls, or text only?
 The contact image says "Text:" — never "Call." Changes the CTA wording across the whole site (*"Text us"* vs *"Call or text us"*).

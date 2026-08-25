@@ -3,7 +3,7 @@
 **Business:** Edventures Pet Sitting — Edward, Philadelphia
 **Services:** Dog walks, cat visits, medication administration, nail trims, overnight stays
 **Service area:** 19102, 19104, 19106, 19107, 19123, 19130, 19143, 19145, 19146, 19147, 19148
-**Contact:** Text 610-888-4541 · edventurespetsitting@gmail.com · IG/FB @edventurespetsitting
+**Contact:** Text 856-433-4010 · edventurespetsitting@gmail.com · IG/FB @edventurespetsitting
 
 > **Canonical email is `edventurespetsitting@gmail.com`.**
 > `starting-assets/Contact us.jpg` carried a typo (`edventurespe**titting**`) and has been **deleted**; [content-draft/contact.md](content-draft/contact.md) is now the record for that content. Recoverable from git history at `d300fbd`. Copies already posted to social or printed still need tracking down — see F1 in [go-back-to-ed.md](go-back-to-ed.md).
@@ -291,7 +291,7 @@ Claude transcribes from the image assets into Markdown, marking anything uncerta
 ### 1.3 — CTA strategy
 
 - [ ] Primary CTA on every page: **Book a walk** → `/book`
-- [ ] Secondary: **Text 610-888-4541** as a `tel:` link (one tap on mobile — meaningfully higher conversion than a form for some customers)
+- [ ] Secondary: **Text 856-433-4010** as a `tel:` link (one tap on mobile — meaningfully higher conversion than a form for some customers)
 - [ ] Sticky mobile footer bar with both, or a sticky header CTA
 - [ ] Ensure the trust strip is above the fold on mobile — it's Edward's strongest differentiator
 
@@ -381,7 +381,7 @@ Every indexable page measured at every width below — 35 page-widths, 894 inter
 
 **2.6.2 — Local SEO (where the actual ranking comes from)**
 
-- [ ] **NAP consistency.** Name, address/service area, and phone must be byte-identical across the site, Google Business Profile, Instagram, and Facebook. Formatting mismatches (`610-888-4541` vs `(610) 888-4541`) genuinely weaken local signal — pick one format and record it here.
+- [ ] **NAP consistency.** Name, address/service area, and phone must be byte-identical across the site, Google Business Profile, Instagram, and Facebook. Formatting mismatches (`856-433-4010` vs `(856) 433-4010`) genuinely weaken local signal — pick one format and record it here.
 - [ ] Put the phone number in the footer of every page as real text, not an image, inside a `tel:` link
 - [ ] Keep a real `/service-area` page after all, listing all 11 zip codes with neighborhood names as text — this is the one case where a thin page earns its keep, because "dog walker Fairmount" is a query people actually type
   - [ ] Supersedes the 1.1 recommendation to fold it into `/contact`; the SEO value outweighs the thinness

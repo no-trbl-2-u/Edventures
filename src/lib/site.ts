@@ -4,8 +4,8 @@
  *
  * NAP consistency (Roadmap 2.6.2) is the reason this file exists. Name,
  * address/service area and phone must be byte-identical across the site, Google
- * Business Profile, Instagram and Facebook -- `610-888-4541` and
- * `(610) 888-4541` are different strings to a local-search crawler, and the
+ * Business Profile, Instagram and Facebook -- `856-433-4010` and
+ * `(856) 433-4010` are different strings to a local-search crawler, and the
  * mismatch measurably weakens the signal. Change the format here, nowhere else.
  */
 
@@ -18,9 +18,9 @@ export const SITE = {
   country: "US",
 
   /** Display format. This exact string is the canonical NAP phone. */
-  phone: "610-888-4541",
+  phone: "856-433-4010",
   /** RFC 3966 form for `tel:` links. */
-  phoneHref: "tel:+16108884541",
+  phoneHref: "tel:+18564334010",
 
   email: "edventurespetsitting@gmail.com",
 
