@@ -131,7 +131,7 @@ Four steps, with a progress indicator:
 - Meet WCAG AA contrast everywhere
 - Have visible keyboard focus states on every interactive element
 - Have a persistent, obvious way to reach the booking form from every page
-- Include a **tap-to-text** secondary CTA — `tel:` link to 610-888-4541. For some customers this converts better than any form.
+- Include a **tap-to-text** secondary CTA — `tel:` link to 856-433-4010. For some customers this converts better than any form.
 - Handle imperfect, mixed-aspect-ratio phone photos gracefully
 - Work with **no images at all** if they fail to load — the layout must not collapse
 

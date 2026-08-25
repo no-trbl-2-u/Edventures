@@ -75,7 +75,7 @@ function deps(overrides: Partial<BookingDeps> = {}): BookingDeps & { mailer: Ret
     ownerEmail: "edventurespetsitting@gmail.com",
     fromAddress: "Edventures <bookings@edventures.pet>",
     site: {
-      phone: "610-888-4541",
+      phone: "856-433-4010",
       email: "edventurespetsitting@gmail.com",
       url: "https://edventures.pet",
       owner: "Edward",
@@ -372,7 +372,7 @@ describe("emails", () => {
   const ctx = {
     catalog,
     outOfArea: false,
-    phone: "610-888-4541",
+    phone: "856-433-4010",
     email: "edventurespetsitting@gmail.com",
     siteUrl: "https://edventures.pet",
     owner: "Edward",
@@ -613,7 +613,7 @@ function confirmDeps(store: ConfirmStore, overrides: Partial<ConfirmDeps> = {}):
     mailer,
     fromAddress: "Edventures <bookings@edventures.pet>",
     site: {
-      phone: "610-888-4541",
+      phone: "856-433-4010",
       email: "edventurespetsitting@gmail.com",
       url: "https://edventures.pet",
       owner: "Edward",
@@ -743,7 +743,7 @@ describe("confirmation", () => {
     const ctx = {
       catalog,
       outOfArea: false,
-      phone: "610-888-4541",
+      phone: "856-433-4010",
       email: "edventurespetsitting@gmail.com",
       siteUrl: "https://edventures.pet",
       owner: "Edward",
@@ -831,7 +831,7 @@ describe("confirmation", () => {
     const ctx = {
       catalog,
       outOfArea: false,
-      phone: "610-888-4541",
+      phone: "856-433-4010",
       email: "edventurespetsitting@gmail.com",
       siteUrl: "https://edventures.pet",
       owner: "Edward",
