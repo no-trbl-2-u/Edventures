@@ -11,7 +11,7 @@
 
 export const SITE = {
   name: "Edventures Pet Sitting",
-  tagline: "Adventurous care. Tailored for your pet.",
+  tagline: "The best pet care in Philly",
   owner: "Edward",
   city: "Philadelphia",
   region: "PA",
