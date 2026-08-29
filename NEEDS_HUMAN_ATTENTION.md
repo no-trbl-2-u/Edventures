@@ -87,6 +87,25 @@ those files exist only on your machine, not in a fresh clone.
 > **confirming any booking whose customer email is not the Resend account
 > owner's will keep failing until the domain is verified** — that is still
 > 3.11, and Eddie's test booking is still unconfirmed in KV.
+>
+> **Asked and answered 2026-08-29: no, `BOOKING_FROM` cannot just be set to
+> `edventurespetsitting@gmail.com`.** It is the obvious next idea, so here is
+> why it is a dead end rather than a shortcut. Resend will only send *from* a
+> domain you have verified by adding DNS records to it, and nobody can add DNS
+> records to `gmail.com`. A Gmail (or any unverified-domain) sender is rejected
+> with the same `403` the file already predicts for `bookings@edventures.pet`,
+> so setting it would not fix confirmations — it would break the bookings that
+> currently work. Resend's own docs are explicit on both halves: production
+> sends "require a verified domain in the sender address, as
+> `onboarding@resend.dev` is restricted to testing", and "to send emails to
+> recipients other than your own account email, you must add and verify a
+> custom domain".
+>
+> That address is, on the evidence, already doing the only job Resend allows it
+> to do: it is almost certainly the **account-owner address**, which is exactly
+> why the 2026-08-23 test to it delivered while the 2026-08-29 one to
+> `edward.m.kyne@gmail.com` did not. There is no from-address that unblocks
+> this. **Verifying a domain is the only unlock** — Roadmap 3.11, step one.
 
 ### Environment variables the endpoint reads
 
