@@ -76,6 +76,17 @@ those files exist only on your machine, not in a fresh clone.
 > succeeds and the customer still sees the success screen — but they get no
 > written receipt. Closing this is Roadmap 3.11 (dedicated sending domain),
 > which is wanted but deliberately deferred.
+>
+> **2026-08-29: this gap now bites `/api/confirm` too, visibly.** Edward
+> submitted a test booking (`booking:2026-08-29T11:19:51.087Z:eddie`, customer
+> email `edward.m.kyne@gmail.com`) and pressed Confirm; Resend refused the send
+> because that address is not the account owner, and the endpoint's 502 was
+> replaced by Cloudflare's branded "Host Error" page — origin 502/504 bodies
+> always are — so he never saw the "that didn't send, nothing was confirmed"
+> page. The masking is fixed (the failure page is a 503 now and renders), but
+> **confirming any booking whose customer email is not the Resend account
+> owner's will keep failing until the domain is verified** — that is still
+> 3.11, and Eddie's test booking is still unconfirmed in KV.
 
 ### Environment variables the endpoint reads
 
