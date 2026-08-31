@@ -295,7 +295,63 @@ actually run them now that the changes are deployed:
 
 ---
 
-## 🟡 8. DNS-AID records — needs Cloudflare DNS access
+## 🔴 8. Verify a Resend sending domain — the confirm flow is blocked on it
+
+**Added 2026-08-29.** This is the live consequence of the 3.11 deferral in
+item 1, promoted to its own entry because it now breaks a shipped feature
+rather than merely degrading one: **pressing Confirm on any booking whose
+customer email is not the Resend account owner's fails, every time.** Edward
+hit it on a real test (see item 1). The failure is honest now — a readable
+"that didn't send, nothing was confirmed, here's their phone number" page
+instead of Cloudflare's branded Host Error — but it is still a failure, and
+`/confirm` is the whole point of Roadmap 3.10's one-button flow.
+
+There is no code fix. `BOOKING_FROM` already exists and already defaults
+correctly; item 1 records why no substitute sender (a Gmail address included)
+can work. **A verified domain is the only unlock.**
+
+### What to do — about five minutes, then a wait for DNS
+
+1. <https://resend.com/domains> → **Add Domain**. Use `send.edventures.pet`
+   rather than the apex: Resend recommends a subdomain so a deliverability
+   problem never touches the reputation of the domain serving the website.
+   (The apex works too, and gives the nicer `bookings@edventures.pet`. Either
+   is defensible — pick one and don't revisit it.)
+2. Resend shows three DNS records — an MX and a TXT for SPF on the sending
+   subdomain, and a DKIM TXT at `resend._domainkey...`. Add them in the
+   Cloudflare dashboard → **edventures.pet** → DNS → Records, each one
+   **DNS only, not proxied** (the orange cloud breaks mail records).
+3. Back in Resend, press **Verify**. Propagation is usually minutes.
+4. Set the sender in Cloudflare → Pages → **edventures** → Settings →
+   Variables → production: `BOOKING_FROM` = `Edventures <bookings@send.edventures.pet>`
+   (match whatever domain step 1 verified), then redeploy so it applies.
+5. Confirm a real booking end to end and **check the spam folder**. That also
+   closes item 1 step 4 and most of Roadmap 3.11.
+
+While you are in Resend, DKIM is set up by step 2 and SPF by the MX/TXT pair;
+adding a DMARC TXT (`_dmarc`, start at `p=none`) finishes 3.11's list.
+
+**Why this was not done from the session that found it:** both halves need
+credentials the remote environment does not have. There is no
+`RESEND_API_KEY` in it — the key exists only as a Cloudflare Pages secret
+(write-only) and in TJ's git-ignored `.env` — so the domain cannot be created
+or verified through the API. And the `CLOUDFLARE_API_TOKEN` there cannot
+read, let alone write, DNS records: `GET /zones/<id>/dns_records` answers
+`10000 Authentication error`, the same narrow scope item 2 ran into on
+rulesets. Widening that token, or running steps 1–3 by hand, is the way
+through. Step 4 is ordinary Pages config and can be handed back to a session
+once the domain verifies.
+
+### Left behind by the incident
+
+`booking:2026-08-29T11:19:51.087Z:eddie` (Drop-in Visit, Monday 31 August,
+midday, for Harry) is **still unconfirmed in KV**. Its token is unspent, so
+the confirm link in Edward's notification email still works — retry it once
+the domain is verified, or tell Eddie directly and leave the record be.
+
+---
+
+## 🟡 9. DNS-AID records — needs Cloudflare DNS access
 
 Roadmap 2.7.5 published every agent-discovery document that can live in a
 repository. **DNS for AI Discovery** cannot: it is a zone change, and this
