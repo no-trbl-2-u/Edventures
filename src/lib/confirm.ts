@@ -347,7 +347,11 @@ export async function handleConfirmRequest(
     });
   } catch (error) {
     deps.onError?.("confirmation-email", error);
-    return html(502, sendFailedPage(found.record, deps.site.phone));
+    // 503, not 502: Cloudflare replaces an origin 502/504 body with its own
+    // branded "Host Error" page, and this page only exists to be read - it is
+    // how Edward learns the customer has NOT been told and the link is still
+    // live. A 503 passes through with its body intact.
+    return html(503, sendFailedPage(found.record, deps.site.phone));
   }
 
   // Only now. See the header note on send-then-stamp.

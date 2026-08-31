@@ -726,7 +726,9 @@ describe("confirmation", () => {
     });
 
     const res = await handleConfirmRequest(confirmPost(TOKEN), c);
-    assert.equal(res.status, 502);
+    // 503 and not 502, because Cloudflare swallows an origin 502's body and
+    // Edward must be able to read this page (confirm.ts explains).
+    assert.equal(res.status, 503);
     assert.match(await res.text(), /have <strong>not<\/strong> been told/);
 
     const key = store.data.get(pointerKey(TOKEN))!;
