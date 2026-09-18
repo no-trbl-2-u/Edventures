@@ -1,0 +1,75 @@
+<!--
+  Standalone "taking a break" placeholder, deployed straight to the live
+  edventures Cloudflare Pages project (branch alias `main`, which
+  edventures.pet and www.edventures.pet point at) to take the site offline
+  without touching any infrastructure: the Pages project, the BOOKINGS KV
+  namespace, and DNS are all untouched. Astro/dist is not involved -- this
+  is uploaded on its own, bypassing the normal build.
+
+  Restore the real site with either:
+    npm run deploy
+  or push any commit to `main`; the Cloudflare Pages Git integration
+  redeploys `dist` from source automatically. See ops/site-down/README.md.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Edventures Pet Sitting — Taking a little break</title>
+<style>
+  :root {
+    --color-brand-green: #163e1f;
+    --color-brand-cream: #f6ede5;
+    --color-brand-brown: #4e3216;
+    --color-brand-ink: #1a1a18;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-brand-cream);
+    color: var(--color-brand-ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 24px;
+    text-align: center;
+  }
+  main {
+    max-width: 28rem;
+  }
+  img {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-size: 1.5rem;
+    margin: 0 0 12px;
+    color: var(--color-brand-green);
+  }
+  p {
+    margin: 0;
+    color: rgb(26 26 24 / 0.8);
+    line-height: 1.5;
+  }
+  a {
+    color: var(--color-brand-brown);
+  }
+</style>
+</head>
+<body>
+  <main>
+    <img src="/logo.png" alt="Edventures Pet Sitting" />
+    <h1>Taking a little break</h1>
+    <p>We're offline for a bit. Check back soon — or reach us directly at
+      <a href="mailto:edventurespetsitting@gmail.com">edventurespetsitting@gmail.com</a>.</p>
+  </main>
+</body>
+</html>
