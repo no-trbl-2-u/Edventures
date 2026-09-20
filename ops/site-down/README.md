@@ -3,6 +3,14 @@
 `edventures.pet` and `www.edventures.pet` were taken offline and are now
 serving `index.html` in this folder in place of the real site.
 
+**Automatic production deployments are turned off** (Cloudflare Pages
+project setting `source.config.production_deployments_enabled = false`, set
+2026-09-20). This was needed because merging a PR into `main` — even one
+that only touched files like this README — triggered Cloudflare's Git
+integration to rebuild and redeploy the real site, undoing the takedown.
+With this setting off, pushes and merges to `main` no longer auto-deploy;
+see "How to bring the real site back" below for how to turn it back on.
+
 ## What was done
 
 ```sh
@@ -25,15 +33,30 @@ custom domains resolve to. Nothing else changed:
 
 ## How to bring the real site back
 
-Either:
+Run:
 
 ```sh
 npm run deploy
 ```
 
-(builds `dist` from the current `main` and deploys it), or push any commit
-to `main` — the Cloudflare Pages Git integration builds and redeploys `dist`
-automatically (see `.github/workflows/ci.yml`).
+This builds `dist` from the current `main` and deploys it directly — it
+works regardless of the auto-deploy setting above.
+
+To also restore normal "push to `main` auto-deploys" behavior, re-enable
+automatic production deployments:
+
+```sh
+curl -X PATCH \
+  -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/edventures" \
+  --data '{"source":{"type":"github","config":{"production_deployments_enabled":true}}}'
+```
+
+(or toggle "Automatic production branch deployments" on in the Cloudflare
+dashboard: Pages project → Settings → Builds & deployments). Do this before
+or after redeploying `dist` — either order is fine, since nothing pushes to
+`main` on its own.
 
 Once the real site is redeployed, this `ops/site-down/` folder can stay in
 the repo (it deploys nothing on its own) or be deleted.
